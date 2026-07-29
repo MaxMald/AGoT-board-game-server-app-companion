@@ -5,13 +5,14 @@ namespace Agotbg.Server.Game.Model
   /// </summary>
   public enum HouseType : byte
   {
-    Stark = 0,
-    Greyjoy = 1,
-    Lannister = 2,
-    Martell = 3,
-    Tyrell = 4,
-    Baratheon = 5,
-    Arryn = 6,
-    Targaryen = 7
+    Undefined = 0,
+    Stark = 1,
+    Greyjoy = 2,
+    Lannister = 3,
+    Martell = 4,
+    Tyrell = 5,
+    Baratheon = 6,
+    Arryn = 7,
+    Targaryen = 8
   }
 }
