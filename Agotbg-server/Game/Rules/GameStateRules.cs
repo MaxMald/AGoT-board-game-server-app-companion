@@ -78,31 +78,6 @@ namespace Agotbg.Server.Game.Rules
       return Result.SUCCESS();
     }
 
-    public static Result CanAddVassalHouse(RoomState room, HouseType vassalHouse)
-    {
-      if (room.Vassals.Values.Any(v => v.House == vassalHouse))
-        return Result.FAILURE($"Vassal house '{vassalHouse}' is already added.");
-
-      if (vassalHouse == HouseType.Targaryen)
-        return Result.FAILURE("Targaryen house cannot be selected for vassals.");
-
-      if (room.Players.Values.Any(p => p.HouseState.Type == vassalHouse))
-        return Result.FAILURE($"House '{vassalHouse}' is already selected by a player.");
-
-      return Result.SUCCESS();
-    }
-
-    public static Result CanRemoveVassalHouse(RoomState room, HouseType vassalHouse)
-    {
-      if (room.IsGameStarted)
-        return Result.FAILURE("Cannot remove vassal houses after the game has started.");
-
-      if (!room.Vassals.Values.Any(v => v.House == vassalHouse))
-        return Result.FAILURE($"Vassal house '{vassalHouse}' does not exist.");
-
-      return Result.SUCCESS();
-    }
-
     public static Result CanAdvancePhase(RoomState room, GamePhaseType targetPhase)
     {
       if (!room.IsGameStarted)
@@ -161,33 +136,6 @@ namespace Agotbg.Server.Game.Rules
 
       if (room.Players.Values.Any(p => p.HouseState.Type == HouseType.Undefined))
         return Result.FAILURE("All players must select a house before starting the game.");
-
-      return Result.SUCCESS();
-    }
-
-    private static Result HasValidHousesForVassals(RoomState room)
-    {
-      List<HouseType> selectedHousesAsVassals = room.Vassals.Values.Select(p => p.House).ToList();
-      if (selectedHousesAsVassals.Count != selectedHousesAsVassals.Distinct().Count())
-        return Result.FAILURE("Vassal houses must be different.");
-
-      if (room.Vassals.Values.Any(p => p.House == HouseType.Undefined))
-        return Result.FAILURE("All vassal houses must be defined before starting the game.");
-
-      if (room.Vassals.Values.Any(p => p.House == HouseType.Targaryen))
-        return Result.FAILURE("Targaryen house cannot be selected for vassals.");
-
-      return Result.SUCCESS();
-    }
-
-    private static Result HasUniqueHousesForPlayersAndVassals(RoomState room)
-    {
-      List<HouseType> selectedHouses = room.Players.Values.Select(p => p.HouseState.Type).ToList();
-      List<HouseType> selectedHousesAsVassals = room.Vassals.Values.Select(p => p.House).ToList();
-      List<HouseType> allSelectedHouses = selectedHouses.Concat(selectedHousesAsVassals).ToList();
-
-      if (allSelectedHouses.Count != allSelectedHouses.Distinct().Count())
-        return Result.FAILURE("Players and vassals houses must be unique.");
 
       return Result.SUCCESS();
     }

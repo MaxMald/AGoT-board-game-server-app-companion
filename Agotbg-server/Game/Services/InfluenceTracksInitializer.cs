@@ -2,8 +2,19 @@ using Agotbg.Server.Game.Model;
 
 namespace Agotbg.Server.Game.Services
 {
+  /// <summary>
+  /// Initializes the influence tracks for the game based on the player and vassal
+  /// houses.
+  /// </summary>
   public static class InfluenceTracksInitializer
   {
+    /// <summary>
+    /// Initialize the influence tracks for the game based on the player and vassal houses.
+    /// </summary>
+    /// 
+    /// <param name="influenceState">The influence state to initialize.</param>
+    /// <param name="playerHouses">The list of player houses.</param>
+    /// <param name="vassalHouses">The list of vassal houses.</param>
     public static void Initialize(
       InfluenceState influenceState,
       List<HouseType> playerHouses,
@@ -41,8 +52,8 @@ namespace Agotbg.Server.Game.Services
       influenceState.FiefdomsTrack = finalInfluenceTrack.ToList();
 
       // KING COURT TRACK
-      playerHouses.Sort((h1, h2) => GetInitialKingdomsWeightForHouse(h2).CompareTo(GetInitialKingdomsWeightForHouse(h1)));
-      vassalHouses.Sort((h1, h2) => GetInitialKingdomsWeightForHouse(h2).CompareTo(GetInitialKingdomsWeightForHouse(h1)));
+      playerHouses.Sort((h1, h2) => GetInitialKingCourtWeightForHouse(h2).CompareTo(GetInitialKingCourtWeightForHouse(h1)));
+      vassalHouses.Sort((h1, h2) => GetInitialKingCourtWeightForHouse(h2).CompareTo(GetInitialKingCourtWeightForHouse(h1)));
 
       finalInfluenceTrack = playerHouses.ToList();
       finalInfluenceTrack.AddRange(vassalHouses);
@@ -85,7 +96,7 @@ namespace Agotbg.Server.Game.Services
       };
     }
 
-    private static int GetInitialKingdomsWeightForHouse(HouseType house)
+    private static int GetInitialKingCourtWeightForHouse(HouseType house)
     {
       return house switch
       {

@@ -12,10 +12,13 @@ namespace Agotbg.Server.Game.Services
       {
         RoomId = roomId,
         MaxPlayers = (byte)Math.Max(GameRules.MinPlayers, Math.Min(maxPlayers, GameRules.MaxPlayers)),
+
         Players = new Dictionary<string, PlayerState>(),
+        Vassals = new Dictionary<HouseType, VassalState>(),
         Round = new RoundState(),
         Wilding = new WildingState(),
         Influence = new InfluenceState(),
+
         IsGameStarted = false,
         IsGameFinished = false,
         Winner = null
@@ -24,39 +27,31 @@ namespace Agotbg.Server.Game.Services
 
     public Result StartGame(RoomState room)
     {
-      Result result = GameStateRules.CanStartGame(room);
-      if (!result.Success)
-        return result;
-
-      room.IsGameStarted = true;
-      room.IsGameFinished = false;
-      room.Winner = null;
-      room.Round.RoundNumber = 1;
-      room.Round.CurrentPhase = GamePhaseType.Planning;
-      room.Wilding.Strength = GameRules.WildingStartingStrength;
-
-      // Vassals Initialization
-      for (byte i = 0; i < (byte)HouseType.Count; ++i)
+      try
       {
-        HouseType houseType = (HouseType)i;
-        if (houseType == HouseType.Undefined || houseType == HouseType.Targaryen)
-          continue; // Skip undefined type. Targaryen cannot be a vassal house
+        Result result = GameStateRules.CanStartGame(room);
+        if (!result.Success)
+          return result;
 
-        if (room.Players.Values.Any(p => p.HouseState.Type == houseType))
-          continue; // Skip if the house is already taken by a player
+        room.IsGameStarted = true;
+        room.IsGameFinished = false;
+        room.Winner = null;
+        room.Round.RoundNumber = 1;
+        room.Round.CurrentPhase = GamePhaseType.Planning;
+        room.Wilding.Strength = GameRules.WildingStartingStrength;
 
-        if (!room.Vassals.ContainsKey(houseType))
-        {
-          Result vassalResult = AddVassalHouse(room, houseType);
-          if (!vassalResult.Success)
-            return vassalResult;
-        }
+        VassalsInitializer.Initialize(room);
+
+        List<HouseType> playerHouses = Helpers.GetPlayerHouseTypesFromRoom(room);
+        List<HouseType> vassalHouses = Helpers.GetVassalHouseTypesFromRoom(room);
+
+        InfluenceTracksInitializer.Initialize(room.Influence, playerHouses, vassalHouses);
       }
-
-      List<HouseType> playerHouses = room.Players.Values.Select(p => p.HouseState.Type).ToList();
-      List<HouseType> vassalHouses = room.Vassals.Keys.ToList();
-
-      InfluenceTracksInitializer.Initialize(room.Influence, playerHouses, vassalHouses);
+      catch (Exception ex)
+      {
+        room.IsGameStarted = false;
+        return Result.FAILURE($"An error occurred while starting the game: {ex.Message}");
+      }
 
       return Result.SUCCESS();
     }
@@ -129,44 +124,6 @@ namespace Agotbg.Server.Game.Services
           return Result.FAILURE($"Not implemented factory method for house: {newHouse}");
       }
 
-      return Result.SUCCESS();
-    }
-
-    public Result AddVassalHouse(RoomState room, HouseType vassalHouse)
-    {
-      Result result = GameStateRules.CanAddVassalHouse(room, vassalHouse);
-      if (!result.Success)
-        return result;
-
-      VassalState vassalState;
-      switch (vassalHouse)
-      {
-        case HouseType.Stark:
-          vassalState = VassalStateFactory.CreateStark();
-          break;
-        case HouseType.Greyjoy:
-          vassalState = VassalStateFactory.CreateGreyjoy();
-          break;
-        case HouseType.Lannister:
-          vassalState = VassalStateFactory.CreateLannister();
-          break;
-        case HouseType.Martell:
-          vassalState = VassalStateFactory.CreateMartell();
-          break;
-        case HouseType.Tyrell:
-          vassalState = VassalStateFactory.CreateTyrell();
-          break;
-        case HouseType.Baratheon:
-          vassalState = VassalStateFactory.CreateBaratheon();
-          break;
-        case HouseType.Arryn:
-          vassalState = VassalStateFactory.CreateArryn();
-          break;
-        default:
-          return Result.FAILURE($"Invalid vassal house: {vassalHouse}");
-      }
-
-      room.Vassals.Add(vassalHouse, vassalState);
       return Result.SUCCESS();
     }
 
@@ -255,6 +212,25 @@ namespace Agotbg.Server.Game.Services
 
       fromPlayer.HouseState.PowerTokens -= amount;
       toPlayer.HouseState.PowerTokens += amount;
+
+      return Result.SUCCESS();
+    }
+
+    public Result DefeatPlayer(RoomState room, string playerId)
+    {
+      if (!room.IsGameStarted)
+        return Result.FAILURE("Cannot defeat a player before the game has started.");
+
+      if (!room.Players.ContainsKey(playerId))
+        return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
+
+      PlayerState player = room.Players[playerId];
+      if (player.HouseState.IsDefeated)
+        return Result.FAILURE($"Player with ID {playerId} is already defeated.");
+
+      player.HouseState.IsDefeated = true;
+      player.HouseState.SupplyLevel = 0;
+      player.HouseState.PowerTokens = 0;
 
       return Result.SUCCESS();
     }
