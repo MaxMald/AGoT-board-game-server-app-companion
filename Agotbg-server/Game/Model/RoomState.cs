@@ -14,7 +14,6 @@ namespace Agotbg.Server.Game.Model
     public WildingState Wilding { get; set; } = new WildingState();
     public InfluenceState Influence { get; set; } = new InfluenceState();
 
-    public bool UseVassals { get; set; } = false;
     public bool IsGameStarted { get; set; } = false;
     public bool IsGameFinished { get; set; } = false;
     public HouseType? Winner { get; set; } = null;

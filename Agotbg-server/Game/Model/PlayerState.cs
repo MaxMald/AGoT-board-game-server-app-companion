@@ -2,9 +2,8 @@ namespace Agotbg.Server.Game.Model
 {
   public class PlayerState
   {
-    public HouseType House { get; set; } = HouseType.Undefined;
-    public byte PowerTokens { get; set; } = 0;
-    public byte SupplyLevel { get; set; } = 0;
-    public byte VictoryPoints { get; set; } = 0;
+    public string PlayerId { get; set; } = string.Empty;
+    public string PlayerName { get; set; } = string.Empty;
+    public HouseState HouseState { get; set; } = new HouseState();
   }
 }

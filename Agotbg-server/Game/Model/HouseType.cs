@@ -13,6 +13,7 @@ namespace Agotbg.Server.Game.Model
     Tyrell = 5,
     Baratheon = 6,
     Arryn = 7,
-    Targaryen = 8
+    Targaryen = 8,
+    Count
   }
 }
