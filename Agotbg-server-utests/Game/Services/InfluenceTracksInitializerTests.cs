@@ -24,7 +24,7 @@ namespace Agotbg.Server.Utests.Game.Services
       var vassalHouses = new List<HouseType>();
 
       // Act
-      InfluenceTracksInitializer.Initialize(influenceState, playerHouses, vassalHouses);
+      InfluenceTracksService.Initialize(influenceState, playerHouses, vassalHouses);
 
       // Assert
       List<HouseType> expectedIronThroneOrder = new()
@@ -90,7 +90,7 @@ namespace Agotbg.Server.Utests.Game.Services
       };
 
       // Act
-      InfluenceTracksInitializer.Initialize(influenceState, playerHouses, vassalHouses);
+      InfluenceTracksService.Initialize(influenceState, playerHouses, vassalHouses);
 
       // Assert
       List<HouseType> expectedIronThroneOrder = new()
@@ -155,7 +155,7 @@ namespace Agotbg.Server.Utests.Game.Services
       };
 
       // Act
-      InfluenceTracksInitializer.Initialize(influenceState, playerHouses, vassalHouses);
+      InfluenceTracksService.Initialize(influenceState, playerHouses, vassalHouses);
 
       // Assert
       List<HouseType> expectedIronThroneOrder = new()
