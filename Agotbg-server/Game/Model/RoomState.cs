@@ -15,7 +15,6 @@ namespace Agotbg.Server.Game.Model
     public Dictionary<HouseType, HouseState> Vassals { get; set; } = [];
     public RoundState Round { get; set; } = new RoundState();
     public WildingState Wilding { get; set; } = new WildingState();
-    public InfluenceState Influence { get; set; } = new InfluenceState();
     public HouseType? Winner { get; set; } = null;
   }
 }

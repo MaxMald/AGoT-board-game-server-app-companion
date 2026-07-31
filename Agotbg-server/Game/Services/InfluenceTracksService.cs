@@ -3,112 +3,93 @@ using Agotbg.Server.Game.Model;
 namespace Agotbg.Server.Game.Services
 {
   /// <summary>
-  /// Initializes the influence tracks for the game based on the player and vassal
-  /// houses.
+  /// Provides services for initializing the three influence tracks (Iron Throne,
+  /// Fiefdoms, and King's Court) in the game.
   /// </summary>
   public static class InfluenceTracksService
   {
     /// <summary>
-    /// Initialize the influence tracks for the game based on the player and vassal houses.
+    /// Initializes all three influence tracks for the given houses based on their
+    /// starting positions defined in the game rules.
     /// </summary>
+    ///
+    /// <param name="houses">The list of houses to position on the influence
+    /// tracks.</param>
     public static void Initialize(List<HouseState> houses)
     {
-      List<HouseType> playerHouses = [];
-      List<HouseType> vassalHouses = [];
-
-      foreach (var house in houses)
-      {
-        if (house.IsVassal)
-          vassalHouses.Add(house.Type);
-        else
-          playerHouses.Add(house.Type);
-      }
-
-      List<HouseType> ironThroneOrder = GetInitialOrderForIronThrone(playerHouses, vassalHouses);
-      SetInfluenceTrackPositions(ironThroneOrder, houses, InfluenceTrackType.IronThrone);
-
-      List<HouseType> fiefdomsOrder = GetInitialOrderForFiefdoms(playerHouses, vassalHouses);
-      SetInfluenceTrackPositions(fiefdomsOrder, houses, InfluenceTrackType.Fiefdom);
-
-      List<HouseType> kingsCourtOrder = GetInitialOrderForKingsCourt(playerHouses, vassalHouses);
-      SetInfluenceTrackPositions(kingsCourtOrder, houses, InfluenceTrackType.KingsCourt);
+      OrderHousesForIronThrone(houses);
+      SetInfluenceTrackPositions(houses, InfluenceTrackType.IronThrone);
+      OrderHousesForFiefdoms(houses);
+      SetInfluenceTrackPositions(houses, InfluenceTrackType.Fiefdom);
+      OrderHousesForKingsCourt(houses);
+      SetInfluenceTrackPositions(houses, InfluenceTrackType.KingsCourt);
     }
 
-    private static List<HouseType> GetInitialOrderForIronThrone(
-      List<HouseType> playerHouses,
-      List<HouseType> vassalHouses
-      )
+    /// <summary>
+    /// Sorts the houses list according to their initial Iron Throne track order, with
+    /// the highest weighted house first.
+    /// </summary>
+    ///
+    /// <param name="houses">The list of houses to sort.</param>
+    private static void OrderHousesForIronThrone(List<HouseState> houses)
     {
-      bool hasTargaryenPlayer = false;
-      if (playerHouses.Any(h => h == HouseType.Targaryen))
-        hasTargaryenPlayer = true;
-
-      playerHouses.Sort((h1, h2) => GetInitialIronThroneWeightForHouse(h2).CompareTo(GetInitialIronThroneWeightForHouse(h1)));
-      vassalHouses.Sort((h1, h2) => GetInitialIronThroneWeightForHouse(h2).CompareTo(GetInitialIronThroneWeightForHouse(h1)));
-
-      List<HouseType> finalInfluenceTrack = playerHouses.ToList();
-      finalInfluenceTrack.AddRange(vassalHouses);
-
-      if (hasTargaryenPlayer)
-      {
-        playerHouses.Add(HouseType.Targaryen);
-        finalInfluenceTrack.Add(HouseType.Targaryen);
-      }
-
-      return finalInfluenceTrack;
+      houses.Sort((h1, h2) => GetInitialIronThroneWeightForHouse(h2)
+                              .CompareTo(GetInitialIronThroneWeightForHouse(h1)));
     }
 
-    private static List<HouseType> GetInitialOrderForFiefdoms(
-      List<HouseType> playerHouses,
-      List<HouseType> vassalHouses
-      )
+    /// <summary>
+    /// Sorts the houses list according to their initial Fiefdoms track order, with the
+    /// highest weighted house first.
+    /// </summary>
+    /// 
+    /// <param name="houses">The list of houses to sort.</param>
+    private static void OrderHousesForFiefdoms(List<HouseState> houses)
     {
-      bool hasTargaryenPlayer = false;
-      if (playerHouses.Any(h => h == HouseType.Targaryen))
-        hasTargaryenPlayer = true;
-
-      playerHouses.Sort((h1, h2) => GetInitialFiefdomsWeightForHouse(h2).CompareTo(GetInitialFiefdomsWeightForHouse(h1)));
-      vassalHouses.Sort((h1, h2) => GetInitialFiefdomsWeightForHouse(h2).CompareTo(GetInitialFiefdomsWeightForHouse(h1)));
-
-      List<HouseType> finalInfluenceTrack = playerHouses.ToList();
-      finalInfluenceTrack.AddRange(vassalHouses);
-
-      if (hasTargaryenPlayer)
-      {
-        playerHouses.Add(HouseType.Targaryen);
-        finalInfluenceTrack.Add(HouseType.Targaryen);
-      }
-
-      return finalInfluenceTrack;
+      houses.Sort((h1, h2) => GetInitialFiefdomsWeightForHouse(h2)
+                              .CompareTo(GetInitialFiefdomsWeightForHouse(h1)));
     }
 
-    private static List<HouseType> GetInitialOrderForKingsCourt(
-      List<HouseType> playerHouses,
-      List<HouseType> vassalHouses
-      )
+    /// <summary>
+    /// Sorts the houses list according to their initial King's Court track order, with
+    /// the highest weighted house first.
+    /// </summary>
+    /// 
+    /// <param name="houses">The list of houses to sort.</param>
+    private static void OrderHousesForKingsCourt(List<HouseState> houses)
     {
-      bool hasTargaryenPlayer = false;
-      if (playerHouses.Any(h => h == HouseType.Targaryen))
-        hasTargaryenPlayer = true;
-
-      playerHouses.Sort((h1, h2) => GetInitialKingCourtWeightForHouse(h2).CompareTo(GetInitialKingCourtWeightForHouse(h1)));
-      vassalHouses.Sort((h1, h2) => GetInitialKingCourtWeightForHouse(h2).CompareTo(GetInitialKingCourtWeightForHouse(h1)));
-
-      List<HouseType> finalInfluenceTrack = playerHouses.ToList();
-      finalInfluenceTrack.AddRange(vassalHouses);
-
-      if (hasTargaryenPlayer)
-      {
-        playerHouses.Add(HouseType.Targaryen);
-        finalInfluenceTrack.Add(HouseType.Targaryen);
-      }
-
-      return finalInfluenceTrack;
+      houses.Sort((h1, h2) => GetInitialKingCourtWeightForHouse(h2)
+                              .CompareTo(GetInitialKingCourtWeightForHouse(h1)));
     }
 
-    private static int GetInitialIronThroneWeightForHouse(HouseType house)
+    /// <summary>
+    /// Gets the sorting weight for a house on the Iron Throne track. Player houses have
+    /// higher weights (12-18) than vassal houses (2-8). Targaryen always has weight 1.
+    /// </summary>
+    ///
+    /// <param name="house">The house to get the weight for.</param>
+    /// 
+    /// <returns>The weight value used for sorting.</returns>
+    private static int GetInitialIronThroneWeightForHouse(HouseState house)
     {
-      return house switch
+      if (!house.IsVassal)
+      {
+        // Player houses weights
+        return house.Type switch
+        {
+          HouseType.Baratheon => 18,
+          HouseType.Lannister => 17,
+          HouseType.Stark => 16,
+          HouseType.Martell => 15,
+          HouseType.Greyjoy => 14,
+          HouseType.Tyrell => 13,
+          HouseType.Arryn => 12,
+          HouseType.Targaryen => 1,
+          _ => 0
+        };
+      }
+
+      // Vassal houses weights
+      return house.Type switch
       {
         HouseType.Baratheon => 8,
         HouseType.Lannister => 7,
@@ -122,9 +103,35 @@ namespace Agotbg.Server.Game.Services
       };
     }
 
-    private static int GetInitialFiefdomsWeightForHouse(HouseType house)
+    /// <summary>
+    /// Gets the sorting weight for a house on the Fiefdoms track. Player houses have
+    /// higher weights (12-18) than vassal houses (2-8). Targaryen always has weight 1.
+    /// </summary>
+    /// 
+    /// <param name="house">The house to get the weight for.</param>
+    /// 
+    /// <returns>The weight value used for sorting.</returns>
+    private static int GetInitialFiefdomsWeightForHouse(HouseState house)
     {
-      return house switch
+      if (!house.IsVassal)
+      {
+        // Player houses weights
+        return house.Type switch
+        {
+          HouseType.Greyjoy => 18,
+          HouseType.Tyrell => 17,
+          HouseType.Martell => 16,
+          HouseType.Arryn => 15,
+          HouseType.Stark => 14,
+          HouseType.Baratheon => 13,
+          HouseType.Lannister => 12,
+          HouseType.Targaryen => 1,
+          _ => 0
+        };
+      }
+
+      // Vassal houses weights
+      return house.Type switch
       {
         HouseType.Greyjoy => 8,
         HouseType.Tyrell => 7,
@@ -138,9 +145,35 @@ namespace Agotbg.Server.Game.Services
       };
     }
 
-    private static int GetInitialKingCourtWeightForHouse(HouseType house)
+    /// <summary>
+    /// Gets the sorting weight for a house on the King's Court track. Player houses have
+    /// higher weights (12-18) than vassal houses (2-8). Targaryen always has weight 1.
+    /// </summary>
+    ///
+    /// <param name="house">The house to get the weight for.</param>
+    ///
+    /// <returns>The weight value used for sorting.</returns>
+    private static int GetInitialKingCourtWeightForHouse(HouseState house)
     {
-      return house switch
+      if (!house.IsVassal)
+      {
+        // Player houses weights
+        return house.Type switch
+        {
+          HouseType.Lannister => 18,
+          HouseType.Stark => 17,
+          HouseType.Martell => 16,
+          HouseType.Tyrell => 15,
+          HouseType.Arryn => 14,
+          HouseType.Baratheon => 13,
+          HouseType.Greyjoy => 12,
+          HouseType.Targaryen => 1,
+          _ => 0
+        };
+      }
+
+      // Vassal houses weights
+      return house.Type switch
       {
         HouseType.Lannister => 8,
         HouseType.Stark => 7,
@@ -155,32 +188,25 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
-    /// Sets the influence track positions for all houses based on an ordered list of
-    /// house types.
+    /// Assigns track positions to each house based on their order in the list. Positions
+    /// start at 1 (highest). Targaryen always receives a constant position defined in
+    /// GameConstants.TargaryenInfluencePosition.
     /// </summary>
     ///
-    /// <param name="orderedHouseTypes">The list of house types in their desired track
-    /// order.</param>
-    /// <param name="houses">The list of house states to update.</param>
-    /// <param name="trackType">The type of influence track to update (IronThrone,
-    /// Fiefdom, or KingsCourt).</param>
+    /// <param name="orderedHouses">The houses in their desired track order.</param>
+    /// <param name="trackType">The influence track to update.</param>
     ///
-    /// <exception cref="Exception">Thrown when a house state is not found for a given
-    /// house type, or when an unknown InfluenceTrackType is provided.</exception>
+    /// <exception cref="Exception">Thrown when an unknown track type is
+    /// provided.</exception>
     private static void SetInfluenceTrackPositions(
-      List<HouseType> orderedHouseTypes,
-      List<HouseState> houses,
+      List<HouseState> orderedHouses,
       InfluenceTrackType trackType
       )
     {
-      for (int i = 0; i < orderedHouseTypes.Count; i++)
+      for (int i = 0; i < orderedHouses.Count; i++)
       {
-        HouseType houseType = orderedHouseTypes[i];
+        HouseState houseState = orderedHouses[i];
         byte trackPosition = (byte)(i + 1);
-
-        var houseState = houses.FirstOrDefault(h => h.Type == houseType);
-        if (houseState == null)
-          throw new Exception($"Influece Track Service: HouseState not found for HouseType: {houseType}");
 
         if (houseState.Type == HouseType.Targaryen)
         {
@@ -193,11 +219,13 @@ namespace Agotbg.Server.Game.Services
               houseState.FiefdomTrackPosition = GameConstants.TargaryenInfluencePosition;
               break;
             case InfluenceTrackType.KingsCourt:
-              HouseStateService.UpdateKingsCourtTrackPosition(houseState, GameConstants.TargaryenInfluencePosition);
+              houseState.KingsCourtTrackPosition = GameConstants.TargaryenInfluencePosition;
               break;
             default:
               throw new Exception($"Influence Track Service: Unknown InfluenceTrackType: {trackType}");
           }
+
+          continue;
         }
 
         switch (trackType)
@@ -209,7 +237,7 @@ namespace Agotbg.Server.Game.Services
             houseState.FiefdomTrackPosition = trackPosition;
             break;
           case InfluenceTrackType.KingsCourt:
-            HouseStateService.UpdateKingsCourtTrackPosition(houseState, trackPosition);
+            houseState.KingsCourtTrackPosition = trackPosition;
             break;
           default:
             throw new Exception($"Influence Track Service: Unknown InfluenceTrackType: {trackType}");

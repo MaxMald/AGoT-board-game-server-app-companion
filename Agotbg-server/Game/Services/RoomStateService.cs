@@ -142,6 +142,9 @@ namespace Agotbg.Server.Game.Services
         List<HouseState> allHouses = GetAllHouses(room);
         InfluenceTracksService.Initialize(allHouses);
 
+        foreach (HouseState house in allHouses)
+          HouseStateService.UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
+
         room.RoomStatus = RoomStatus.InProgress;
         room.Round.CurrentPhase = RoundPhaseType.Setup;
       }
@@ -253,6 +256,48 @@ namespace Agotbg.Server.Game.Services
       PlayerState player = room.Players[playerId];
 
       return HouseStateService.UpdatePowerTokensBid(player.HouseState, newBid);
+    }
+
+    public Result PillageHouse(RoomState room, string saboteurPlayerId, string sabotagedPlayerId)
+    {
+      if (room.RoomStatus != RoomStatus.InProgress)
+        return Result.FAILURE("Cannot pillage a house if the game is not in progress.");
+
+      if (room.Round.CurrentPhase != RoundPhaseType.Action)
+        return Result.FAILURE("Cannot pillage a house if the current phase is not the action phase.");
+
+      if (!room.Players.ContainsKey(saboteurPlayerId))
+        return Result.FAILURE($"Player with ID {saboteurPlayerId} does not exist in the room.");
+
+      if (!room.Players.ContainsKey(sabotagedPlayerId))
+        return Result.FAILURE($"Player with ID {sabotagedPlayerId} does not exist in the room.");
+
+      PlayerState saboteurPlayer = room.Players[saboteurPlayerId];
+      PlayerState sabotagedPlayer = room.Players[sabotagedPlayerId];
+
+      HouseStateService.PillageHouse(saboteurPlayer.HouseState, sabotagedPlayer.HouseState);
+      return Result.SUCCESS();
+    }
+
+    public Result VassalPillageHouse(RoomState room, HouseType vassalHouse, string sabotagePlayerId)
+    {
+      if (room.RoomStatus != RoomStatus.InProgress)
+        return Result.FAILURE("Cannot pillage a house if the game is not in progress.");
+
+      if (room.Round.CurrentPhase != RoundPhaseType.Action)
+        return Result.FAILURE("Cannot pillage a house if the current phase is not the action phase.");
+
+      if (!room.Vassals.ContainsKey(vassalHouse))
+        return Result.FAILURE($"Vassal of type: {vassalHouse} does not exist in the room.");
+
+      if (!room.Players.ContainsKey(sabotagePlayerId))
+        return Result.FAILURE($"Player with ID {sabotagePlayerId} does not exist in the room.");
+
+      HouseState vassal = room.Vassals[vassalHouse];
+      PlayerState sabotagePlayer = room.Players[sabotagePlayerId];
+
+      HouseStateService.PillageHouse(vassal, sabotagePlayer.HouseState);
+      return Result.SUCCESS();
     }
 
     public Result TransferPowerTokens(
@@ -401,7 +446,6 @@ namespace Agotbg.Server.Game.Services
         PlayerState playerState = new PlayerState()
         {
           PlayerId = playerDescriptor.PlayerId,
-          PlayerName = playerDescriptor.Name,
           HouseState = houseState
         };
 

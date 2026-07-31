@@ -78,7 +78,7 @@ namespace Agotbg.Server.Game.Services
       }
 
       throw new NotImplementedException("HouseStateService.CreateVassal: Vassal HouseType not implemented: " + houseType);
-    })
+    }
 
     /// <summary>
     /// Updates the power token of a house, ensuring that vassal houses cannot have power
@@ -122,6 +122,49 @@ namespace Agotbg.Server.Game.Services
     {
       house.KingsCourtTrackPosition = newPosition;
       UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
+    }
+
+    /// <summary>
+    /// Updates the number of special orders based on the house's King's Court track
+    /// position.
+    /// </summary>
+    ///
+    /// <param name="house">The house whose number of special orders is to be
+    /// updated.</param>
+    public static void UpdateNumSpecialOrdersBasedOnKingsCourtPosition(HouseState house)
+    {
+      if (house.Type == HouseType.Targaryen) // Targaryen always has 3 special orders regardless of position
+      {
+        house.NumSpecialOrders = 3;
+        return;
+      }
+
+      if (house.IsVassal)
+      {
+        house.NumSpecialOrders = 0;
+        return;
+      }
+
+      if (house.KingsCourtTrackPosition <= 1)
+      {
+        house.NumSpecialOrders = 3;
+      }
+      else if (house.KingsCourtTrackPosition == 2)
+      {
+        house.NumSpecialOrders = 3;
+      }
+      else if (house.KingsCourtTrackPosition == 3)
+      {
+        house.NumSpecialOrders = 2;
+      }
+      else if (house.KingsCourtTrackPosition == 4)
+      {
+        house.NumSpecialOrders = 1;
+      }
+      else if (house.KingsCourtTrackPosition >= 5)
+      {
+        house.NumSpecialOrders = 0;
+      }
     }
 
     /// <summary>
@@ -372,6 +415,22 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
+    /// Adds one power token to the saboteur house and removes one power token from the
+    /// sabotaged house (if any).
+    /// </summary>
+    /// 
+    /// <param name="saboteur">The house performing the pillage.</param>
+    /// <param name="sabotaged">The house being pillaged.</param>
+    public static void PillageHouse(HouseState saboteur, HouseState sabotaged)
+    {
+      if (!saboteur.IsVassal && saboteur.PowerTokens < byte.MaxValue)
+        saboteur.PowerTokens += 1;
+
+      if (sabotaged.PowerTokens > 0)
+        sabotaged.PowerTokens -= 1;
+    }
+
+    /// <summary>
     /// Updates the maximum number of armies a house can have based on its supply level.
     /// </summary>
     /// 
@@ -419,46 +478,6 @@ namespace Agotbg.Server.Game.Services
         house.MaxArmiesOfTwo = 3;
         house.MaxArmiesOfThree = 1;
         house.MaxArmiesOfFour = 1;
-      }
-    }
-
-    /// <summary>
-    /// Updates the number of special orders based on the house's King's Court track
-    /// position.
-    /// </summary>
-    ///
-    /// <param name="house">The house whose number of special orders is to be
-    /// updated.</param>
-    private static void UpdateNumSpecialOrdersBasedOnKingsCourtPosition(HouseState house)
-    {
-      if (house.Type == HouseType.Targaryen) // Targaryen always has 3 special orders regardless of position
-      {
-        house.NumSpecialOrders = 3;
-        return;
-      }
-
-      if (house.IsVassal)
-        return; // Vassal houses do not have special orders.
-
-      if (house.KingsCourtTrackPosition <= 1)
-      {
-        house.NumSpecialOrders = 3;
-      }
-      else if (house.KingsCourtTrackPosition == 2)
-      {
-        house.NumSpecialOrders = 3;
-      }
-      else if (house.KingsCourtTrackPosition == 3)
-      {
-        house.NumSpecialOrders = 2;
-      }
-      else if (house.KingsCourtTrackPosition == 4)
-      {
-        house.NumSpecialOrders = 1;
-      }
-      else if (house.KingsCourtTrackPosition >= 5)
-      {
-        house.NumSpecialOrders = 0;
       }
     }
 
