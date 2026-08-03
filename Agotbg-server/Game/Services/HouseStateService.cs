@@ -108,7 +108,6 @@ namespace Agotbg.Server.Game.Services
     public static void UpdateHouseSupplyLevel(HouseState house, byte newSupplyLevel)
     {
       house.SupplyLevel = Math.Min(newSupplyLevel, GameConstants.MaximumSupplyLevel);
-      UpdateHouseMaximumArmiesBasedOnSupplyLevel(house);
     }
 
     /// <summary>
@@ -203,17 +202,11 @@ namespace Agotbg.Server.Game.Services
       if (!vassal.IsVassal)
         return Result.FAILURE("The house is not a vassal.");
 
-      if (vassal.Type == HouseType.Undefined)
-        return Result.FAILURE("Vassal house type cannot be undefined.");
-
       if (vassal.IsDefeated)
         return Result.FAILURE("A defeated house cannot be a vassal.");
 
       if (vassal.CommanderHouse != HouseType.Undefined)
         return Result.FAILURE("The house is already a vassal to another house. Vassalage status must be broken first.");
-
-      if (commander.Type == HouseType.Undefined)
-        return Result.FAILURE("Commander house cannot be undefined.");
 
       if (commander.Type == vassal.Type)
         return Result.FAILURE("A house cannot be vassal to itself.");
@@ -247,14 +240,8 @@ namespace Agotbg.Server.Game.Services
       if (!vassal.IsVassal)
         return Result.FAILURE("The house is not a vassal.");
 
-      if (vassal.Type == HouseType.Undefined)
-        return Result.FAILURE("Vassal house type cannot be undefined.");
-
       if (vassal.CommanderHouse != commander.CommanderHouse)
         return Result.FAILURE("The specified commander does not command this vassal.");
-
-      if (commander.Type == HouseType.Undefined)
-        return Result.FAILURE("Commander house cannot be undefined.");
 
       if (commander.Type == vassal.Type)
         return Result.FAILURE("A house cannot be vassal to itself.");
@@ -283,9 +270,6 @@ namespace Agotbg.Server.Game.Services
     /// validation fails.</returns>
     public static Result UpdateIronBankLoanInterest(HouseState house, byte newLoanInterest)
     {
-      if (house.Type == HouseType.Undefined)
-        return Result.FAILURE("House type cannot be undefined.");
-
       if (house.IsVassal)
         return Result.FAILURE("Vassal houses cannot have Iron Bank loan interest.");
 
@@ -294,31 +278,28 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
-    /// Updates the power tokens bid for a house after validating the house type and
-    /// available tokens.
+    /// Updates the power tokens bid
     /// </summary>
     ///
     /// <param name="house">The house state to update.</param>
     /// <param name="newBid">The bid amount to set.</param>
     ///
-    /// <returns>A Result indicating success, or failure if the house type is undefined
-    /// or the bid exceeds available power tokens.</returns>
+    /// <returns>A Result indicating success, or failure the bid exceeds available power
+    /// tokens.</returns>
     public static Result UpdatePowerTokensBid(HouseState house, byte newBid)
     {
-      if (house.Type == HouseType.Undefined)
-        return Result.FAILURE("House type cannot be undefined.");
-
       if (newBid > house.PowerTokens)
         return Result.FAILURE("Bid cannot exceed available power tokens.");
 
-      if (house.IsDefeated)
-        return Result.FAILURE("Defeated houses cannot place bids.");
-
-      if (house.IsVassal)
-        return Result.FAILURE("Vassal houses cannot place bids.");
-
       house.PowerTokensBid = newBid;
+      house.HasBidPowerTokens = true;
       return Result.SUCCESS();
+    }
+
+    public static void CancelPowerTokensBid(HouseState house)
+    {
+      house.PowerTokensBid = 0;
+      house.HasBidPowerTokens = false;
     }
 
     /// <summary>
@@ -332,17 +313,12 @@ namespace Agotbg.Server.Game.Services
     /// result with an error message.</returns>
     public static Result ResolveBid(HouseState house)
     {
-      if (house.Type == HouseType.Undefined)
-        return Result.FAILURE("House type cannot be undefined.");
-
       if (house.PowerTokensBid > house.PowerTokens)
         return Result.FAILURE("Bid cannot exceed available power tokens.");
 
-      if (house.PowerTokensBid == 0)
-        return Result.SUCCESS();
-
       house.PowerTokens -= house.PowerTokensBid;
       house.PowerTokensBid = 0;
+      house.HasBidPowerTokens = false;
 
       return Result.SUCCESS();
     }
@@ -361,12 +337,6 @@ namespace Agotbg.Server.Game.Services
     /// validation fails.</returns>
     public static Result TransferPowerTokens(HouseState from, HouseState to, byte amount)
     {
-      if (from.Type == HouseType.Undefined)
-        return Result.FAILURE("Source house type cannot be undefined.");
-
-      if (to.Type == HouseType.Undefined)
-        return Result.FAILURE("Destination house type cannot be undefined.");
-
       if (to.IsVassal)
         return Result.FAILURE("Vassal houses cannot receive power tokens.");
 
@@ -397,17 +367,11 @@ namespace Agotbg.Server.Game.Services
     /// validation fails.</returns>
     public static Result SetHouseAsDefeated(HouseState house)
     {
-      if (house.Type == HouseType.Undefined)
-        return Result.FAILURE("House type cannot be undefined.");
-
       if (house.IsVassal)
         return Result.FAILURE("Vassal houses cannot be set as defeated.");
 
       house.IsDefeated = true;
       house.SupplyLevel = 0;
-      house.MaxArmiesOfTwo = 0;
-      house.MaxArmiesOfThree = 0;
-      house.MaxArmiesOfFour = 0;
       house.VictoryPoints = 0;
       house.PowerTokens = 0;
 
@@ -428,57 +392,6 @@ namespace Agotbg.Server.Game.Services
 
       if (sabotaged.PowerTokens > 0)
         sabotaged.PowerTokens -= 1;
-    }
-
-    /// <summary>
-    /// Updates the maximum number of armies a house can have based on its supply level.
-    /// </summary>
-    /// 
-    /// <param name="house">The house whose maximum armies are to be updated.</param>
-    private static void UpdateHouseMaximumArmiesBasedOnSupplyLevel(HouseState house)
-    {
-      if (house.SupplyLevel == 0)
-      {
-        house.MaxArmiesOfTwo = 2;
-        house.MaxArmiesOfThree = 0;
-        house.MaxArmiesOfFour = 0;
-      }
-      else if (house.SupplyLevel == 1)
-      {
-        house.MaxArmiesOfTwo = 1;
-        house.MaxArmiesOfThree = 1;
-        house.MaxArmiesOfFour = 0;
-      }
-      else if (house.SupplyLevel == 2)
-      {
-        house.MaxArmiesOfTwo = 2;
-        house.MaxArmiesOfThree = 1;
-        house.MaxArmiesOfFour = 0;
-      }
-      else if (house.SupplyLevel == 3)
-      {
-        house.MaxArmiesOfTwo = 3;
-        house.MaxArmiesOfThree = 1;
-        house.MaxArmiesOfFour = 0;
-      }
-      else if (house.SupplyLevel == 4)
-      {
-        house.MaxArmiesOfTwo = 2;
-        house.MaxArmiesOfThree = 2;
-        house.MaxArmiesOfFour = 0;
-      }
-      else if (house.SupplyLevel == 5)
-      {
-        house.MaxArmiesOfTwo = 2;
-        house.MaxArmiesOfThree = 1;
-        house.MaxArmiesOfFour = 1;
-      }
-      else if (house.SupplyLevel >= 6)
-      {
-        house.MaxArmiesOfTwo = 3;
-        house.MaxArmiesOfThree = 1;
-        house.MaxArmiesOfFour = 1;
-      }
     }
 
     // Player Houses Factory methods

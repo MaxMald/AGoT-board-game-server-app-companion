@@ -8,6 +8,7 @@ namespace Agotbg.Server.Game.Model
     public static readonly byte MaxPlayers = 8;
     public static readonly byte MinPlayers = 3;
     public static byte StartingPowerTokens { get; set; } = 5;
+    public static byte StartingRoundNumber { get; set; } = 1;
     public static byte NumRounds { get; set; } = 10;
     public static byte NumVictoryPointsToWin { get; set; } = 7;
     public static byte WildingMaxStrength { get; set; } = 12;

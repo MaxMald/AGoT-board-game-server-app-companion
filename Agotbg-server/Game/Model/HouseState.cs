@@ -23,24 +23,6 @@ namespace Agotbg.Server.Game.Model
     public byte SupplyLevel { get; set; } = 0;
 
     /// <summary>
-    /// Indicates the maximum number of armies of two units this house can have on the
-    /// board.
-    /// </summary>
-    public byte MaxArmiesOfTwo { get; set; } = 0;
-
-    /// <summary>
-    /// Indicates the maximum number of armies of three units this house can have on the
-    /// board.
-    /// </summary>
-    public byte MaxArmiesOfThree { get; set; } = 0;
-
-    /// <summary>
-    /// Indicates the maximum number of armies of four units this house can have on the
-    /// board.
-    /// </summary>
-    public byte MaxArmiesOfFour { get; set; } = 0;
-
-    /// <summary>
     /// Indicates the amount of Victory points, either castles or influence tokens if the
     /// house is Targaryen.
     /// </summary>
@@ -51,6 +33,11 @@ namespace Agotbg.Server.Game.Model
     /// bidding phase. This value is reset to 0 at the end of each bidding phase.
     /// </summary>
     public byte PowerTokensBid { get; set; } = 0;
+
+    /// <summary>
+    /// Indicates if this house has placed a bid during the current bidding phase.
+    /// </summary>
+    public bool HasBidPowerTokens { get; set; } = false;
 
     /// <summary>
     /// Indicates that the house has been defeated and cannot longer play the game.

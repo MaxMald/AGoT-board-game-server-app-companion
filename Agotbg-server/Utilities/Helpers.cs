@@ -8,12 +8,16 @@ namespace Agotbg.Server.Utilities
 
     public static List<HouseType> GetPlayerHouseTypesFromRoom(RoomState room)
     {
-      return room.Players.Values.Select(p => p.HouseState.Type).ToList();
+      if (room.GameState == null)
+        return new List<HouseType>();
+      return room.GameState.Players.Values.Select(p => p.HouseState.Type).ToList();
     }
 
     public static List<HouseType> GetVassalHouseTypesFromRoom(RoomState room)
     {
-      return room.Vassals.Keys.ToList();
+      if (room.GameState == null)
+        return new List<HouseType>();
+      return room.GameState.Vassals.Keys.ToList();
     }
 
     public static Result IsValidPlayerName(string playerName)

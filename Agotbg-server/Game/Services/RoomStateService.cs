@@ -26,6 +26,7 @@ namespace Agotbg.Server.Game.Services
       };
 
       room.PlayersDescriptors.Add(
+        hosterPlayerId,
         new PlayerDescriptor()
         {
           Name = hosterPlayerName,
@@ -45,7 +46,7 @@ namespace Agotbg.Server.Game.Services
       if (room.PlayersDescriptors.Count >= room.MaxPlayers)
         return Result.FAILURE($"Cannot add new player. Maximum number of players ({room.MaxPlayers}) reached.");
 
-      if (room.PlayersDescriptors.Any(pd => pd.PlayerId == playerId))
+      if (room.PlayersDescriptors.ContainsKey(playerId))
         return Result.FAILURE($"Player ID '{playerId}' is already in use.");
 
       playerName = playerName.Trim();
@@ -60,7 +61,7 @@ namespace Agotbg.Server.Game.Services
         HouseType = HouseType.Undefined
       };
 
-      room.PlayersDescriptors.Add(playerDescriptor);
+      room.PlayersDescriptors.Add(playerId, playerDescriptor);
       return Result.SUCCESS();
     }
 
@@ -72,10 +73,10 @@ namespace Agotbg.Server.Game.Services
       if (room.HosterPlayerId == playerId)
         return Result.FAILURE("Cannot remove the hoster player from the room.");
 
-      if (!room.PlayersDescriptors.Any(pd => pd.PlayerId == playerId))
+      if (!room.PlayersDescriptors.ContainsKey(playerId))
         return Result.FAILURE($"Player ID '{playerId}' does not exist.");
 
-      room.PlayersDescriptors.RemoveAll(pd => pd.PlayerId == playerId);
+      room.PlayersDescriptors.Remove(playerId);
 
       return Result.SUCCESS();
     }
@@ -85,16 +86,10 @@ namespace Agotbg.Server.Game.Services
       if (room.RoomStatus != RoomStatus.PreparingGame)
         return Result.FAILURE("Cannot modify player house after the game has started.");
 
-      if (!room.PlayersDescriptors.Any(pd => pd.PlayerId == playerId))
+      if (!room.PlayersDescriptors.ContainsKey(playerId))
         return Result.FAILURE($"Player ID '{playerId}' does not exist.");
 
-      if (newHouse != HouseType.Undefined) // if player is selecting a valid house, check if it's already taken by another player
-      {
-        if (room.PlayersDescriptors.Any(pd => pd.HouseType == newHouse))
-          return Result.FAILURE($"House '{newHouse}' is already selected by another player.");
-      }
-
-      PlayerDescriptor playerDescriptor = room.PlayersDescriptors.First(pd => pd.PlayerId == playerId);
+      PlayerDescriptor playerDescriptor = room.PlayersDescriptors[playerId];
       playerDescriptor.HouseType = newHouse;
 
       return Result.SUCCESS();
@@ -117,370 +112,22 @@ namespace Agotbg.Server.Game.Services
       if (room.RoomStatus != RoomStatus.PreparingGame)
         return Result.FAILURE("Game has already started.");
 
-      if (room.PlayersDescriptors.Count < GameConstants.MinPlayers)
-        return Result.FAILURE($"Not enough players to start the game. Minimum required is {GameConstants.MinPlayers}.");
-
-      if (room.PlayersDescriptors.Count > room.MaxPlayers)
-        return Result.FAILURE($"Too many players to start the game. Current Number of players: {room.PlayersDescriptors.Count}. Maximum allowed is {room.MaxPlayers}.");
-
-      foreach (PlayerDescriptor playerDescriptor in room.PlayersDescriptors)
-      {
-        if (playerDescriptor.HouseType == HouseType.Undefined)
-          return Result.FAILURE($"Player '{playerDescriptor.Name}' has not selected a house.");
-      }
-
       try
-      { 
-        room.Winner = null;
-        room.Round.RoundNumber = 1;
-        room.Wilding.Strength = GameConstants.WildingStartingStrength;
-
-        AssertPlayerDescriptorsAreValidForCreation(room.PlayersDescriptors);
-        CreatePlayerHouses(room);
-        CreateVassalHouses(room);
-
-        List<HouseState> allHouses = GetAllHouses(room);
-        InfluenceTracksService.Initialize(allHouses);
-
-        foreach (HouseState house in allHouses)
-          HouseStateService.UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
-
+      {
+        room.GameState = GameStateService.Create(
+          room.PlayersDescriptors.Values.ToList(),
+          room.MaxPlayers
+        );
         room.RoomStatus = RoomStatus.InProgress;
-        room.Round.CurrentPhase = RoundPhaseType.Setup;
       }
       catch (Exception ex)
       {
+        room.GameState = null;
         room.RoomStatus = RoomStatus.PreparingGame;
-        room.Players.Clear();
-        room.Vassals.Clear();
-
-        return Result.FAILURE($"An error occurred while starting the game: {ex.Message}");
+        return Result.FAILURE($"Failed to start the game: {ex.Message}");
       }
 
       return Result.SUCCESS();
-    }
-
-    public Result MoveToRoundPhase(RoomState room, RoundPhaseType newPhase)
-    {
-      // TODO Round Transitions
-
-      room.Round.CurrentPhase = newPhase;
-      return Result.SUCCESS();
-    }
-
-    public Result ModifyPlayerPowerTokens(RoomState room, string playerId, short delta)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot modify power tokens if game is not in progress.");
-
-      if (!room.Players.ContainsKey(playerId))
-        return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
-
-      HouseState house = room.Players[playerId].HouseState;
-      short power = house.PowerTokens;
-      short newPower = (short)Math.Max(0, power + delta);
-      byte newPowerByte = (byte)Math.Min(newPower, byte.MaxValue);
-
-      return HouseStateService.UpdatePowerTokens(house, newPowerByte);
-    }
-
-    public Result UpdatePlayerPowerTokens(RoomState room, string playerId, byte newPowerTokens)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot update power tokens if game is not in progress.");
-
-      if (!room.Players.ContainsKey(playerId))
-        return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
-
-      PlayerState player = room.Players[playerId];
-      return HouseStateService.UpdatePowerTokens(player.HouseState, newPowerTokens);
-    }
-
-    public Result UpdatePlayerSupplyLevel(RoomState room, string playerId, byte newSupplyLevel)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot update supply level if game is not in progress.");
-
-      if (!room.Players.ContainsKey(playerId))
-        return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
-
-      HouseState house = room.Players[playerId].HouseState;
-      HouseStateService.UpdateHouseSupplyLevel(house, newSupplyLevel);
-
-      return Result.SUCCESS();
-    }
-
-    public Result UpdatePlayerVictoryPoints(RoomState room, string playerId, byte newVictoryPoints)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot update victory points if game is not in progress.");
-
-      if (!room.Players.ContainsKey(playerId))
-        return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
-
-      PlayerState player = room.Players[playerId];
-      player.HouseState.VictoryPoints = newVictoryPoints;
-
-      CheckWinCondition(room);
-      return Result.SUCCESS();
-    }
-
-    public Result UpdatePlayerDragonStrength(RoomState room, string playerId, byte newDragonStrength)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot update dragon strength if game is not in progress.");
-
-      if (!room.Players.ContainsKey(playerId))
-        return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
-
-      PlayerState player = room.Players[playerId];
-      return HouseStateService.UpdateDragonStrength(player.HouseState, newDragonStrength);
-    }
-
-    public Result UpdatePlayerPowerTokensBid(RoomState room, string playerId, byte newBid)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot update bid if game is not in progress.");
-
-      if (room.Round.CurrentPhase != RoundPhaseType.KingsCourtBidding &&
-        room.Round.CurrentPhase != RoundPhaseType.FiefdomsBidding &&
-        room.Round.CurrentPhase != RoundPhaseType.IronThroneBidding &&
-        room.Round.CurrentPhase != RoundPhaseType.WildlingsBidding)
-      {
-        return Result.FAILURE("Cannot update bid if the current phase is not a bidding phase.");
-      }
-
-      if (!room.Players.ContainsKey(playerId))
-        return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
-
-      PlayerState player = room.Players[playerId];
-
-      return HouseStateService.UpdatePowerTokensBid(player.HouseState, newBid);
-    }
-
-    public Result PillageHouse(RoomState room, string saboteurPlayerId, string sabotagedPlayerId)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot pillage a house if the game is not in progress.");
-
-      if (room.Round.CurrentPhase != RoundPhaseType.Action)
-        return Result.FAILURE("Cannot pillage a house if the current phase is not the action phase.");
-
-      if (!room.Players.ContainsKey(saboteurPlayerId))
-        return Result.FAILURE($"Player with ID {saboteurPlayerId} does not exist in the room.");
-
-      if (!room.Players.ContainsKey(sabotagedPlayerId))
-        return Result.FAILURE($"Player with ID {sabotagedPlayerId} does not exist in the room.");
-
-      PlayerState saboteurPlayer = room.Players[saboteurPlayerId];
-      PlayerState sabotagedPlayer = room.Players[sabotagedPlayerId];
-
-      HouseStateService.PillageHouse(saboteurPlayer.HouseState, sabotagedPlayer.HouseState);
-      return Result.SUCCESS();
-    }
-
-    public Result VassalPillageHouse(RoomState room, HouseType vassalHouse, string sabotagePlayerId)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot pillage a house if the game is not in progress.");
-
-      if (room.Round.CurrentPhase != RoundPhaseType.Action)
-        return Result.FAILURE("Cannot pillage a house if the current phase is not the action phase.");
-
-      if (!room.Vassals.ContainsKey(vassalHouse))
-        return Result.FAILURE($"Vassal of type: {vassalHouse} does not exist in the room.");
-
-      if (!room.Players.ContainsKey(sabotagePlayerId))
-        return Result.FAILURE($"Player with ID {sabotagePlayerId} does not exist in the room.");
-
-      HouseState vassal = room.Vassals[vassalHouse];
-      PlayerState sabotagePlayer = room.Players[sabotagePlayerId];
-
-      HouseStateService.PillageHouse(vassal, sabotagePlayer.HouseState);
-      return Result.SUCCESS();
-    }
-
-    public Result TransferPowerTokens(
-      RoomState room,
-      string fromPlayerId,
-      string toPlayerId,
-      byte amount
-    )
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot transfer power tokens if game is not in progress.");
-
-      if (!room.Players.ContainsKey(fromPlayerId))
-        return Result.FAILURE($"Player with ID {fromPlayerId} does not exist in the room.");
-
-      if (!room.Players.ContainsKey(toPlayerId))
-        return Result.FAILURE($"Player with ID {toPlayerId} does not exist in the room.");
-
-      PlayerState fromPlayer = room.Players[fromPlayerId];
-      PlayerState toPlayer = room.Players[toPlayerId];
-
-      return HouseStateService.TransferPowerTokens(
-        fromPlayer.HouseState,
-        toPlayer.HouseState,
-        amount
-      );
-    }
-
-    public Result MakeVassalageStatus(RoomState room, string commanderPlayerId, HouseType vassalHouseType)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot make a player a vassal if the game is not in progress.");
-
-      if (!room.Players.ContainsKey(commanderPlayerId))
-        return Result.FAILURE($"Commander player with ID {commanderPlayerId} does not exist in the room.");
-
-      if (!room.Vassals.ContainsKey(vassalHouseType))
-        return Result.FAILURE($"Vassal of type: {vassalHouseType} does not exist in the room.");
-
-      PlayerState commanderPlayer = room.Players[commanderPlayerId];
-      HouseState vassalHouse = room.Vassals[vassalHouseType];
-
-      return HouseStateService.MakeVassalageStatus(commanderPlayer.HouseState, vassalHouse);
-    }
-
-    public Result BreakVassalageStatus(RoomState room, string commanderPlayerId, HouseType vassalHouseType)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot break a vassalage status if the game is not in progress.");
-
-      if (!room.Players.ContainsKey(commanderPlayerId))
-        return Result.FAILURE($"Commander player with ID {commanderPlayerId} does not exist in the room.");
-
-      if (!room.Vassals.ContainsKey(vassalHouseType))
-        return Result.FAILURE($"Vassal of type: {vassalHouseType} does not exist in the room.");
-
-      PlayerState commanderPlayer = room.Players[commanderPlayerId];
-      HouseState vassalHouse = room.Vassals[vassalHouseType];
-
-      return HouseStateService.BreakVassalageStatus(commanderPlayer.HouseState, vassalHouse);
-    }
-
-    public Result ModifyVassalSupplyLevel(
-      RoomState room,
-      HouseType vassalHouseType,
-      byte newSupplyLevel
-      )
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot modify a vassal's supply level if the game is not in progress.");
-
-      if (!room.Vassals.ContainsKey(vassalHouseType))
-        return Result.FAILURE($"Vassal of type: {vassalHouseType} does not exist in the room.");
-
-      HouseState vassalHouse = room.Vassals[vassalHouseType];
-      HouseStateService.UpdateHouseSupplyLevel(vassalHouse, newSupplyLevel);
-
-      return Result.SUCCESS();
-    }
-
-    public Result DefeatPlayer(RoomState room, string playerId)
-    {
-      if (room.RoomStatus != RoomStatus.InProgress)
-        return Result.FAILURE("Cannot defeat a player before the game has started.");
-
-      // TODO: Consider check the game round is on a safe phase to defeat a player, like
-      // after the planning phase and action phase.
-
-      if (!room.Players.ContainsKey(playerId))
-        return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
-
-      PlayerState player = room.Players[playerId];
-      if (player.HouseState.IsDefeated)
-        return Result.FAILURE($"Player with ID {playerId} is already defeated.");
-
-      List<HouseType> vassalsToBreak = player.HouseState.VassalHouseTypes.ToList();
-      foreach (HouseType vassalHouseType in vassalsToBreak)
-      {
-        Result breakResult = BreakVassalageStatus(room, playerId, vassalHouseType);
-        if (!breakResult.Success)
-          return Result.FAILURE($"Failed to break vassalage status for vassal {vassalHouseType}: {breakResult.Message}");
-      }
-
-      return HouseStateService.SetHouseAsDefeated(player.HouseState);
-    }
-
-    public void CheckWinCondition(RoomState room)
-    {
-      foreach (var player in room.Players)
-      {
-        if (player.Value.HouseState.VictoryPoints >= GameConstants.NumVictoryPointsToWin
-          && !player.Value.HouseState.IsDefeated)
-        {
-          room.Winner = player.Value.HouseState.Type;
-          room.RoomStatus = RoomStatus.Finished;
-          return;
-        }
-      }
-    }
-
-    private static void AssertPlayerDescriptorsAreValidForCreation(List<PlayerDescriptor> playerDescriptors)
-    {
-      var houseTypes = new HashSet<HouseType>();
-
-      foreach (var playerDescriptor in playerDescriptors)
-      {
-        if (playerDescriptor.HouseType == HouseType.Undefined)
-          throw new InvalidOperationException($"Player '{playerDescriptor.Name}' has not selected a house.");
-
-        if (!houseTypes.Add(playerDescriptor.HouseType))
-          throw new InvalidOperationException($"House '{playerDescriptor.HouseType}' is already selected by another player.");
-      }
-    }
-
-    private static void CreatePlayerHouses(RoomState room)
-    {
-      foreach (var playerDescriptor in room.PlayersDescriptors)
-      {
-        if (playerDescriptor.HouseType == HouseType.Undefined)
-          throw new InvalidOperationException($"Player '{playerDescriptor.Name}' has not selected a house.");
-
-        if (room.Players.ContainsKey(playerDescriptor.PlayerId))
-          throw new InvalidOperationException($"Player ID '{playerDescriptor.PlayerId}' is already in use.");
-
-        HouseState houseState = HouseStateService.Create(playerDescriptor.HouseType);
-        PlayerState playerState = new PlayerState()
-        {
-          PlayerId = playerDescriptor.PlayerId,
-          HouseState = houseState
-        };
-
-        room.Players[playerDescriptor.PlayerId] = playerState;
-      }
-    }
-
-    private static void CreateVassalHouses(RoomState room)
-    {
-      for (byte i = 0; i < (byte)HouseType.Count; ++i)
-      {
-        HouseType houseType = (HouseType)i;
-        if (houseType == HouseType.Undefined || houseType == HouseType.Targaryen)
-          continue; // Skip undefined type. Targaryen cannot be a vassal house
-
-        if (room.Players.Values.Any(p => p.HouseState.Type == houseType))
-          continue; // Skip if the house is already taken by a player
-
-        if (room.Vassals.ContainsKey(houseType))
-          continue; // Skip if the house is already added as a vassal
-
-        room.Vassals[houseType] = HouseStateService.CreateVassal(houseType);
-      }
-    }
-
-    private static List<HouseState> GetAllHouses(RoomState room)
-    {
-      List<HouseState> allHouses = new List<HouseState>();
-      foreach (var player in room.Players.Values)
-        allHouses.Add(player.HouseState);
-
-      foreach (var vassal in room.Vassals.Values)
-        allHouses.Add(vassal);
-
-      return allHouses;
     }
   }
 }
