@@ -86,21 +86,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       );
     }
 
-    public static Result ExecuteUpdatePowerTokensBid(
-      GameState gameState,
-      IRoundPhaseCommand command
-    )
-    {
-      if (command is not RpcUpdatePowerTokensBid updatePowerTokensBidCommand)
-        return Result.FAILURE($"Invalid command type {command.Type} for updating power tokens bid.");
-
-      return GameStateService.UpdatePlayerPowerTokensBid(
-        gameState,
-        updatePowerTokensBidCommand.PlayerId,
-        updatePowerTokensBidCommand.NewBid
-      );
-    }
-
     public static Result ExecuteMakeVassalStatus(
       GameState gameState,
       IRoundPhaseCommand command
