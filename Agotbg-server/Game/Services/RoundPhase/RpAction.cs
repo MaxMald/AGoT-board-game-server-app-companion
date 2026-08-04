@@ -7,10 +7,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// <summary>
   /// <para>
   /// The Action phase is the final phase of a round in the board game (not the app
-  /// companion). During this phase, players resolves their orders in the following
-  /// order: Raid, March and Consolidate Power. The app companion does not have
-  /// information about the orders of each player and does not care about it, however
-  /// many game state operations can be performed during this phase, such as:
+  /// companion). During this phase, players resolves their orders in the game board.
+  /// Many game state operations can be performed during this phase, such as:
   /// </para>
   /// <list type="bullet">
   ///   <item>Transferring power tokens</item>
@@ -140,9 +138,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
     private static PlayerState? GetPlayerWithHighestVictoryPoints(List<PlayerState> players)
     {
-      return players
-        .OrderByDescending(p => p.HouseState.VictoryPoints)
-        .FirstOrDefault();
+      return players.OrderByDescending(p => p.HouseState.VictoryPoints)
+                    .FirstOrDefault();
     }
 
     private static bool ShouldUpdateTargaryenDragonStrength(byte nextRound)
