@@ -4,6 +4,21 @@ using Agotbg.Server.Utilities;
 
 namespace Agotbg.Server.Game.Services.RoundPhase
 {
+  /// <summary>
+  /// <para>
+  /// Represents the Westeros phase of the game. During this phase, players resolve the
+  /// effects of the Westeros cards and may transition to other sub-phases based on these
+  /// events.
+  /// </para>
+  /// <para>
+  /// Possible transitions from this phase include:
+  /// <list type="bullet">
+  ///   <item>Planning</item>
+  ///   <item>WildlingsBidding</item>
+  ///   <item>IronThroneBidding</item>
+  /// </list>
+  /// </para>
+  /// </summary>
   public class RpWesteros : ARoundPhase
   {
     /// <inheritdoc/>
@@ -47,8 +62,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
             gameState,
             command
           );
-
-        // TODO: Modify Wildings Strength Command
       }
       return Result.FAILURE($"Invalid command type {command.Type} for round phase {Type}");
     }
@@ -65,7 +78,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         case RoundPhaseCommandType.UpdateSupplyLevel:
         case RoundPhaseCommandType.UpdateVictoryPoints:
         case RoundPhaseCommandType.UpdateIronBankLoanInterest:
-        // TODO: Modify Wildings Strength Command
           return true;
       }
       return false;

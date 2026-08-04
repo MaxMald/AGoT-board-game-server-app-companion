@@ -35,8 +35,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// Possible transitions from this phase:
   /// </para>
   /// <list type="bullet">
-  ///   <item>Westeros</item>
-  ///   <item>Tie Resolution</item>
+  ///   <item>WesterosWildlingIconsResolution</item>
+  ///   <item>WinnerTie Resolution</item>
   ///   <item>Game Over</item>
   /// </list>
   /// </summary>
@@ -101,7 +101,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return false;
     }
 
-    private Result ResolveActionPhase(GameState gameState)
+    private static Result ResolveActionPhase(GameState gameState)
     {
       List<PlayerState> playerStates = gameState.Players.Values.ToList();
 
@@ -109,7 +109,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       {
         if (GameStateService.HasTiedPlayersByVictoryPoints(gameState))
         {
-          gameState.CurrentPhase = RoundPhaseType.TieResolution; // Transition to Tie Resolution phase if there are tied players
+          gameState.CurrentPhase = RoundPhaseType.WinnerTieResolution; // Transition to Tie Resolution phase if there are tied players
           return Result.SUCCESS();
         }
         else
@@ -132,7 +132,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       ResolveIronBankInterestPayment(playerStates);
 
       gameState.CurrentRound = nextRound; // TODO: Event
-      gameState.CurrentPhase = RoundPhaseType.Westeros; // Transition
+      gameState.CurrentPhase = RoundPhaseType.WesterosWildlingIconsResolution; // Transition
       return Result.SUCCESS();
     }
 

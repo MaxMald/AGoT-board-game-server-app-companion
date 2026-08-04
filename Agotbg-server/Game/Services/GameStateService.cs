@@ -30,7 +30,7 @@ namespace Agotbg.Server.Game.Services
       }
 
       GameState gameState = new();
-      gameState.Wilding.Strength = GameConstants.WildingStartingStrength;
+      gameState.Wildling.Strength = GameConstants.WildingStartingStrength;
 
       CreatePlayerHouses(gameState, playersDescriptors);
       CreateVassalHouses(gameState);

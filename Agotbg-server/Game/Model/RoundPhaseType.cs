@@ -6,18 +6,22 @@ namespace Agotbg.Server.Game.Model
   public enum RoundPhaseType : byte
   {
     Setup,
+    WesterosWildlingIconsResolution,
     Westeros,
     WildlingsBidding,
-    WildlingsBiddingResolution,
+    WildlingsBiddingTieResolution,
     IronThroneBidding,
-    IronThroneBiddingResolution,
+    IronThroneBiddingTargaryenResolution,
+    IronThroneBiddingTieResolution,
     FiefdomsBidding,
-    FiefdomsBiddingResolution,
+    FiefdomsBiddingTargaryenResolution,
+    FiefdomsBiddingTieResolution,
     KingsCourtBidding,
-    KingsCourtBiddingResolution,
+    KingsCourtBiddingTargaryenResolution,
+    KingsCourtBiddingTieResolution,
     Planning,
     Action,
-    TieResolution,
+    WinnerTieResolution,
     GameOver
   }
 }

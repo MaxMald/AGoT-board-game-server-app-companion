@@ -11,9 +11,9 @@ namespace Agotbg.Server.Game.Model
     public static byte StartingRoundNumber { get; set; } = 1;
     public static byte NumRounds { get; set; } = 10;
     public static byte NumVictoryPointsToWin { get; set; } = 7;
-    public static byte WildingMaxStrength { get; set; } = 12;
+    public static byte WildlingMaxStrength { get; set; } = 12;
     public static byte WildingStartingStrength { get; set; } = 2;
-    public static byte WildingStrengthStep { get; set; } = 2;
+    public static byte WildlingStrengthStep { get; set; } = 2;
     public static byte MaximumNumberOfVassals { get; set; } = 4;
     public static byte MaximumSupplyLevel { get; set; } = 6;
     public static byte MaximumDragonStrength { get; set; } = 5;

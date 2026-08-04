@@ -9,7 +9,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// The Game Over round phase represents the end of the game. In this phase, no further
   /// commands can be executed, and the game state is considered final.
   /// </para>
-  ///
   /// <para>
   /// No possible transitions exist from this phase.
   /// </para>

@@ -6,7 +6,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 {
   /// <summary>
   /// <para>
-  /// Represents a phase for tie resolution, which determines the game winner when
+  /// Represents a phase for winner tie resolution, which determines the game winner when
   /// multiple houses are tied with the highest victory points.
   /// </para>
   /// <para>
@@ -38,10 +38,10 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// </list>
   /// </para>
   /// </summary>
-  public class RpTieResolution : ARoundPhase
+  public class RpWinnerTieResolution : ARoundPhase
   {
     /// <inheritdoc/>
-    public override RoundPhaseType Type => RoundPhaseType.TieResolution;
+    public override RoundPhaseType Type => RoundPhaseType.WinnerTieResolution;
 
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
