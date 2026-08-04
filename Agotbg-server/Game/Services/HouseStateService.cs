@@ -296,6 +296,12 @@ namespace Agotbg.Server.Game.Services
       return Result.SUCCESS();
     }
 
+    /// <summary>
+    /// Cancels the power tokens bid for a house, resetting the bid amount to zero and
+    /// indicating that the house has not bid any power tokens.
+    /// </summary>
+    /// 
+    /// <param name="house">The house state for which to cancel the power tokens bid.</param>
     public static void CancelPowerTokensBid(HouseState house)
     {
       house.PowerTokensBid = 0;

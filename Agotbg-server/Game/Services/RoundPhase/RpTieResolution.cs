@@ -57,8 +57,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     {
       if (command.Type == RoundPhaseCommandType.ResolveTieBySupplyLevelOrIronThronePosition)
       {
-        RpResolveTieBySupplyLevelOrIronThronePosition? tieResolutionCommand
-          = command as RpResolveTieBySupplyLevelOrIronThronePosition;
+        RpcResolveTieBySupplyLevelOrIronThronePosition? tieResolutionCommand
+          = command as RpcResolveTieBySupplyLevelOrIronThronePosition;
 
         if (tieResolutionCommand == null)
           return Result.FAILURE("Invalid command type for tie resolution by area.");
@@ -70,7 +70,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       }
       else if (command.Type == RoundPhaseCommandType.ResolveWithWinner)
       {
-        RpResolveWithWinner? resolveWithWinnerCommand = command as RpResolveWithWinner;
+        RpcResolveWithWinner? resolveWithWinnerCommand = command as RpcResolveWithWinner;
 
         if (resolveWithWinnerCommand == null)
           return Result.FAILURE("Invalid command type for resolving with a winner.");
@@ -90,7 +90,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
     private static Result ExecuteResolveTieBySupplyLevelOrIronThronePosition(
       GameState gameState,
-      RpResolveTieBySupplyLevelOrIronThronePosition command
+      RpcResolveTieBySupplyLevelOrIronThronePosition command
     )
     {
       List<HouseState> tiedHouses = GetPlayerHousesWithHightestNumberOfVictoryPoints(gameState);
@@ -119,7 +119,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
     private static Result ExecuteResolveWithWinner(
       GameState gameState,
-      RpResolveWithWinner command
+      RpcResolveWithWinner command
     )
     {
       if (!gameState.Players.ContainsKey(command.WinnerPlayerId))

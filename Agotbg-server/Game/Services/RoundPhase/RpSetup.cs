@@ -6,8 +6,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 {
   /// <summary>
   /// <para>
-  /// Represents the setup phase of the game, where players prepare the game board for
-  /// the upcoming rounds.
+  /// Represents the setup phase of the game. During this phase players prepare the game
+  /// board for the upcoming rounds.
   /// </para>
   ///
   /// <para>

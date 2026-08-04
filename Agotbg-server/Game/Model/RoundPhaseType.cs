@@ -17,7 +17,6 @@ namespace Agotbg.Server.Game.Model
     KingsCourtBiddingResolution,
     Planning,
     Action,
-    NextRoundPreparation,
     TieResolution,
     GameOver
   }

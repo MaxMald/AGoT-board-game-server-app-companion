@@ -1,10 +1,9 @@
-
 namespace Agotbg.Server.Game.Services.RoundPhase.Command
 {
   /// <summary>
   /// Represents a command to resolve a round phase with a specified winner.
   /// </summary>
-  public class RpResolveWithWinner : IRoundPhaseCommand
+  public class RpcResolveWithWinner : IRoundPhaseCommand
   {
     /// <inheritdoc/>
     public RoundPhaseCommandType Type => RoundPhaseCommandType.ResolveWithWinner;
@@ -14,7 +13,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase.Command
     /// </summary>
     public string WinnerPlayerId { get; }
 
-    public RpResolveWithWinner(string winnerPlayerId)
+    public RpcResolveWithWinner(string winnerPlayerId)
     {
       WinnerPlayerId = winnerPlayerId;
     }

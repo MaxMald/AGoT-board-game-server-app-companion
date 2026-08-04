@@ -9,6 +9,18 @@ namespace Agotbg.Server.Game.Services.RoundPhase.Command
     Resolve,
     ResolveAndMoveTo,
     ResolveWithWinner,
-    ResolveTieBySupplyLevelOrIronThronePosition
+    ResolveTieBySupplyLevelOrIronThronePosition,
+    ModifyPowerTokens,
+    TransferPowerTokens,
+    UpdateSupplyLevel,
+    UpdateVassalSupplyLevel,
+    UpdateVictoryPoints,
+    UpdatePowerTokensBid,
+    CancelPowerTokensBid,
+    UpdateIronBankLoanInterest,
+    Pillage,
+    PillageVassal,
+    MakeVassalageStatus,
+    BreakVassalageStatus
   }
 }

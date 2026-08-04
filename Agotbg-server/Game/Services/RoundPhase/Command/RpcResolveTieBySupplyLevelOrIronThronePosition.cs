@@ -5,7 +5,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase.Command
   /// Iron Throne position. This command is used to indicate that the players are ready
   /// to proceed to the next phase of the game after resolving a tie.
   /// </summary>
-  public class RpResolveTieBySupplyLevelOrIronThronePosition : IRoundPhaseCommand
+  public class RpcResolveTieBySupplyLevelOrIronThronePosition : IRoundPhaseCommand
   {
     /// <inheritdoc/>
     public RoundPhaseCommandType Type => RoundPhaseCommandType.ResolveTieBySupplyLevelOrIronThronePosition;
