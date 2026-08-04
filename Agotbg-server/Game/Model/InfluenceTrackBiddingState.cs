@@ -14,6 +14,6 @@ namespace Agotbg.Server.Game.Model
     /// <summary>
     /// The bet of each house on the current influence track.
     /// </summary>
-    public List<HouseBet> houseBets { get; set; } = [];
+    public List<HouseBet> HouseBets { get; set; } = [];
   }
 }
