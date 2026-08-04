@@ -9,7 +9,7 @@ namespace Agotbg.Server.Game.Model
     WesterosWildlingIconsResolution,
     Westeros,
     WildlingsBidding,
-    WildlingsBiddingTieResolution,
+    WildlingsBiddingPresentation,
     IronThroneBidding,
     IronThroneBiddingTargaryenResolution,
     IronThroneBiddingTieResolution,

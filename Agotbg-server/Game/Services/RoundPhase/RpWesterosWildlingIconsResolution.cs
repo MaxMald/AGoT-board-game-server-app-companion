@@ -41,13 +41,13 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       }
 
       byte iconsStrength = (byte)(resolveWildlingIconsCommand.NumWildlingIcons * GameConstants.WildlingStrengthStep);
-      byte totalStrength = (byte)(gameState.Wildling.Strength + iconsStrength);
+      byte totalStrength = (byte)(gameState.Wildlings.Strength + iconsStrength);
 
       if (totalStrength > GameConstants.WildlingMaxStrength)
         totalStrength = GameConstants.WildlingMaxStrength;
 
-      gameState.Wildling.Strength = totalStrength;
-      if (gameState.Wildling.Strength >= GameConstants.WildlingMaxStrength)
+      gameState.Wildlings.Strength = totalStrength;
+      if (gameState.Wildlings.Strength >= GameConstants.WildlingMaxStrength)
       {
         gameState.CurrentPhase = RoundPhaseType.WildlingsBidding;
         return Result.SUCCESS();

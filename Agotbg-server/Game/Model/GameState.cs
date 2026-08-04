@@ -29,7 +29,7 @@ namespace Agotbg.Server.Game.Model
     /// <summary>
     /// The current wildling state of the game.
     /// </summary>
-    public WildingState Wildling { get; set; } = new WildingState();
+    public WildlingsState Wildlings { get; set; } = new WildlingsState();
 
     /// <summary>
     /// The house type of the winner. Null if the game has not ended yet.

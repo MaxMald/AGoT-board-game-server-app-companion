@@ -330,6 +330,20 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
+    /// Undoes the resolution of a bid by restoring the previous bid amount to the
+    /// house's
+    /// </summary>
+    /// 
+    /// <param name="house">The house state for which to undo the bid resolution.</param>
+    /// <param name="previousBid">The previous bid amount to restore.</param>
+    public static void UndoBidResolution(HouseState house, byte previousBid)
+    {
+      house.PowerTokens += previousBid;
+      house.PowerTokensBid = previousBid;
+      house.HasBidPowerTokens = true;
+    }
+
+    /// <summary>
     /// Transfer a specified amount of power tokens from one house to another, ensuring
     /// that the transfer is valid and does not exceed the available tokens of the source
     /// house.

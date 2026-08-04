@@ -7,16 +7,17 @@ namespace Agotbg.Server.Game.Model
   {
     public static readonly byte MaxPlayers = 8;
     public static readonly byte MinPlayers = 3;
-    public static byte StartingPowerTokens { get; set; } = 5;
-    public static byte StartingRoundNumber { get; set; } = 1;
-    public static byte NumRounds { get; set; } = 10;
-    public static byte NumVictoryPointsToWin { get; set; } = 7;
-    public static byte WildlingMaxStrength { get; set; } = 12;
-    public static byte WildingStartingStrength { get; set; } = 2;
-    public static byte WildlingStrengthStep { get; set; } = 2;
-    public static byte MaximumNumberOfVassals { get; set; } = 4;
-    public static byte MaximumSupplyLevel { get; set; } = 6;
-    public static byte MaximumDragonStrength { get; set; } = 5;
-    public static byte TargaryenInfluencePosition { get; set; } = 8;
+    public static readonly byte StartingPowerTokens = 5;
+    public static readonly byte StartingRoundNumber = 1;
+    public static readonly byte NumRounds = 10;
+    public static readonly byte NumVictoryPointsToWin = 7;
+    public static readonly byte WildlingMaxStrength = 12;
+    public static readonly byte WildingStartingStrength = 2;
+    public static readonly byte WildlingStrengthStep = 2;
+    public static readonly byte WildlingStrengthReduction = 4;
+    public static readonly byte MaximumNumberOfVassals = 4;
+    public static readonly byte MaximumSupplyLevel = 6;
+    public static readonly byte MaximumDragonStrength = 5;
+    public static readonly byte TargaryenInfluencePosition = 8;
   }
 }
