@@ -16,6 +16,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   ///   <item>Updating supply levels</item>
   ///   <item>Updating victory points</item>
   ///   <item>Updating Iron Bank loan interest</item>
+  ///   <item>Moving influence track positions for houses</item>
   /// </list>
   /// <para>
   /// When resolving this phase, this phase will check if the current round is the last
@@ -35,8 +36,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// Possible transitions from this phase:
   /// </para>
   /// <list type="bullet">
-  ///   <item>WesterosWildlingIconsResolution</item>
-  ///   <item>WinnerTie Resolution</item>
+  ///   <item>Westeros Wildling Icons Resolution</item>
+  ///   <item>Winner Tie Resolution</item>
   ///   <item>Game Over</item>
   /// </list>
   /// </summary>
@@ -80,6 +81,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
             gameState,
             command
           );
+        case RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse:
+          return RoundPhaseSharedCommandExecutions.ExecuteMoveInfluenceTrackPositionForHouse(
+            gameState,
+            command
+          );
       }
 
       return Result.FAILURE($"Invalid command type {command.Type} for round phase {Type}");
@@ -96,6 +102,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         case RoundPhaseCommandType.UpdateSupplyLevel:
         case RoundPhaseCommandType.UpdateVictoryPoints:
         case RoundPhaseCommandType.UpdateIronBankLoanInterest:
+        case RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse:
           return true;
       }
       return false;

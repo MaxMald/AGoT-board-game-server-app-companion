@@ -17,12 +17,45 @@ namespace Agotbg.Server.Game.Services
     /// tracks.</param>
     public static void Initialize(List<HouseState> houses)
     {
-      OrderHousesForIronThrone(houses);
+      InitializeHousesOrderForIronThrone(houses);
       SetInfluenceTrackPositions(houses, InfluenceTrackType.IronThrone);
-      OrderHousesForFiefdoms(houses);
+      InitializeHousesOrderForFiefdoms(houses);
       SetInfluenceTrackPositions(houses, InfluenceTrackType.Fiefdom);
-      OrderHousesForKingsCourt(houses);
+      InitializeHouseOrderForKingsCourt(houses);
       SetInfluenceTrackPositions(houses, InfluenceTrackType.KingsCourt);
+    }
+
+    /// <summary>
+    /// Moves a specified house to a new position on the given influence track. This
+    /// shifts other houses accordingly to maintain the order. The new position is
+    /// 1-based, with 1 being the highest position on the track.
+    /// </summary>
+    ///
+    /// <param name="houses">The list of houses.</param>
+    /// <param name="houseType">The type of the house to move.</param>
+    /// <param name="trackType">The type of the influence track.</param>
+    /// <param name="newPosition">The new 1-based position for the house.</param>
+    ///
+    /// <exception cref="Exception"/>
+    /// <exception cref="ArgumentException"/>
+    public static void MoveInfluenceTrackPositionForHouse(
+      List<HouseState> houses,
+      HouseType houseType,
+      InfluenceTrackType trackType,
+      byte newPosition
+    )
+    {
+      HouseState? houseToMove = houses.FirstOrDefault(h => h.Type == houseType);
+      if (houseToMove == null)
+        throw new Exception($"House {houseType} not found in the provided list.");
+
+      SortHousesByInfluenceTrackPosition(houses, trackType);
+      houses.Remove(houseToMove);
+
+      byte zeroBasedPosition = (byte)(newPosition - 1);
+      houses.Insert(zeroBasedPosition, houseToMove);
+
+      SetInfluenceTrackPositions(houses, trackType);
     }
 
     /// <summary>
@@ -31,7 +64,7 @@ namespace Agotbg.Server.Game.Services
     /// </summary>
     ///
     /// <param name="houses">The list of houses to sort.</param>
-    private static void OrderHousesForIronThrone(List<HouseState> houses)
+    private static void InitializeHousesOrderForIronThrone(List<HouseState> houses)
     {
       houses.Sort((h1, h2) => GetInitialIronThroneWeightForHouse(h2)
                               .CompareTo(GetInitialIronThroneWeightForHouse(h1)));
@@ -43,7 +76,7 @@ namespace Agotbg.Server.Game.Services
     /// </summary>
     /// 
     /// <param name="houses">The list of houses to sort.</param>
-    private static void OrderHousesForFiefdoms(List<HouseState> houses)
+    private static void InitializeHousesOrderForFiefdoms(List<HouseState> houses)
     {
       houses.Sort((h1, h2) => GetInitialFiefdomsWeightForHouse(h2)
                               .CompareTo(GetInitialFiefdomsWeightForHouse(h1)));
@@ -55,7 +88,7 @@ namespace Agotbg.Server.Game.Services
     /// </summary>
     /// 
     /// <param name="houses">The list of houses to sort.</param>
-    private static void OrderHousesForKingsCourt(List<HouseState> houses)
+    private static void InitializeHouseOrderForKingsCourt(List<HouseState> houses)
     {
       houses.Sort((h1, h2) => GetInitialKingCourtWeightForHouse(h2)
                               .CompareTo(GetInitialKingCourtWeightForHouse(h1)));
@@ -243,6 +276,41 @@ namespace Agotbg.Server.Game.Services
             throw new Exception($"Influence Track Service: Unknown InfluenceTrackType: {trackType}");
         }
       }
+    }
+
+    /// <summary>
+    /// Sorts the list of houses based on their current position on the specified
+    /// influence track. The house with the lowest position value (highest influence)
+    /// will be first in the list.
+    /// </summary>
+    /// 
+    /// <param name="houses">The list of houses to sort.</param>
+    /// <param name="trackType">The influence track to sort by.</param>
+    private static void SortHousesByInfluenceTrackPosition(
+      List<HouseState> houses,
+      InfluenceTrackType trackType
+    )
+    {
+      houses.Sort((h1, h2) =>
+      {
+        byte pos1 = trackType switch
+        {
+          InfluenceTrackType.IronThrone => h1.IronThroneTrackPosition,
+          InfluenceTrackType.Fiefdom => h1.FiefdomTrackPosition,
+          InfluenceTrackType.KingsCourt => h1.KingsCourtTrackPosition,
+          _ => 0
+        };
+
+        byte pos2 = trackType switch
+        {
+          InfluenceTrackType.IronThrone => h2.IronThroneTrackPosition,
+          InfluenceTrackType.Fiefdom => h2.FiefdomTrackPosition,
+          InfluenceTrackType.KingsCourt => h2.KingsCourtTrackPosition,
+          _ => 0
+        };
+
+        return pos1.CompareTo(pos2);
+      });
     }
   }
 }

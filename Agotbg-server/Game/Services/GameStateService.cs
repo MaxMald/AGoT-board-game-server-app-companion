@@ -320,6 +320,26 @@ namespace Agotbg.Server.Game.Services
       return playersWithHighestVictoryPoints.Count > 1;
     }
 
+    /// <summary>
+    /// Gets a list of all houses in the game state, including both player houses and
+    /// vassal houses.
+    /// </summary>
+    /// 
+    /// <param name="gameState">The current game state.</param>
+    /// 
+    /// <returns>A list of all houses in the game state.</returns>
+    public static List<HouseState> GetAllHouses(GameState gameState)
+    {
+      List<HouseState> allHouses = new List<HouseState>();
+      foreach (var player in gameState.Players.Values)
+        allHouses.Add(player.HouseState);
+
+      foreach (var vassal in gameState.Vassals.Values)
+        allHouses.Add(vassal);
+
+      return allHouses;
+    }
+
     private static void CreatePlayerHouses(GameState gameState, List<PlayerDescriptor> playersDescriptors)
     {
       foreach (var playerDescriptor in playersDescriptors)
@@ -353,16 +373,5 @@ namespace Agotbg.Server.Game.Services
       }
     }
 
-    private static List<HouseState> GetAllHouses(GameState gameState)
-    {
-      List<HouseState> allHouses = new List<HouseState>();
-      foreach (var player in gameState.Players.Values)
-        allHouses.Add(player.HouseState);
-
-      foreach (var vassal in gameState.Vassals.Values)
-        allHouses.Add(vassal);
-
-      return allHouses;
-    }
   }
 }

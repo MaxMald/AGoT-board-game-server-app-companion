@@ -145,5 +145,30 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         updateIronBankLoanInterestCommand.NewInterest
       );
     }
+
+    public static Result ExecuteMoveInfluenceTrackPositionForHouse(
+      GameState gameState,
+      IRoundPhaseCommand command
+    )
+    {
+      if (command is not RpcMoveInfluenceTrackPositionForHouse moveInfluenceTrackPositionCommand)
+        return Result.FAILURE($"Invalid command type {command.Type} for moving influence track position for house.");
+
+      try
+      {
+        List<HouseState> houses = GameStateService.GetAllHouses(gameState);
+        InfluenceTracksService.MoveInfluenceTrackPositionForHouse(
+          houses,
+          moveInfluenceTrackPositionCommand.HouseType,
+          moveInfluenceTrackPositionCommand.InfluenceTrackType,
+          moveInfluenceTrackPositionCommand.NewPosition
+        );
+      }
+      catch (Exception e)
+      {
+        return Result.FAILURE($"Error moving influence track position for house: {e.Message}");
+      }
+      return Result.SUCCESS();
+    }
   }
 }

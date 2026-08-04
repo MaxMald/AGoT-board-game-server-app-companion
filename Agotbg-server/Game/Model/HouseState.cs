@@ -45,19 +45,20 @@ namespace Agotbg.Server.Game.Model
     public bool IsDefeated { get; set; } = false;
 
     /// <summary>
-    /// Indicates the position of this house in the Iron Throne track. 1 is the highest
-    /// position.
+    /// Indicates the 1-based position of this house in the Iron Throne track. 1 is the
+    /// highest position.
     /// </summary>
     public byte IronThroneTrackPosition { get; set; } = 0;
 
     /// <summary>
-    /// Indicates the position of this house in the Fiefdom track. 1 is the highest position.
+    /// Indicates the 1-based position of this house in the Fiefdom track. 1 is the
+    /// highest position.
     /// </summary>
     public byte FiefdomTrackPosition { get; set; } = 0;
 
     /// <summary>
-    /// Indicates the positions of this house int he King's Court track. 1 is the highest
-    /// position.
+    /// Indicates the 1-based position of this house in the King's Court track. 1 is the
+    /// highest position.
     /// </summary>
     public byte KingsCourtTrackPosition { get; set; } = 0;
 

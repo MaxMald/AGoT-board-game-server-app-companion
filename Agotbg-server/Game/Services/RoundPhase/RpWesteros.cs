@@ -62,6 +62,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
             gameState,
             command
           );
+        case RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse:
+          return RoundPhaseSharedCommandExecutions.ExecuteMoveInfluenceTrackPositionForHouse(
+            gameState,
+            command
+          );
       }
       return Result.FAILURE($"Invalid command type {command.Type} for round phase {Type}");
     }
@@ -78,6 +83,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         case RoundPhaseCommandType.UpdateSupplyLevel:
         case RoundPhaseCommandType.UpdateVictoryPoints:
         case RoundPhaseCommandType.UpdateIronBankLoanInterest:
+        case RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse:
           return true;
       }
       return false;
