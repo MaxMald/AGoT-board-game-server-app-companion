@@ -15,8 +15,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// <para>
   /// Possible transitions from this phase include:
   /// <list type="bullet">
-  ///   <item>Wildlings Bidding</item>
-  ///   <item>Westeros</item>
+  ///   <item><see cref="RoundPhaseType.WildlingsBidding"/></item>
+  ///   <item><see cref="RoundPhaseType.Westeros"/></item>
   /// </list>
   /// </para>
   /// </summary>

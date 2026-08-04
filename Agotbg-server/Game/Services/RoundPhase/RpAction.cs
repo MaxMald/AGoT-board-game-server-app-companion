@@ -11,12 +11,13 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// Many game state operations can be performed during this phase, such as:
   /// </para>
   /// <list type="bullet">
-  ///   <item>Transferring power tokens</item>
-  ///   <item>Modifying power tokens</item>
-  ///   <item>Updating supply levels</item>
-  ///   <item>Updating victory points</item>
-  ///   <item>Updating Iron Bank loan interest</item>
-  ///   <item>Moving influence track positions for houses</item>
+  ///   <item><see cref="RoundPhaseCommandType.Resolve"/></item>
+  ///   <item><see cref="RoundPhaseCommandType.TransferPowerTokens"/></item>
+  ///   <item><see cref="RoundPhaseCommandType.ModifyPowerTokens"/></item>
+  ///   <item><see cref="RoundPhaseCommandType.UpdateSupplyLevel"/></item>
+  ///   <item><see cref="RoundPhaseCommandType.UpdateVictoryPoints"/></item>
+  ///   <item><see cref="RoundPhaseCommandType.UpdateIronBankLoanInterest"/></item>
+  ///   <item><see cref="RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse"/></item>
   /// </list>
   /// <para>
   /// When resolving this phase, this phase will check if the current round is the last
@@ -36,9 +37,9 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// Possible transitions from this phase:
   /// </para>
   /// <list type="bullet">
-  ///   <item>Westeros Wildling Icons Resolution</item>
-  ///   <item>Winner Tie Resolution</item>
-  ///   <item>Game Over</item>
+  ///   <item><see cref="RoundPhaseType.WesterosWildlingIconsResolution"/></item>
+  ///   <item><see cref="RoundPhaseType.WinnerTieResolution"/></item>
+  ///   <item><see cref="RoundPhaseType.GameOver"/></item>
   /// </list>
   /// </summary>
   public class RpAction : ARoundPhase

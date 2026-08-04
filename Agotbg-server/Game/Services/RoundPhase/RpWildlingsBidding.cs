@@ -3,6 +3,25 @@ using Agotbg.Server.Utilities;
 
 namespace Agotbg.Server.Game.Services.RoundPhase
 {
+  /// <summary>
+  /// Represents the round phase where houses bid power tokens against the wildlings
+  /// threat.
+  /// </summary>
+  /// 
+  /// <remarks>
+  /// <para>
+  /// Resolves all house bids and determines whether the Night's Watch wins
+  /// based on the total bet amount versus the wildlings strength. Updates the game state
+  /// accordingly and transitions to the bidding presentation phase.
+  /// </para>
+  /// <para>
+  /// Possible transitions from this phase:
+  /// <list type="bullet">
+  ///   <item><see cref="RoundPhaseType.WildlingsBiddingPresentation"/></item>
+  /// </list>
+  /// </para>
+  /// </remarks>
+  /// 
   public class RpWildlingsBidding : RpABiddingPhase
   {
     /// <inheritdoc />
