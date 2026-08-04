@@ -32,6 +32,11 @@ namespace Agotbg.Server.Game.Model
     public WildlingsState Wildlings { get; set; } = new WildlingsState();
 
     /// <summary>
+    /// The current influence track bidding state of the game.
+    /// </summary>
+    public InfluenceTrackBiddingState InfluenceTrackBiddingState { get; set; } = new InfluenceTrackBiddingState();
+
+    /// <summary>
     /// The house type of the winner. Null if the game has not ended yet.
     /// </summary>
     public HouseType? Winner { get; set; } = null;

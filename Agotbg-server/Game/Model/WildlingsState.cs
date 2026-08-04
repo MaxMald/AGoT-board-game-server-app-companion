@@ -1,7 +1,8 @@
 namespace Agotbg.Server.Game.Model
 {
   /// <summary>
-  /// Represents the strength of the Wilding threat in the game.
+  /// Contains information related to the state of the Wildlings and the bidding process
+  /// against them in the game.
   /// </summary>
   public class WildlingsState
   {

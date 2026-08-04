@@ -5,8 +5,9 @@ namespace Agotbg.Server.Game.Model
   /// </summary>
   public enum InfluenceTrackType : byte
   {
-    IronThrone = 0,
-    Fiefdom = 1,
-    KingsCourt = 2
+    None = 0,
+    IronThrone = 1,
+    Fiefdom = 2,
+    KingsCourt = 3
   }
 }
