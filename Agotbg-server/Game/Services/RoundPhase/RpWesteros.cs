@@ -9,6 +9,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc/>
     public override RoundPhaseType Type => RoundPhaseType.Westeros;
 
+    /// <inheritdoc/>
     protected override Result ExecuteDerived(
       GameState gameState,
       IRoundPhaseCommand command
@@ -52,6 +53,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return Result.FAILURE($"Invalid command type {command.Type} for round phase {Type}");
     }
 
+    /// <inheritdoc/>
     protected override bool IsValidCommandType(RoundPhaseCommandType commandType)
     {
       switch (commandType)

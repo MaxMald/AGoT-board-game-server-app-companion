@@ -10,7 +10,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// secretly issue orders on the board. The game state should stay on this phase until
   /// all players finish placing orders.
   /// </para>
-  ///
   /// <para>
   /// This phase allows players to perform some operations on the game state, such as:
   /// <list type="bullet">
@@ -31,14 +30,12 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// </item>
   /// </list>
   /// </para>
-  ///
   /// <para>
   /// Although there is no explicit action during this phase that could lead to a
   /// modification of any of these properties, the app companion let them be modified in
   /// case of special scenarios. For example, if someone forgets to update the supply
   /// level during the Westeros Phase, the app companion will let them fix that.
   /// </para>
-  ///
   /// <para>
   /// Possible transitions from this phase:
   /// <list type="bullet">

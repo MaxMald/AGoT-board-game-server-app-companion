@@ -9,13 +9,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// Represents a phase for tie resolution, which determines the game winner when
   /// multiple houses are tied with the highest victory points.
   /// </para>
-  ///
   /// <para>
   /// The tie could be broken by the number of land areas controlled. Since the companion
   /// app does not have information about the number of land areas controlled, players
   /// could tell the app who the winner is by using the "Resolve with Winner" command.
   /// </para>
-  ///
   /// <para>
   /// If the tie cannot be resolved by the number of land areas controlled, the tie could
   /// be broken by the supply level or Iron Throne position of the tied houses. Players
@@ -23,20 +21,16 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// indicate that they are ready to proceed after resolving the tie using these
   /// criterias.
   /// </para>
-  ///
   /// The priority of tie-breaking criteria is as follows:
-  ///
   /// <list type="number">
   ///   <item>Most total land areas controlled (not implemented in the app)</item>
   ///   <item>Highest supply level</item>
   ///   <item>Lowest Iron Throne position</item>
   /// </list>
-  ///
   /// <para>
   /// Based on the Fantasy Flight Errata and FAQ Version 2.0 document: <see
   /// href="https://images-cdn.fantasyflightgames.com/filer_public/cf/06/cf06eb26-48e3-46b9-b57c-f053beb2518d/agotbg_faq_v2_forweb.pdf"/>
   /// </para>
-  ///
   /// <para>
   /// Possible transitions from this phase:
   /// <list type="bullet">
