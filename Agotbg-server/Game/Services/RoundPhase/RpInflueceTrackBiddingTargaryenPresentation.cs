@@ -4,6 +4,21 @@ using Agotbg.Server.Utilities;
 
 namespace Agotbg.Server.Game.Services.RoundPhase
 {
+  /// <summary>
+  /// Represents the round phase where the Targaryen player presents their influence
+  /// gifts results. Other players can then see the alteration of the influence track
+  /// bidding based on the Targaryen player's gifts.
+  /// </summary>
+  ///
+  /// <remarks>
+  /// Possible transitions from this phase include:
+  /// <list type="bullet">
+  /// <item>
+  ///   <item><see cref="RoundPhaseType.InfluenceTrackBiddingTieResolution"/></item>
+  ///   <item><see cref="RoundPhaseType.InfluenceTrackBiddingPresentation"/></item>
+  /// </item>
+  /// </list>
+  /// </remarks>
   public class RpInflueceTrackBiddingTargaryenPresentation : ARoundPhase
   {
     /// <inheritdoc />
@@ -18,7 +33,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (InfluenceTrackBiddingStateService.HasTiedHouseBets(gameState.InfluenceTrackBiddingState)
       {
         gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingTieResolution;
-        return Result.SUCCESS();
       }
       else
       {
@@ -32,8 +46,9 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           gameState.InfluenceTrackBiddingState.InfluenceTrackType
         );
 
-        return Result.SUCCESS();
+        gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingPresentation;
       }
+      return Result.SUCCESS();
     }
 
     /// <inheritdoc />

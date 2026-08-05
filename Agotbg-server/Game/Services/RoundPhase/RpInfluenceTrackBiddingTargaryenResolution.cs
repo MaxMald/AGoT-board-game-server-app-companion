@@ -72,8 +72,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       foreach (PowerTokenGift gift in giftsCommand.PowerTokenGifts)
       {
         bool receiverExists = gameState.InfluenceTrackBiddingState
-                                        .HouseBets
-                                        .Any(houseBet => houseBet.HouseType == gift.Receiver);
+                                       .HouseBets
+                                       .Any(houseBet => houseBet.HouseType == gift.Receiver);
 
         if (!receiverExists)
           return Result.FAILURE($"Invalid receiver: {gift.Receiver} for power token gift");

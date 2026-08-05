@@ -341,9 +341,13 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
-    /// Prepares the game state for influence track bidding. It automatically prepares
-    /// each vassal house for submitting their bids with zero power tokens.
+    /// Prepares the game state for influence track bidding.
     /// </summary>
+    ///
+    /// <remarks>
+    /// Prepares players and vassal for a bidding round. For the vassal houses it
+    /// automatically submits their bids with 0 power tokens.
+    /// </remarks>
     ///
     /// <param name="gameState">The current game state.</param>
     /// <param name="influenceTrackType">The type of influence track for bidding.</param>
@@ -356,6 +360,12 @@ namespace Agotbg.Server.Game.Services
       gameState.InfluenceTrackBiddingState.TargaryenPowerTokenGifts.Clear();
       gameState.InfluenceTrackBiddingState.HouseBets.Clear();
 
+      foreach (PlayerState player in gameState.Players.Values)
+      {
+        player.HouseState.PowerTokensBid = 0;
+        player.HouseState.HasBidPowerTokens = false;
+      }
+
       foreach (HouseState vassalHouse in gameState.Vassals.Values)
       {
         vassalHouse.PowerTokensBid = 0;
@@ -363,11 +373,17 @@ namespace Agotbg.Server.Game.Services
       }
     }
 
-    public static void UpdateNumSpecialOrdersBasedOnKingsCourtPosition(GameState gameState)
+    /// <summary>
+    /// Clears the influence track bidding state in the game state, resetting the
+    /// influence track type and clearing any Targaryen power token gifts and house bets.
+    /// </summary>
+    /// 
+    /// <param name="gameState">The current game state.</param>
+    public static void ClearInfluenceTrackBiddingState(GameState gameState)
     {
-      List<HouseState> allHouses = GetAllHouses(gameState);
-      foreach (HouseState house in allHouses)
-        HouseStateService.UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
+      gameState.InfluenceTrackBiddingState.InfluenceTrackType = InfluenceTrackType.None;
+      gameState.InfluenceTrackBiddingState.TargaryenPowerTokenGifts.Clear();
+      gameState.InfluenceTrackBiddingState.HouseBets.Clear();
     }
 
     private static void CreatePlayerHouses(GameState gameState, List<PlayerDescriptor> playersDescriptors)

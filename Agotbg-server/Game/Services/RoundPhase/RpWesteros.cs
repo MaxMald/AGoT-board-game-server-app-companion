@@ -109,11 +109,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           gameState.CurrentPhase = RoundPhaseType.WildlingsBidding;
           return Result.SUCCESS();
 
-        case RoundPhaseType.InfluenceTrackBidding: // Interpreted as the Clash of Kings event
-          GameStateService.PrepareForInfluenceTrackBidding(
-            gameState,
-            InfluenceTrackType.IronThrone
-          );
+        case RoundPhaseType.InfluenceTrackBidding:
+          GameStateService.PrepareForInfluenceTrackBidding(gameState, InfluenceTrackType.IronThrone);
           gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBidding;
           return Result.SUCCESS();
       }
