@@ -59,6 +59,70 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
+    /// Updates influence track positions for houses based on their bet amounts, ordering
+    /// houses from highest to lowest bet.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// <para>
+    /// This method assumes that the number of house bets matches the number of houses.
+    /// It sorts the house bets in descending order and then updates the influence track
+    /// positions accordingly.
+    /// </para>
+    /// <para>
+    /// This method does not resolve scenarios where multiple houses have the same bet
+    /// amount. In such cases, the order of those houses in the resulting influence track
+    /// may not be deterministic.
+    /// </para>
+    /// <para>
+    /// Targaryen always receives a fixed position on the influence tracks, as defined in
+    /// <see cref="GameConstants.TargaryenInfluencePosition"/>.
+    /// </para>
+    /// </remarks>
+    ///
+    /// <param name="houses">The collection of house states to update.</param>
+    /// <param name="houseBets">The collection of house bets used to determine track
+    /// positions.</param>
+    /// <param name="trackType">The type of influence track to update.</param>
+    ///
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="Exception"/>
+    public static void UpdateInfluenceTrackPositionsByHouseBets(
+      List<HouseState> houses,
+      List<HouseBet> houseBets,
+      InfluenceTrackType trackType
+    )
+    {
+      AssertHouseBetsAndHousesAreValid(houseBets, houses);
+
+      bool hasTargaryenBet = HasTargaryenBet(houseBets);
+      if (hasTargaryenBet)
+        RemoveTargaryenBet(houseBets);
+
+      houseBets.Sort((b1, b2) => b2.BetAmount.CompareTo(b1.BetAmount));
+      List<HouseState> orderedHouses = [];
+      foreach (var bet in houseBets)
+      {
+        HouseState? house = houses.FirstOrDefault(h => h.Type == bet.HouseType);
+        if (house == null)
+          throw new Exception($"House {bet.HouseType} not found in the provided list.");
+
+        orderedHouses.Add(house);
+      }
+
+      if (hasTargaryenBet)
+      {
+        HouseState? targaryenHouse = houses.FirstOrDefault(h => h.Type == HouseType.Targaryen);
+        if (targaryenHouse == null)
+          throw new Exception("House Targaryen not found in the provided list.");
+
+        orderedHouses.Add(targaryenHouse);
+      }
+
+      SetInfluenceTrackPositions(orderedHouses, trackType);
+    }
+
+    /// <summary>
     /// Sorts the houses list according to their initial Iron Throne track order, with
     /// the highest weighted house first.
     /// </summary>
@@ -311,6 +375,61 @@ namespace Agotbg.Server.Game.Services
 
         return pos1.CompareTo(pos2);
       });
+    }
+
+    /// <summary>
+    /// Validates that the provided house bets and houses are consistent. It checks that
+    /// the number of house bets matches the number of houses, that each house bet
+    /// corresponds to a house in the list, and that there are no duplicate house bets.
+    /// </summary>
+    ///
+    /// <param name="houseBets">The list of house bets to validate.</param>
+    /// <param name="houses">The list of houses to validate against.</param>
+    ///
+    /// <exception cref="ArgumentException">Thrown when the number of house bets does not
+    /// match the number of houses or when there are duplicate house bets.</exception>
+    /// <exception cref="Exception">Thrown when a house bet does not correspond to any
+    /// house in the provided list.</exception>
+    private static void AssertHouseBetsAndHousesAreValid(
+      List<HouseBet> houseBets,
+      List<HouseState> houses
+    )
+    {
+      if (houseBets.Count != houses.Count)
+        throw new ArgumentException("The number of house bets must match the number of houses.");
+
+      foreach (HouseBet house in houseBets)
+      {
+        if (!houses.Any(h => h.Type == house.HouseType))
+          throw new Exception($"House {house.HouseType} in bets not found in the provided list of houses.");
+      }
+
+      IEnumerable<HouseBet> distinct = houseBets.DistinctBy(b => b.HouseType);
+      if (distinct.Count() != houseBets.Count)
+        throw new ArgumentException("Duplicate house bets found. Each house can only have one bet.");
+    }
+
+    /// <summary>
+    /// Indicates whether any of the provided house bets are for House Targaryen.
+    /// </summary>
+    ///
+    /// <param name="houseBets">The list of house bets to check.</param>
+    ///
+    /// <returns>True if any of the house bets are for House Targaryen; otherwise,
+    /// false.</returns>
+    private static bool HasTargaryenBet(List<HouseBet> houseBets)
+    {
+      return houseBets.Any(b => b.HouseType == HouseType.Targaryen);
+    }
+
+    /// <summary>
+    /// Removes the Targaryen bet from the provided list of house bets, if it exists.
+    /// </summary>
+    /// 
+    /// <param name="houseBets">The list of house bets to modify.</param>
+    private static void RemoveTargaryenBet(List<HouseBet> houseBets)
+    {
+      houseBets.RemoveAll(b => b.HouseType == HouseType.Targaryen);
     }
   }
 }

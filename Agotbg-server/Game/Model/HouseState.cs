@@ -63,12 +63,6 @@ namespace Agotbg.Server.Game.Model
     public byte KingsCourtTrackPosition { get; set; } = 0;
 
     /// <summary>
-    /// Indicates the number of special orders this house has. This is usually based on
-    /// its positions on the King's Court track.
-    /// </summary>
-    public byte NumSpecialOrders { get; set; } = 0;
-
-    /// <summary>
     /// Indicates the loan interest amount this house has with the Iron Bank.
     /// </summary>
     public byte IronBankLoanInterest { get; set; } = 0;

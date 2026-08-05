@@ -15,7 +15,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// <list type="bullet">
   ///   <item><see cref="RoundPhaseType.Planning"/></item>
   ///   <item><see cref="RoundPhaseType.WildlingsBidding"/></item>
-  ///   <item><see cref="RoundPhaseType.IronThroneBidding"/></item>
+  ///   <item><see cref="RoundPhaseType.InfluenceTrackBidding"/></item>
   /// </list>
   /// </para>
   /// </summary>
@@ -104,11 +104,17 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         case RoundPhaseType.Planning:
           gameState.CurrentPhase = RoundPhaseType.Planning;
           return Result.SUCCESS();
+
         case RoundPhaseType.WildlingsBidding:
           gameState.CurrentPhase = RoundPhaseType.WildlingsBidding;
           return Result.SUCCESS();
-        case RoundPhaseType.IronThroneBidding:
-          gameState.CurrentPhase = RoundPhaseType.IronThroneBidding;
+
+        case RoundPhaseType.InfluenceTrackBidding: // Interpreted as the Clash of Kings event
+          GameStateService.PrepareForInfluenceTrackBidding(
+            gameState,
+            InfluenceTrackType.IronThrone
+          );
+          gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBidding;
           return Result.SUCCESS();
       }
       return Result.FAILURE($"Invalid next round phase {nextPhase} for resolving and moving to another phase.");

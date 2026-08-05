@@ -33,6 +33,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       List<HouseBet> houseBets
     )
     {
+      houseBets.RemoveAll(bet => gameState.Vassals.ContainsKey(bet.HouseType));
+
       gameState.Wildlings.StrengthWhenBiddingStarted = gameState.Wildlings.Strength;
       gameState.Wildlings.HouseBets.Clear();
       gameState.Wildlings.HouseBets.AddRange(houseBets);

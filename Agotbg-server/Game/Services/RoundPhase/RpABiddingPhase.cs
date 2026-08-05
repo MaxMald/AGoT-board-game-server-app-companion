@@ -81,9 +81,9 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// been updated to reflect the resolved bids.
     /// </para>
     /// <para>
-    /// Take into account that only the houses that had placed bids will be present in
-    /// the <paramref name="houseBets"/> parameter. Houses that did not place a bid
-    /// (usually the vassal houses) will not be present in the list.
+    /// Take into account that all houses will be present in the <paramref
+    /// name="houseBets"/> parameter, including vassal houses that always place a bid of
+    /// zero.
     /// </para>
     /// </remarks>
     ///
@@ -144,8 +144,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     }
 
     /// <summary>
-    /// Resolves power token bids for all houses that have placed bids and populates the
-    /// output collection with the resolved bets.
+    /// Resolves power token bids for all houses and populates the output collection with
+    /// the resolved bets.
     /// </summary>
     ///
     /// <remarks>If any house bid resolution fails, all previously resolved bets in the
@@ -168,7 +168,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     {
       foreach (HouseState houseState in houses)
       {
-        if (!houseState.HasBidPowerTokens)
+        if (houseState.IsDefeated)
           continue;
 
         HouseBet houseBet = new()

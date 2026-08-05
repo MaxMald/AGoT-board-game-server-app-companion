@@ -120,50 +120,6 @@ namespace Agotbg.Server.Game.Services
     public static void UpdateKingsCourtTrackPosition(HouseState house, byte newPosition)
     {
       house.KingsCourtTrackPosition = newPosition;
-      UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
-    }
-
-    /// <summary>
-    /// Updates the number of special orders based on the house's King's Court track
-    /// position.
-    /// </summary>
-    ///
-    /// <param name="house">The house whose number of special orders is to be
-    /// updated.</param>
-    public static void UpdateNumSpecialOrdersBasedOnKingsCourtPosition(HouseState house)
-    {
-      if (house.Type == HouseType.Targaryen) // Targaryen always has 3 special orders regardless of position
-      {
-        house.NumSpecialOrders = 3;
-        return;
-      }
-
-      if (house.IsVassal)
-      {
-        house.NumSpecialOrders = 0;
-        return;
-      }
-
-      if (house.KingsCourtTrackPosition <= 1)
-      {
-        house.NumSpecialOrders = 3;
-      }
-      else if (house.KingsCourtTrackPosition == 2)
-      {
-        house.NumSpecialOrders = 3;
-      }
-      else if (house.KingsCourtTrackPosition == 3)
-      {
-        house.NumSpecialOrders = 2;
-      }
-      else if (house.KingsCourtTrackPosition == 4)
-      {
-        house.NumSpecialOrders = 1;
-      }
-      else if (house.KingsCourtTrackPosition >= 5)
-      {
-        house.NumSpecialOrders = 0;
-      }
     }
 
     /// <summary>
@@ -445,7 +401,6 @@ namespace Agotbg.Server.Game.Services
       };
 
       UpdateHouseSupplyLevel(house, 1);
-      UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
       return house;
     }
 
@@ -463,7 +418,6 @@ namespace Agotbg.Server.Game.Services
       };
 
       UpdateHouseSupplyLevel(house, 2);
-      UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
       return house;
     }
 
@@ -481,7 +435,6 @@ namespace Agotbg.Server.Game.Services
       };
 
       UpdateHouseSupplyLevel(house, 2);
-      UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
       return house;
     }
 
@@ -499,7 +452,6 @@ namespace Agotbg.Server.Game.Services
       };
 
       UpdateHouseSupplyLevel(house, 2);
-      UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
       return house;
     }
 
@@ -517,7 +469,6 @@ namespace Agotbg.Server.Game.Services
       };
 
       UpdateHouseSupplyLevel(house, 2);
-      UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
       return house;
     }
 
@@ -535,7 +486,6 @@ namespace Agotbg.Server.Game.Services
       };
 
       UpdateHouseSupplyLevel(house, 2);
-      UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
       return house;
     }
 
@@ -553,7 +503,6 @@ namespace Agotbg.Server.Game.Services
       };
 
       UpdateHouseSupplyLevel(house, 1);
-      UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
       return house;
     }
 
@@ -571,7 +520,6 @@ namespace Agotbg.Server.Game.Services
       };
 
       UpdateHouseSupplyLevel(house, 4);
-      UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
       return house;
     }
 

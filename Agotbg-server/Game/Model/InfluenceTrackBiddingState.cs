@@ -15,5 +15,11 @@ namespace Agotbg.Server.Game.Model
     /// The bet of each house on the current influence track.
     /// </summary>
     public List<HouseBet> HouseBets { get; set; } = [];
+
+    /// <summary>
+    /// The power token gifts of the Targaryen house for the current influence track
+    /// bidding.
+    /// </summary>
+    public List<PowerTokenGift> TargaryenPowerTokenGifts { get; set; } = [];
   }
 }

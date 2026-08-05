@@ -9,6 +9,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase.Command
     Resolve,
     ResolveAndMoveTo,
     ResolveWithWinner,
+    ResolveWithTargaryenPowerTokenGifts,
     ResolveTieBySupplyLevelOrIronThronePosition,
     ResolveWildlingIcons,
     ModifyPowerTokens,

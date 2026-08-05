@@ -340,6 +340,36 @@ namespace Agotbg.Server.Game.Services
       return allHouses;
     }
 
+    /// <summary>
+    /// Prepares the game state for influence track bidding. It automatically prepares
+    /// each vassal house for submitting their bids with zero power tokens.
+    /// </summary>
+    ///
+    /// <param name="gameState">The current game state.</param>
+    /// <param name="influenceTrackType">The type of influence track for bidding.</param>
+    public static void PrepareForInfluenceTrackBidding(
+      GameState gameState,
+      InfluenceTrackType influenceTrackType
+    )
+    {
+      gameState.InfluenceTrackBiddingState.InfluenceTrackType = influenceTrackType;
+      gameState.InfluenceTrackBiddingState.TargaryenPowerTokenGifts.Clear();
+      gameState.InfluenceTrackBiddingState.HouseBets.Clear();
+
+      foreach (HouseState vassalHouse in gameState.Vassals.Values)
+      {
+        vassalHouse.PowerTokensBid = 0;
+        vassalHouse.HasBidPowerTokens = true;
+      }
+    }
+
+    public static void UpdateNumSpecialOrdersBasedOnKingsCourtPosition(GameState gameState)
+    {
+      List<HouseState> allHouses = GetAllHouses(gameState);
+      foreach (HouseState house in allHouses)
+        HouseStateService.UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
+    }
+
     private static void CreatePlayerHouses(GameState gameState, List<PlayerDescriptor> playersDescriptors)
     {
       foreach (var playerDescriptor in playersDescriptors)
