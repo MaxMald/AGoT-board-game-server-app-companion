@@ -38,9 +38,6 @@ namespace Agotbg.Server.Game.Services
       List<HouseState> allHouses = GetAllHouses(gameState);
       InfluenceTracksService.Initialize(allHouses);
 
-      foreach (HouseState house in allHouses)
-        HouseStateService.UpdateNumSpecialOrdersBasedOnKingsCourtPosition(house);
-
       gameState.CurrentPhase = RoundPhaseType.Setup;
       return gameState;
     }
@@ -122,14 +119,6 @@ namespace Agotbg.Server.Game.Services
 
     public static Result UpdatePlayerPowerTokensBid(GameState gameState, string playerId, byte newBid)
     {
-     if (gameState.CurrentPhase != RoundPhaseType.KingsCourtBidding &&
-        gameState.CurrentPhase != RoundPhaseType.FiefdomsBidding &&
-        gameState.CurrentPhase != RoundPhaseType.IronThroneBidding &&
-        gameState.CurrentPhase != RoundPhaseType.WildlingsBidding)
-      {
-        return Result.FAILURE("Cannot update bid if the current phase is not a bidding phase.");
-      }
-
       if (!gameState.Players.ContainsKey(playerId))
         return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
 
@@ -356,9 +345,10 @@ namespace Agotbg.Server.Game.Services
       InfluenceTrackType influenceTrackType
     )
     {
-      gameState.InfluenceTrackBiddingState.InfluenceTrackType = influenceTrackType;
-      gameState.InfluenceTrackBiddingState.TargaryenPowerTokenGifts.Clear();
-      gameState.InfluenceTrackBiddingState.HouseBets.Clear();
+      InfluenceTrackBiddingStateService.Prepare(
+        gameState.InfluenceTrackBiddingState,
+        influenceTrackType
+      );
 
       foreach (PlayerState player in gameState.Players.Values)
       {
@@ -371,19 +361,6 @@ namespace Agotbg.Server.Game.Services
         vassalHouse.PowerTokensBid = 0;
         vassalHouse.HasBidPowerTokens = true;
       }
-    }
-
-    /// <summary>
-    /// Clears the influence track bidding state in the game state, resetting the
-    /// influence track type and clearing any Targaryen power token gifts and house bets.
-    /// </summary>
-    /// 
-    /// <param name="gameState">The current game state.</param>
-    public static void ClearInfluenceTrackBiddingState(GameState gameState)
-    {
-      gameState.InfluenceTrackBiddingState.InfluenceTrackType = InfluenceTrackType.None;
-      gameState.InfluenceTrackBiddingState.TargaryenPowerTokenGifts.Clear();
-      gameState.InfluenceTrackBiddingState.HouseBets.Clear();
     }
 
     private static void CreatePlayerHouses(GameState gameState, List<PlayerDescriptor> playersDescriptors)

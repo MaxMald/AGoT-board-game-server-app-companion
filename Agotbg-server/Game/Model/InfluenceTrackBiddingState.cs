@@ -21,5 +21,16 @@ namespace Agotbg.Server.Game.Model
     /// bidding.
     /// </summary>
     public List<PowerTokenGift> TargaryenPowerTokenGifts { get; set; } = [];
+
+    /// <summary>
+    /// The list of tied groups of houses in the influence track bidding, along with
+    /// their starting positions on the influence track.
+    /// </summary>
+    public List<InfluenceTrackTiedGroup> TiedGroups { get; set; } = [];
+
+    /// <summary>
+    /// List of houses with their influence positions on the current influence track.
+    /// </summary>
+    public List<HouseInfluencePositionItem> HouseInfluencePositions { get; set; } = [];
   }
 }
