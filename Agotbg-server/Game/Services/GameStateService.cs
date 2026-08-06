@@ -363,6 +363,36 @@ namespace Agotbg.Server.Game.Services
       }
     }
 
+    /// <summary>
+    /// Returns the player ID of the player who currently holds the Iron Throne token
+    /// based on the game state.
+    /// </summary>
+    ///
+    /// <param name="gameState">The current game state.</param>
+    /// <returns>The player ID of the player who currently holds the Iron Throne
+    /// token.</returns>
+    ///
+    /// <exception cref="InvalidOperationException">Thrown if there are no players in the
+    /// game state or no player found with the Iron Throne token.</exception>
+    public static string GetPlayerIdThatHoldsTheIronThroneToken(GameState gameState)
+    {
+      if (gameState.Players.Count == 0)
+        throw new InvalidOperationException("No players in the game state.");
+
+      byte minIronThronePosition = gameState.Players
+                                            .Values
+                                            .Min(player => player.HouseState.IronThroneTrackPosition);
+
+      PlayerState? playerWithIronThroneToken = gameState.Players
+                                                        .Values
+                                                        .FirstOrDefault(player => player.HouseState.IronThroneTrackPosition == minIronThronePosition);
+
+      if (playerWithIronThroneToken == null)
+        throw new InvalidOperationException("No player found with the Iron Throne token.");
+
+      return playerWithIronThroneToken.PlayerId;
+    }
+
     private static void CreatePlayerHouses(GameState gameState, List<PlayerDescriptor> playersDescriptors)
     {
       foreach (var playerDescriptor in playersDescriptors)

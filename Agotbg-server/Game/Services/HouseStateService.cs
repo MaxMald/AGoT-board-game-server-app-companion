@@ -247,6 +247,12 @@ namespace Agotbg.Server.Game.Services
       if (newBid > house.PowerTokens)
         return Result.FAILURE("Bid cannot exceed available power tokens.");
 
+      // TODO
+      //
+      // We can remove the bidden power tokens from the house's available power tokens
+      // here. This way is won't be necessary an aditional check when resolving the bid,
+      // and remove that ugly Undo method.
+
       house.PowerTokensBid = newBid;
       house.HasBidPowerTokens = true;
       return Result.SUCCESS();

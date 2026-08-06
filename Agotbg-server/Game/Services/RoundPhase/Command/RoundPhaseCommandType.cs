@@ -24,6 +24,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase.Command
     PillageVassal,
     MakeVassalageStatus,
     BreakVassalageStatus,
-    MoveInfluenceTrackPositionForHouse
+    MoveInfluenceTrackPositionForHouse,
+    ResolveInfluenceTieGroup
   }
 }
