@@ -59,67 +59,46 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
-    /// Updates influence track positions for houses based on their bet amounts, ordering
-    /// houses from highest to lowest bet.
+    /// Updates the influence track positions for the provided houses based on the given
+    /// list of house influence position items. Each item specifies a house and its new
+    /// position on the specified influence track. The method ensures that the houses are
+    /// updated correctly according to the provided positions.
     /// </summary>
     ///
-    /// <remarks>
-    /// <para>
-    /// This method assumes that the number of house bets matches the number of houses.
-    /// It sorts the house bets in descending order and then updates the influence track
-    /// positions accordingly.
-    /// </para>
-    /// <para>
-    /// This method does not resolve scenarios where multiple houses have the same bet
-    /// amount. In such cases, the order of those houses in the resulting influence track
-    /// may not be deterministic.
-    /// </para>
-    /// <para>
-    /// Targaryen always receives a fixed position on the influence tracks, as defined in
-    /// <see cref="GameConstants.TargaryenInfluencePosition"/>.
-    /// </para>
-    /// </remarks>
+    /// <param name="houses">The list of houses to update.</param>
+    /// <param name="houseInfluencePositions">The list of house influence position
+    /// items.</param>
+    /// <param name="trackType">The type of the influence track.</param>
     ///
-    /// <param name="houses">The collection of house states to update.</param>
-    /// <param name="houseBets">The collection of house bets used to determine track
-    /// positions.</param>
-    /// <param name="trackType">The type of influence track to update.</param>
-    ///
-    /// <exception cref="ArgumentException"/>
-    /// <exception cref="Exception"/>
-    public static void UpdateInfluenceTrackPositionsByHouseBets(
+    /// <exception cref="Exception">Thrown when a house in the provided list is not
+    /// found.</exception>
+    public static void UpdateInfluenceTrackPositions(
       List<HouseState> houses,
-      List<HouseBet> houseBets,
+      List<HouseInfluencePositionItem> houseInfluencePositions,
       InfluenceTrackType trackType
     )
     {
-      AssertHouseBetsAndHousesAreValid(houseBets, houses);
-
-      bool hasTargaryenBet = HasTargaryenBet(houseBets);
-      if (hasTargaryenBet)
-        RemoveTargaryenBet(houseBets);
-
-      houseBets.Sort((b1, b2) => b2.BetAmount.CompareTo(b1.BetAmount));
-      List<HouseState> orderedHouses = [];
-      foreach (var bet in houseBets)
+      foreach (var item in houseInfluencePositions)
       {
-        HouseState? house = houses.FirstOrDefault(h => h.Type == bet.HouseType);
+        HouseState? house = houses.FirstOrDefault(h => h.Type == item.HouseType);
         if (house == null)
-          throw new Exception($"House {bet.HouseType} not found in the provided list.");
+          throw new Exception($"House {item.HouseType} not found in the provided list.");
 
-        orderedHouses.Add(house);
+        switch (trackType)
+        {
+          case InfluenceTrackType.IronThrone:
+            house.IronThroneTrackPosition = item.InfluencePosition;
+            break;
+          case InfluenceTrackType.Fiefdom:
+            house.FiefdomTrackPosition = item.InfluencePosition;
+            break;
+          case InfluenceTrackType.KingsCourt:
+            house.KingsCourtTrackPosition = item.InfluencePosition;
+            break;
+          default:
+            throw new Exception($"Unknown InfluenceTrackType: {trackType}");
+        }
       }
-
-      if (hasTargaryenBet)
-      {
-        HouseState? targaryenHouse = houses.FirstOrDefault(h => h.Type == HouseType.Targaryen);
-        if (targaryenHouse == null)
-          throw new Exception("House Targaryen not found in the provided list.");
-
-        orderedHouses.Add(targaryenHouse);
-      }
-
-      SetInfluenceTrackPositions(orderedHouses, trackType);
     }
 
     /// <summary>

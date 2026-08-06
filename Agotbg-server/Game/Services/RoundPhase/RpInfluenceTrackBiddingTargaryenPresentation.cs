@@ -19,7 +19,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// </item>
   /// </list>
   /// </remarks>
-  public class RpInflueceTrackBiddingTargaryenPresentation : ARoundPhase
+  public class RpInfluenceTrackBiddingTargaryenPresentation : ARoundPhase
   {
     /// <inheritdoc />
     public override RoundPhaseType Type => RoundPhaseType.InfluenceTrackBiddingTargaryenPresentation;
@@ -30,24 +30,33 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IRoundPhaseCommand command
     )
     {
-      if (InfluenceTrackBiddingStateService.HasTiedHouseBets(gameState.InfluenceTrackBiddingState)
+      InfluenceTrackBiddingStateService.ProcessBetsAndDeterminePositions(
+        gameState.InfluenceTrackBiddingState
+      );
+
+      if (InfluenceTrackBiddingStateService.HasTiedGroups(gameState.InfluenceTrackBiddingState))
       {
         gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingTieResolution;
       }
       else
       {
-        List<HouseState> houses = GameStateService.GetAllHouses(gameState);
-        List<HouseBet> houseBets = InfluenceTrackBiddingStateService
-                                    .GetHouseBetsWithGiftsIncluded(gameState.InfluenceTrackBiddingState);
-
-        InfluenceTracksService.UpdateInfluenceTrackPositionsByHouseBets(
-          houses,
-          houseBets,
-          gameState.InfluenceTrackBiddingState.InfluenceTrackType
-        );
+        try
+        {
+          List<HouseState> houses = GameStateService.GetAllHouses(gameState);
+          InfluenceTracksService.UpdateInfluenceTrackPositions(
+            houses,
+            gameState.InfluenceTrackBiddingState.HouseInfluencePositions,
+            gameState.InfluenceTrackBiddingState.InfluenceTrackType
+          );
+        }
+        catch (Exception e)
+        {
+          return Result.FAILURE($"Failed to resolve new influence track order: {e.Message}");
+        }
 
         gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingPresentation;
       }
+
       return Result.SUCCESS();
     }
 

@@ -39,15 +39,29 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         return Result.SUCCESS();
       }
 
-      if (HasTies(houseBets))
+      InfluenceTrackBiddingStateService.ProcessBetsAndDeterminePositions(
+        gameState.InfluenceTrackBiddingState
+      );
+
+      if (InfluenceTrackBiddingStateService.HasTiedGroups(gameState.InfluenceTrackBiddingState))
       {
         gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingTieResolution;
         return Result.SUCCESS();
       }
 
-      Result updateResult = UpdateInfluenceTrackPositionsFromHouseBets(gameState, houseBets);
-      if (!updateResult.Success)
-        return updateResult;
+      try
+      {
+        List<HouseState> houses = GameStateService.GetAllHouses(gameState);
+        InfluenceTracksService.UpdateInfluenceTrackPositions(
+          houses,
+          gameState.InfluenceTrackBiddingState.HouseInfluencePositions,
+          gameState.InfluenceTrackBiddingState.InfluenceTrackType
+        );
+      }
+      catch(Exception e)
+      {
+        return Result.FAILURE($"Failed to resolve new influence track order: {e.Message}");
+      }
 
       gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingPresentation;
       return Result.SUCCESS();
@@ -63,47 +77,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         return false;
 
       return targaryenHouseBet.BetAmount > 0;
-    }
-
-    private static bool HasTies(List<HouseBet> houseBets)
-    {
-      if (houseBets.Count < 2)
-        return false;
-
-      houseBets = houseBets
-        .OrderByDescending(houseBet => houseBet.BetAmount)
-        .ToList();
-
-      for (int i = 0; i < houseBets.Count - 1; i++)
-      {
-        byte currentBetAmount = houseBets[i].BetAmount;
-        byte nextBetAmount = houseBets[i + 1].BetAmount;
-
-        if (currentBetAmount == nextBetAmount)
-          return true;
-      }
-      return false;
-    }
-
-    private static Result UpdateInfluenceTrackPositionsFromHouseBets(
-      GameState gameState,
-      List<HouseBet> houseBets
-    )
-    {
-      try
-      {
-        List<HouseState> houses = GameStateService.GetAllHouses(gameState);
-        InfluenceTracksService.UpdateInfluenceTrackPositionsByHouseBets(
-          houses,
-          houseBets,
-          gameState.InfluenceTrackBiddingState.InfluenceTrackType
-        );
-      }
-      catch (Exception e)
-      {
-        return Result.FAILURE($"Failed to resolve new influence track order: {e.Message}");
-      }
-      return Result.SUCCESS();
     }
   }
 }

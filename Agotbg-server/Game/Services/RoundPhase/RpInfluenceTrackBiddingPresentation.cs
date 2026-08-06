@@ -44,7 +44,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       } 
       else
       {
-        GameStateService.ClearInfluenceTrackBiddingState(gameState);
+        InfluenceTrackBiddingStateService.Clear(gameState.InfluenceTrackBiddingState);
         gameState.CurrentPhase = RoundPhaseType.Westeros;
       }
       return Result.SUCCESS();
