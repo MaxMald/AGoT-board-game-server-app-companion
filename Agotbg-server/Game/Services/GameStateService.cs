@@ -464,6 +464,23 @@ namespace Agotbg.Server.Game.Services
         HouseStateService.ClearSubmittedPowerTokenBid(vassal);
     }
 
+    /// <summary>
+    /// Gets a list of players in the game state sorted by their Iron Throne track
+    /// position, which determines the turn order. Players with lower Iron Throne track
+    /// positions will appear earlier in the list.
+    /// </summary>
+    /// 
+    /// <param name="gameState">The current game state.</param>
+    /// 
+    /// <returns>A list of players in turn order.</returns>
+    public static List<PlayerState> GetPlayersInTurnOrder(GameState gameState)
+    {
+      return gameState.Players
+                      .Values
+                      .OrderBy(player => player.HouseState.IronThroneTrackPosition)
+                      .ToList();
+    }
+
     private static void CreatePlayerHouses(GameState gameState, List<PlayerDescriptor> playersDescriptors)
     {
       foreach (var playerDescriptor in playersDescriptors)

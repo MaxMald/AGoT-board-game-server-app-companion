@@ -37,6 +37,11 @@ namespace Agotbg.Server.Game.Model
     public InfluenceTrackBiddingState InfluenceTrackBiddingState { get; set; } = new InfluenceTrackBiddingState();
 
     /// <summary>
+    /// Represents the state of a vassal assignment phase for this game.
+    /// </summary>
+    public VassalAssignmentState VassalAssignmentState { get; set; } = new VassalAssignmentState();
+
+    /// <summary>
     /// The house type of the winner. Null if the game has not ended yet.
     /// </summary>
     public HouseType? Winner { get; set; } = null;

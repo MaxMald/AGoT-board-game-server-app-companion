@@ -7,10 +7,11 @@ namespace Agotbg.Server.Game.Model
   /// </summary>
   public enum VassalOrderTokenSetType : byte
   {
-    None,
     Star,
     Circle,
     Triangle,
-    Square
+    Square,
+    MaximumNumberOfSets,
+    None = MaximumNumberOfSets
   }
 }

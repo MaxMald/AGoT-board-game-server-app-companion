@@ -18,12 +18,6 @@ namespace Agotbg.Server.Game.Model
     public string NextPlayerId { get; set; } = string.Empty;
 
     /// <summary>
-    /// The status of the player during the vassal assignment phase, indicating whether
-    /// they are waiting, selecting, or done.
-    /// </summary>
-    public VassalSelectionPlayerStatus Status { get; set; }
-
-    /// <summary>
     /// The list of Vassal Order Token Set types that the player possesses. This list can
     /// include any combination of Star, Circle, Triangle, or Square types, and is used
     /// to determine the player's available number of vassal order tokens during the
