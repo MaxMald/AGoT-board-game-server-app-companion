@@ -81,9 +81,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// been updated to reflect the resolved bids.
     /// </para>
     /// <para>
-    /// Take into account that all houses will be present in the <paramref
-    /// name="houseBets"/> parameter, including vassal houses that always place a bid of
-    /// zero.
+    /// Take into account that only houses that had submitted a bid will be present in
+    /// the list of house bets.
     /// </para>
     /// </remarks>
     ///
@@ -104,7 +103,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (command is not RpcUpdatePowerTokensBid updatePowerTokensBidCommand)
         return Result.FAILURE($"Invalid command type {command.Type} for updating power tokens bid.");
 
-      return GameStateService.UpdatePlayerPowerTokensBid(
+      return GameStateService.SubmitPlayerPowerTokensBid(
         gameState,
         updatePowerTokensBidCommand.PlayerId,
         updatePowerTokensBidCommand.NewBid
@@ -130,99 +129,13 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
     private Result ExecuteResolve(GameState gameState)
     {
-      if (!AllPlayersHavePlacedTheirBets(gameState))
-        return Result.FAILURE("Not all players have placed their bets.");
+      if (!GameStateService.HaveAllPlayersSubmittedTheirBids(gameState))
+        return Result.FAILURE("Not all players have submitted their bids.");
 
-      List<HouseState> houses = GameStateService.GetAllHouses(gameState);
-      List<HouseBet> housesBets = new();
-
-      Result result = ResolveHousesBets(gameState, houses, housesBets);
-      if (!result.Success)
-        return result;
+      List<HouseBet> housesBets = GameStateService.CreateHouseBets(gameState);
+      GameStateService.ClearAllHousesSubmittedBids(gameState);
 
       return ExecuteDerivedBidResolution(gameState, housesBets);
-    }
-
-    /// <summary>
-    /// Resolves power token bids for all houses and populates the output collection with
-    /// the resolved bets.
-    /// </summary>
-    ///
-    /// <remarks>If any house bid resolution fails, all previously resolved bets in the
-    /// current operation are rolled back.</remarks>
-    ///
-    /// <param name="gameState">The current game state used for rollback operations if
-    /// bid resolution fails.</param>
-    /// <param name="houses">The collection of house states to process for bid
-    /// resolution.</param>
-    /// <param name="outHouseBets">The output collection that will be populated with
-    /// successfully resolved house bets.</param>
-    ///
-    /// <returns>A result indicating success if all house bids were resolved
-    /// successfully, or a failure result if any bid resolution failed.</returns>
-    private static Result ResolveHousesBets(
-      GameState gameState,
-      List<HouseState> houses,
-      List<HouseBet> outHouseBets
-    )
-    {
-      foreach (HouseState houseState in houses)
-      {
-        if (houseState.IsDefeated)
-          continue;
-
-        HouseBet houseBet = new()
-        {
-          HouseType = houseState.Type,
-          BetAmount = houseState.PowerTokensBid
-        };
-
-        Result result = HouseStateService.ResolveBid(houseState);
-        if (!result.Success)
-        {
-          UndoBetResolution(gameState, outHouseBets);
-          return result;
-        }
-
-        outHouseBets.Add(houseBet);
-      }
-
-      return Result.SUCCESS();
-    }
-
-    /// <summary>
-    /// Undoes the bid resolution for all houses in the provided list of house bets. This
-    /// method is called when an error occurs during the bid resolution process, allowing
-    /// the game state to revert to its previous state before the bids were resolved.
-    /// </summary>
-    /// 
-    /// <param name="gameState">The current game state.</param>
-    /// <param name="houseBets">The list of house bets to undo.</param>
-    private static void UndoBetResolution(GameState gameState, List<HouseBet> houseBets)
-    {
-      foreach (HouseBet houseBet in houseBets)
-      {
-        if (gameState.Players.Values.Any(p => p.HouseState.Type == houseBet.HouseType))
-        {
-          PlayerState playerState = gameState.Players.Values.First(p => p.HouseState.Type == houseBet.HouseType);
-          HouseStateService.UndoBidResolution(playerState.HouseState, houseBet.BetAmount);
-        }
-        else if (gameState.Vassals.ContainsKey(houseBet.HouseType))
-        {
-          HouseState vassalHouseState = gameState.Vassals[houseBet.HouseType];
-          HouseStateService.UndoBidResolution(vassalHouseState, houseBet.BetAmount);
-        }
-      }
-    }
-
-    private static bool AllPlayersHavePlacedTheirBets(GameState gameState)
-    {
-      foreach (var player in gameState.Players)
-      {
-        if (!player.Value.HouseState.HasBidPowerTokens)
-          return false;
-      }
-      return true;
     }
   }
 }

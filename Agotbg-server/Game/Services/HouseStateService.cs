@@ -238,22 +238,20 @@ namespace Agotbg.Server.Game.Services
     /// </summary>
     ///
     /// <param name="house">The house state to update.</param>
-    /// <param name="newBid">The bid amount to set.</param>
+    /// <param name="bid">The bid amount to set.</param>
     ///
     /// <returns>A Result indicating success, or failure the bid exceeds available power
     /// tokens.</returns>
-    public static Result UpdatePowerTokensBid(HouseState house, byte newBid)
+    public static Result SubmitPowerTokensBid(HouseState house, byte bid)
     {
-      if (newBid > house.PowerTokens)
+      if (house.HasBidPowerTokens)
+        return Result.FAILURE("House has already submitted a power tokens bid.");
+
+      if (bid > house.PowerTokens)
         return Result.FAILURE("Bid cannot exceed available power tokens.");
 
-      // TODO
-      //
-      // We can remove the bidden power tokens from the house's available power tokens
-      // here. This way is won't be necessary an aditional check when resolving the bid,
-      // and remove that ugly Undo method.
-
-      house.PowerTokensBid = newBid;
+      house.PowerTokens -= bid;
+      house.PowerTokensBid = bid;
       house.HasBidPowerTokens = true;
       return Result.SUCCESS();
     }
@@ -266,29 +264,26 @@ namespace Agotbg.Server.Game.Services
     /// <param name="house">The house state for which to cancel the power tokens bid.</param>
     public static void CancelPowerTokensBid(HouseState house)
     {
+      if (!house.HasBidPowerTokens)
+        return;
+
+      house.PowerTokens += house.PowerTokensBid;
       house.PowerTokensBid = 0;
       house.HasBidPowerTokens = false;
     }
 
     /// <summary>
-    /// Resolves a bid by deducting the bid amount from the house's available power
-    /// tokens and resetting the bid to zero.
+    /// Clears the power tokens bid for a house, resetting the bid amount to zero and
+    /// indicating that the house has not bid any power tokens. This method does not
+    /// refund the bid amount to the house's available power tokens.
     /// </summary>
-    /// 
-    /// <param name="house">The house state containing the bid to resolve.</param>
-    /// 
-    /// <returns>A success result if the bid is valid and resolved; otherwise, a failure
-    /// result with an error message.</returns>
-    public static Result ResolveBid(HouseState house)
+    ///
+    /// <param name="house">The house state for which to clear the power tokens
+    /// bid.</param>
+    public static void ClearSubmittedPowerTokenBid(HouseState house)
     {
-      if (house.PowerTokensBid > house.PowerTokens)
-        return Result.FAILURE("Bid cannot exceed available power tokens.");
-
-      house.PowerTokens -= house.PowerTokensBid;
       house.PowerTokensBid = 0;
       house.HasBidPowerTokens = false;
-
-      return Result.SUCCESS();
     }
 
     /// <summary>

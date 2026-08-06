@@ -117,13 +117,13 @@ namespace Agotbg.Server.Game.Services
       return HouseStateService.UpdateDragonStrength(player.HouseState, newDragonStrength);
     }
 
-    public static Result UpdatePlayerPowerTokensBid(GameState gameState, string playerId, byte newBid)
+    public static Result SubmitPlayerPowerTokensBid(GameState gameState, string playerId, byte newBid)
     {
       if (!gameState.Players.ContainsKey(playerId))
         return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
 
       PlayerState player = gameState.Players[playerId];
-      return HouseStateService.UpdatePowerTokensBid(player.HouseState, newBid);
+      return HouseStateService.SubmitPowerTokensBid(player.HouseState, newBid);
     }
 
     public static Result CancelPlayerPowerTokenBid(GameState gameState, string playerId)
@@ -391,6 +391,77 @@ namespace Agotbg.Server.Game.Services
         throw new InvalidOperationException("No player found with the Iron Throne token.");
 
       return playerWithIronThroneToken.PlayerId;
+    }
+
+    /// <summary>
+    /// Indicates whether all players have submitted their bids for the current influence
+    /// track bidding round.
+    /// </summary>
+    /// 
+    /// <param name="gameState">The current game state.</param>
+    /// 
+    /// <returns>True if all players have submitted their bids; otherwise, false.</returns>
+    public static bool HaveAllPlayersSubmittedTheirBids(GameState gameState)
+    {
+      foreach (var player in gameState.Players.Values)
+      {
+        if (!player.HouseState.HasBidPowerTokens)
+          return false;
+      }
+      return true;
+    }
+
+    /// <summary>
+    /// Creates a list with the submitted house bets for the current influence track
+    /// bidding round, including both player houses and vassal houses. Houses that have
+    /// not submitted a bid will not be included in the list.
+    /// </summary>
+    ///
+    /// <param name="gameState">The current game state.</param>
+    /// 
+    /// <returns>A list of submitted house bets.</returns>
+    public static List<HouseBet> CreateHouseBets(GameState gameState)
+    {
+      List<HouseBet> houseBets = new List<HouseBet>();
+      foreach (var player in gameState.Players.Values)
+      {
+        if (player.HouseState.HasBidPowerTokens)
+        {
+          HouseBet houseBet = new HouseBet()
+          {
+            HouseType = player.HouseState.Type,
+            BetAmount = player.HouseState.PowerTokensBid
+          };
+          houseBets.Add(houseBet);
+        }
+      }
+      foreach (var vassal in gameState.Vassals.Values)
+      {
+        if (vassal.HasBidPowerTokens)
+        {
+          HouseBet houseBet = new HouseBet()
+          {
+            HouseType = vassal.Type,
+            BetAmount = vassal.PowerTokensBid
+          };
+          houseBets.Add(houseBet);
+        }
+      }
+      return houseBets;
+    }
+
+    /// <summary>
+    /// Clears all houses submitted bids in the game state, including both player houses
+    /// and vassal houses.
+    /// </summary>
+    /// 
+    /// <param name="gameState">The current game state.</param>
+    public static void ClearAllHousesSubmittedBids(GameState gameState)
+    {
+      foreach (var player in gameState.Players.Values)
+        HouseStateService.ClearSubmittedPowerTokenBid(player.HouseState);
+      foreach (var vassal in gameState.Vassals.Values)
+        HouseStateService.ClearSubmittedPowerTokenBid(vassal);
     }
 
     private static void CreatePlayerHouses(GameState gameState, List<PlayerDescriptor> playersDescriptors)
