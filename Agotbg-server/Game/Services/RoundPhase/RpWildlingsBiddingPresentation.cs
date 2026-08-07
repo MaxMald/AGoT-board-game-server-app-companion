@@ -26,10 +26,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IRoundPhaseCommand command
     )
     {
-      gameState.Wildlings.StrengthWhenBiddingStarted = 0;
-      gameState.Wildlings.TotalBetAmount = 0;
-      gameState.Wildlings.HouseBets.Clear();
-      gameState.Wildlings.NightWatchWins = false;
+      WildlingsStateServices.ClearBiddingProperties(gameState.Wildlings);
       gameState.CurrentPhase = RoundPhaseType.Westeros;
       return Result.SUCCESS();
     }

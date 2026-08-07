@@ -25,6 +25,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase.Command
     MoveInfluenceTrackPositionForHouse,
     ResolveInfluenceTieGroup,
     AssignVassalHouses,
-    ResolveFireMadeFlesh
+    ResolveFireMadeFlesh,
+    StartPreemptiveRaid
   }
 }

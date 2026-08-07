@@ -27,6 +27,12 @@ namespace Agotbg.Server.Game.Model
     public short StrengthWhenBiddingStarted { get; set; } = 0;
 
     /// <summary>
+    /// Indicates if the current wildling attack phase is resolving the "Preemptive Raid"
+    /// event.
+    /// </summary>
+    public bool IsPreemptiveRaid { get; set; } = false;
+
+    /// <summary>
     /// Contains the list of bets placed by houses when bidding against the Wildlings.
     /// </summary>
     public List<HouseBet> HouseBets { get; set; } = [];

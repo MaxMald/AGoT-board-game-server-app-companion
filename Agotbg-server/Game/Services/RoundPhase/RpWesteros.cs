@@ -68,6 +68,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
             gameState,
             command
           );
+        case RoundPhaseCommandType.StartPreemptiveRaid:
+          return ExecuteStartPreemptiveRaid(gameState);
       }
       return Result.FAILURE($"Invalid command type {command.Type} for round phase {Type}");
     }
@@ -85,6 +87,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         case RoundPhaseCommandType.UpdateVictoryPoints:
         case RoundPhaseCommandType.UpdateIronBankLoanInterest:
         case RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse:
+        case RoundPhaseCommandType.StartPreemptiveRaid:
           return true;
       }
       return false;
@@ -108,6 +111,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           return Result.SUCCESS();
 
         case RoundPhaseType.WildlingsBidding:
+          WildlingsStateServices.PrepareForBidding(gameState.Wildlings, false);
           gameState.CurrentPhase = RoundPhaseType.WildlingsBidding;
           return Result.SUCCESS();
 
@@ -117,6 +121,13 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           return Result.SUCCESS();
       }
       return Result.FAILURE($"Invalid next round phase {nextPhase} for resolving and moving to another phase.");
+    }
+
+    private static Result ExecuteStartPreemptiveRaid(GameState gameState)
+    {
+      WildlingsStateServices.PrepareForBidding(gameState.Wildlings, true);
+      gameState.CurrentPhase = RoundPhaseType.WildlingsBidding;
+      return Result.SUCCESS();
     }
 
     private static Result ExecuteResolve(
