@@ -55,6 +55,6 @@ namespace Agotbg.Server.Game.Model
     /// <summary>
     /// Indicates if the game has ended.
     /// </summary>
-    public bool IsGameOver = false;
+    public bool IsGameOver { get; set; } = false;
   }
 }
