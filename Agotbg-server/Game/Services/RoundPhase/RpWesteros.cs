@@ -14,6 +14,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// Possible transitions from this phase include:
   /// <list type="bullet">
   ///   <item><see cref="RoundPhaseType.Planning"/></item>
+  ///   <item><see cref="RoundPhaseType.VassalAssignment"/></item>
   ///   <item><see cref="RoundPhaseType.WildlingsBidding"/></item>
   ///   <item><see cref="RoundPhaseType.InfluenceTrackBidding"/></item>
   /// </list>
@@ -33,8 +34,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       switch (command.Type)
       {
         case RoundPhaseCommandType.Resolve:
-          gameState.CurrentPhase = RoundPhaseType.Planning;
-          return Result.SUCCESS();
+          return ExecuteResolve(gameState);
         case RoundPhaseCommandType.ResolveAndMoveTo:
           return ExecuteResolveAndMoveTo(gameState, command);
         case RoundPhaseCommandType.TransferPowerTokens:
@@ -101,10 +101,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       RoundPhaseType nextPhase = resolveAndMoveToCommand.NextRoundPhase;
       switch (nextPhase)
       {
-        case RoundPhaseType.Planning:
-          gameState.CurrentPhase = RoundPhaseType.Planning;
-          return Result.SUCCESS();
-
         case RoundPhaseType.WildlingsBidding:
           gameState.CurrentPhase = RoundPhaseType.WildlingsBidding;
           return Result.SUCCESS();
@@ -115,6 +111,22 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           return Result.SUCCESS();
       }
       return Result.FAILURE($"Invalid next round phase {nextPhase} for resolving and moving to another phase.");
+    }
+
+    private static Result ExecuteResolve(
+      GameState gameState
+    )
+    {
+      if (gameState.Vassals.Count == 0)
+      {
+        gameState.CurrentPhase = RoundPhaseType.Planning;
+      }
+      else
+      {
+        VassalAssignmentStateServices.Prepare(gameState);
+        gameState.CurrentPhase = RoundPhaseType.VassalAssignment;
+      }
+      return Result.SUCCESS();
     }
   }
 }

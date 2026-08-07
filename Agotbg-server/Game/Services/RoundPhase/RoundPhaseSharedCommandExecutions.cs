@@ -94,7 +94,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (command is not RpcMakeVassalageStatus makeVassalageStatusCommand)
         return Result.FAILURE($"Invalid command type {command.Type} for making vassalage status.");
 
-      return GameStateService.MakeVassalageStatus(
+      return GameStateService.MakeVassalageRelationship(
         gameState,
         makeVassalageStatusCommand.CommanderPlayerId,
         makeVassalageStatusCommand.VassalHouseType

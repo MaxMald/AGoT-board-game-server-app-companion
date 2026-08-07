@@ -12,7 +12,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// <para>
   /// Possible transitions from this phase include:
   /// <list type="bullet">
-  ///   <item>Planning</item>
+  ///   <item><see cref="RoundPhaseType.VassalAssignment"/></item>
+  ///   <item><see cref="RoundPhaseType.Planning"/></item>
   /// </list>
   /// </para>
   /// </summary>
@@ -27,7 +28,15 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IRoundPhaseCommand command
     )
     {
-      gameState.CurrentPhase = RoundPhaseType.Planning; // Transtion
+      if (gameState.Vassals.Count == 0)
+      {
+        gameState.CurrentPhase = RoundPhaseType.Planning;
+      }
+      else
+      {
+        VassalAssignmentStateServices.Prepare(gameState);
+        gameState.CurrentPhase = RoundPhaseType.VassalAssignment;
+      }
       return Result.SUCCESS();
     }
 

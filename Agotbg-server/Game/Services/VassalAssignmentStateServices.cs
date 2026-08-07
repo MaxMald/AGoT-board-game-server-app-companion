@@ -68,23 +68,24 @@ namespace Agotbg.Server.Game.Services
       }
 
       vaState.CurrentPlayerID = playersInTurnOrder[0].PlayerId;
+      vaState.IsCompleted = false;
     }
 
     /// <summary>
-    /// Assigns a vassal house to the current player, consuming one of their order token
-    /// sets. Validates that the player is the current player, has order token sets
-    /// available, and the vassal house is available for assignment.
+    /// Assigns vassal houses to the current player, consuming one of their order token
+    /// sets for each vassal house. Validates that the player is the current player, has
+    /// order token sets available, and the vassal houses are available for assignment.
     /// </summary>
-    /// 
+    ///
     /// <param name="vaState">The vassal assignment state to update.</param>
     /// <param name="playerId">The ID of the player requesting the assignment.</param>
-    /// <param name="vassalHouseType">The type of vassal house to assign.</param>
-    /// 
+    /// <param name="vassalHouseTypes">The types of vassal houses to assign.</param>
+    ///
     /// <returns>A Result indicating success or failure with an error message.</returns>
-    public static Result AssignVassal(
+    public static Result AssignVassals(
       VassalAssignmentState vaState,
       string playerId,
-      HouseType vassalHouseType
+      List<HouseType> vassalHouseTypes
     )
     {
       if (string.IsNullOrEmpty(playerId))
@@ -99,27 +100,44 @@ namespace Agotbg.Server.Game.Services
       if (vaState.AvailableVassalHouses.Count == 0)
         return Result.FAILURE("No available Vassal Houses for assignment.");
 
-      if (!vaState.AvailableVassalHouses.Contains(vassalHouseType))
-        return Result.FAILURE("Given Vassal House is not available for assignment.");
+      int distinctCount = vassalHouseTypes.Distinct().Count();
+      if (distinctCount != vassalHouseTypes.Count)
+        return Result.FAILURE("Given Vassal House Types contain duplicates.");
+
+      foreach (HouseType vassalHouseType in vassalHouseTypes)
+      {
+        if (!vaState.AvailableVassalHouses.Contains(vassalHouseType))
+          return Result.FAILURE($"Given Vassal House {vassalHouseType} is not available for assignment.");
+      }
 
       VassalAssignmentPlayer? vaPlayer = vaState.Players.Find(p => p.PlayerId == playerId);
       if (vaPlayer == null)
         return Result.FAILURE("Given Player ID does not correspond to a Vassal Assignment Player.");
 
-      if (vaPlayer.PossesedOrderTokenSets.Count == 0)
-        return Result.FAILURE("Given Player does not possess any Order Token Sets.");
+      if (vaPlayer.PossesedOrderTokenSets.Count < vassalHouseTypes.Count)
+        return Result.FAILURE("Given Player does not possess enough Order Token Sets for the requested Vassal House assignments.");
 
-      VassalOrderTokenSetType vOrderTokenSet = vaPlayer.PossesedOrderTokenSets[0];
-      vaPlayer.PossesedOrderTokenSets.RemoveAt(0);
-      vaState.AvailableVassalHouses.Remove(vassalHouseType);
-
-      VassalHouseSelectionDescriptor vHouseSelectionDescriptor = new()
+      foreach (HouseType vassalHouseType in vassalHouseTypes)
       {
-        HouseType = vassalHouseType,
-        VassalOrderTokenSetType = vOrderTokenSet
-      };
+        VassalOrderTokenSetType vOrderTokenSet = vaPlayer.PossesedOrderTokenSets[0];
+        vaPlayer.PossesedOrderTokenSets.RemoveAt(0);
+        vaState.AvailableVassalHouses.Remove(vassalHouseType);
 
-      vaPlayer.SelectedVassalHouses.Add(vHouseSelectionDescriptor);
+        VassalHouseSelectionDescriptor vHouseSelectionDescriptor = new()
+        {
+          HouseType = vassalHouseType,
+          VassalOrderTokenSetType = vOrderTokenSet
+        };
+
+        vaPlayer.SelectedVassalHouses.Add(vHouseSelectionDescriptor);
+      }
+
+      if (vaState.AvailableVassalHouses.Count == 0)
+      {
+        vaState.CurrentPlayerID = string.Empty;
+        vaState.IsCompleted = true;
+      }
+
       return Result.SUCCESS();
     }
 
@@ -144,6 +162,7 @@ namespace Agotbg.Server.Game.Services
       if (string.IsNullOrEmpty(nextPlayerId))
       {
         vaState.CurrentPlayerID = string.Empty;
+        vaState.IsCompleted = true;
         return Result.SUCCESS();
       }
 
@@ -154,53 +173,76 @@ namespace Agotbg.Server.Game.Services
       if (currentPlayer.PossesedOrderTokenSets.Count > 0)
         nextPlayer.PossesedOrderTokenSets.AddRange(currentPlayer.PossesedOrderTokenSets);
 
+      if (nextPlayer.PossesedOrderTokenSets.Count == 0)
+      {
+        vaState.CurrentPlayerID = string.Empty;
+        vaState.IsCompleted = true;
+        return Result.SUCCESS();
+      }
+
       vaState.CurrentPlayerID = nextPlayerId;
       return Result.SUCCESS();
     }
 
     /// <summary>
-    /// Indicates if the given vassal assignment state can move to the next player. This
-    /// is true if the current player has a next player ID.
+    /// Indicates if the vassal assignment state has a current player set. Returns true
+    /// if the CurrentPlayerID is not null or empty; otherwise, false.
     /// </summary>
-    ///
+    /// 
     /// <param name="vaState">The Vassal Assignment State.</param>
-    ///
-    /// <returns>True if the current player can move to the next player; otherwise,
-    /// false.</returns>
-    public static bool CanMoveToNextPlayer(VassalAssignmentState vaState)
+    /// 
+    /// <returns>True if there is a current player; otherwise, false.</returns>
+    public static bool HasCurrentPlayer(VassalAssignmentState vaState)
     {
-      if (string.IsNullOrEmpty(vaState.CurrentPlayerID))
-        return false;
-
-      VassalAssignmentPlayer? currentPlayer = vaState.Players.Find(p => p.PlayerId == vaState.CurrentPlayerID);
-      if (currentPlayer == null)
-        return false;
-
-      return !string.IsNullOrEmpty(currentPlayer.NextPlayerId);
+      return !string.IsNullOrEmpty(vaState.CurrentPlayerID);
     }
 
     /// <summary>
-    /// Indicates if the given player has any vassal order token sets in possesion.
+    /// Indicates if the vassal assignment state has any available vassal houses for
+    /// assignment.
     /// </summary>
     ///
     /// <param name="vaState">The Vassal Assignment State.</param>
-    /// <param name="playerId">The ID of the player to check.</param>
     ///
-    /// <returns>True if the player has any vassal order token sets; otherwise,
+    /// <returns>True if there are available vassal houses; otherwise, false.</returns>
+    public static bool HasAvailableVassalHouses(VassalAssignmentState vaState)
+    {
+      return vaState.AvailableVassalHouses.Count > 0;
+    }
+
+    /// <summary>
+    /// Indicates if the vassal assignment state is completed, meaning it cannot assign
+    /// any more vassal houses to players.
+    /// </summary>
+    ///
+    /// <param name="vaState">The Vassal Assignment State.</param>
+    ///
+    /// <returns>True if the vassal assignment state is completed; otherwise,
+    /// false.</returns>
+    public static bool IsCompleted(VassalAssignmentState vaState)
+    {
+      return vaState.IsCompleted;
+    }
+
+    /// <summary>
+    /// Indicates if the vassal assignment state has any vassal order token sets in
+    /// possession.
+    /// </summary>
+    ///
+    /// <param name="vaState">The Vassal Assignment State.</param>
+    ///
+    /// <returns>True if there are any vassal order token sets; otherwise,
     /// false.</returns>
     public static bool HasVassalOrderTokenSets(
-      VassalAssignmentState vaState,
-      string playerId
+      VassalAssignmentState vaState
     )
     {
-      if (string.IsNullOrEmpty(playerId))
-        return false;
-
-      VassalAssignmentPlayer? vaPlayer = vaState.Players.Find(p => p.PlayerId == playerId);
-      if (vaPlayer == null)
-        return false;
-
-      return vaPlayer.PossesedOrderTokenSets.Count > 0;
+      foreach (VassalAssignmentPlayer vaPlayer in vaState.Players)
+      {
+        if (vaPlayer.PossesedOrderTokenSets.Count > 0)
+          return true;
+      }
+      return false;
     }
 
     /// <summary>
@@ -225,6 +267,45 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
+    /// Automatically resolves vassal order token sets for the current player by
+    /// assigning available vassal houses to the player until they run out of order
+    /// token sets or there are no more available vassal houses.
+    /// </summary>
+    /// 
+    /// <param name="vaState">The Vassal Assignment State.</param>
+    public static void AutomaticallyResolveOrderTokenSetsForCurrentPlayer(
+      VassalAssignmentState vaState
+    )
+    {
+      if (string.IsNullOrEmpty(vaState.CurrentPlayerID))
+        return;
+
+      VassalAssignmentPlayer? currentPlayer = vaState.Players.Find(p => p.PlayerId == vaState.CurrentPlayerID);
+      if (currentPlayer == null)
+        return;
+
+      for (int i = vaState.AvailableVassalHouses.Count - 1; i >= 0; i--)
+      {
+        HouseType vassalHouseType = vaState.AvailableVassalHouses[i];
+
+        if (currentPlayer.PossesedOrderTokenSets.Count == 0)
+          break;
+
+        VassalOrderTokenSetType vOrderTokenSet = currentPlayer.PossesedOrderTokenSets[0];
+        currentPlayer.PossesedOrderTokenSets.RemoveAt(0);
+        vaState.AvailableVassalHouses.RemoveAt(i);
+
+        VassalHouseSelectionDescriptor vHouseSelectionDescriptor = new()
+        {
+          HouseType = vassalHouseType,
+          VassalOrderTokenSetType = vOrderTokenSet
+        };
+
+        currentPlayer.SelectedVassalHouses.Add(vHouseSelectionDescriptor);
+      }
+    }
+
+    /// <summary>
     /// Clears the given vassal assignment state, resetting to default values.
     /// </summary>
     /// 
@@ -234,6 +315,7 @@ namespace Agotbg.Server.Game.Services
       state.AvailableVassalHouses.Clear();
       state.Players.Clear();
       state.CurrentPlayerID = string.Empty;
+      state.IsCompleted = false;
     }
   }
 }

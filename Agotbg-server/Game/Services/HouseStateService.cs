@@ -153,7 +153,7 @@ namespace Agotbg.Server.Game.Services
     /// 
     /// <returns>A Result indicating success, or failure with an error message if
     /// validation fails.</returns>
-    public static Result MakeVassalageStatus(HouseState commander, HouseState vassal)
+    public static Result MakeVassalageRelationship(HouseState commander, HouseState vassal)
     {
       if (!vassal.IsVassal)
         return Result.FAILURE("The house is not a vassal.");
@@ -212,6 +212,19 @@ namespace Agotbg.Server.Game.Services
       commander.VassalHouseTypes.Remove(vassal.Type);
 
       return Result.SUCCESS();
+    }
+
+    /// <summary>
+    /// Clears the vassalage status of a house, resetting its commander house to
+    /// undefined and clearing its list of vassal house types.
+    /// </summary>
+    ///
+    /// <param name="house">The house state for which to clear the vassalage
+    /// status.</param>
+    public static void ClearVassalageRelationship(HouseState house)
+    {
+      house.CommanderHouse = HouseType.Undefined;
+      house.VassalHouseTypes.Clear();
     }
 
     /// <summary>

@@ -15,6 +15,7 @@ namespace Agotbg.Server.Game.Model
     InfluenceTrackBiddingTargaryenPresentation,
     InfluenceTrackBiddingTieResolution,
     InfluenceTrackBiddingPresentation,
+    VassalAssignment,
     Planning,
     Action,
     WinnerTieResolution,

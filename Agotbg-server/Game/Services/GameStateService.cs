@@ -205,7 +205,7 @@ namespace Agotbg.Server.Game.Services
       );
     }
 
-    public static Result MakeVassalageStatus(GameState gameState, string commanderPlayerId, HouseType vassalHouseType)
+    public static Result MakeVassalageRelationship(GameState gameState, string commanderPlayerId, HouseType vassalHouseType)
     {
       if (!gameState.Players.ContainsKey(commanderPlayerId))
         return Result.FAILURE($"Commander player with ID {commanderPlayerId} does not exist in the room.");
@@ -216,28 +216,53 @@ namespace Agotbg.Server.Game.Services
       PlayerState commanderPlayer = gameState.Players[commanderPlayerId];
       HouseState vassalHouse = gameState.Vassals[vassalHouseType];
 
-      return HouseStateService.MakeVassalageStatus(commanderPlayer.HouseState, vassalHouse);
+      return HouseStateService.MakeVassalageRelationship(
+        commanderPlayer.HouseState,
+        vassalHouse
+      );
     }
 
-    public static Result BreakVassalageStatus(GameState gameState, string commanderPlayerId, HouseType vassalHouseType)
+    /// <summary>
+    /// Clears all vassalage relationships in the game state, effectively removing all
+    /// vassal relationships between player houses and vassal houses.
+    /// </summary>
+    ///
+    /// <param name="gameState">The current game state.</param>
+    public static void ClearVassalageRelationships(GameState gameState)
     {
-      if (!gameState.Players.ContainsKey(commanderPlayerId))
-        return Result.FAILURE($"Commander player with ID {commanderPlayerId} does not exist in the room.");
-
-      if (!gameState.Vassals.ContainsKey(vassalHouseType))
-        return Result.FAILURE($"Vassal of type: {vassalHouseType} does not exist in the room.");
-
-      PlayerState commanderPlayer = gameState.Players[commanderPlayerId];
-      HouseState vassalHouse = gameState.Vassals[vassalHouseType];
-
-      return HouseStateService.BreakVassalageStatus(commanderPlayer.HouseState, vassalHouse);
+      List<HouseState> allHouses = GetAllHouses(gameState);
+      foreach (HouseState house in allHouses)
+        HouseStateService.ClearVassalageRelationship(house);
     }
 
-    // TODO: Defeat Player is not fully implemented.
+    /// <summary>
+    /// TODO: Defeat a player in the game state. This method is a placeholder and needs to be
+    /// implemented according to the game rules and mechanics.
+    /// </summary>
     public static Result DefeatPlayer(GameState gameState, string playerId)
     {
-      // TODO: Consider check the game round is on a safe phase to defeat a player, like
-      // after the planning phase and action phase.
+      // TODO:
+      //
+      // Looks like defeating a player would affect considerably the game state.
+      //
+      // Should we consider checking if the game round is on a safe phase to defeat a
+      // player? The rules say a player cannot be defeated, but they can be eliminated
+      // from the game by turning into a vassal.
+      //
+      // What would happen to the vassals of the defeated player? Should they be freed or
+      // assigned to another player? Should we start a new round of vassal assignment?
+      // When turning defeated player into a vassal, what if there are no more order
+      // tokens sets to assign to the defeated player (new vassal)? Should we remove the
+      // defeated player from the game state?
+      //
+      // What if the defeated player is a Targaryen player? Should we remove the
+      // Targaryen player from the game state?
+      //
+      // What if, after converting the defeated player into a vassal, there are less than
+      // the minimum number of players in the game state? Should we end the game and
+      // declare a winner?
+
+      return Result.FAILURE("DefeatPlayer method is not implemented yet.");
 
       if (!gameState.Players.ContainsKey(playerId))
         return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
@@ -245,14 +270,6 @@ namespace Agotbg.Server.Game.Services
       PlayerState player = gameState.Players[playerId];
       if (player.HouseState.IsDefeated)
         return Result.FAILURE($"Player with ID {playerId} is already defeated.");
-
-      List<HouseType> vassalsToBreak = player.HouseState.VassalHouseTypes.ToList();
-      foreach (HouseType vassalHouseType in vassalsToBreak)
-      {
-        Result breakResult = BreakVassalageStatus(gameState, playerId, vassalHouseType);
-        if (!breakResult.Success)
-          return Result.FAILURE($"Failed to break vassalage status for vassal {vassalHouseType}: {breakResult.Message}");
-      }
 
       return HouseStateService.SetHouseAsDefeated(player.HouseState);
     }

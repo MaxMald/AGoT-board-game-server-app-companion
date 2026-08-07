@@ -22,5 +22,12 @@ namespace Agotbg.Server.Game.Model
     /// The ID of the current player whose turn it is during the vassal assignment phase.
     /// </summary>
     public string CurrentPlayerID { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Indicates whether the vassal assignment phase has been completed. If true, the
+    /// phase is finished, and the game can proceed to the next phase. If false, the
+    /// phase is still ongoing, and players can continue to assign vassal houses.
+    /// </summary>
+    public bool IsCompleted { get; set; } = false;
   }
 }

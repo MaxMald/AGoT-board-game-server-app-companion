@@ -22,9 +22,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase.Command
     UpdateIronBankLoanInterest,
     Pillage,
     PillageVassal,
-    MakeVassalageStatus,
-    BreakVassalageStatus,
     MoveInfluenceTrackPositionForHouse,
-    ResolveInfluenceTieGroup
+    ResolveInfluenceTieGroup,
+    AssignVassalHouses,
   }
 }
