@@ -19,6 +19,10 @@ namespace Agotbg.Server.Game.Model
     Planning,
     Action,
     WinnerTieResolution,
-    GameOver
+    GameOver,
+
+    // Special phases
+
+    CardFireMadeFlesh
   }
 }

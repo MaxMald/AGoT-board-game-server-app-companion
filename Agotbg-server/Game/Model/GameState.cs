@@ -48,6 +48,11 @@ namespace Agotbg.Server.Game.Model
     public DragonTokensState DragonTokensState { get; set; } = new DragonTokensState();
 
     /// <summary>
+    /// Represents the state of the "Fire Made Flesh" card in the game.
+    /// </summary>
+    public FireMadeFleshState FireMadeFleshState { get; set; } = new FireMadeFleshState();
+
+    /// <summary>
     /// The house type of the winner. Null if the game has not ended yet.
     /// </summary>
     public HouseType? Winner { get; set; } = null;
