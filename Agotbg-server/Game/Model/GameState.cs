@@ -42,6 +42,12 @@ namespace Agotbg.Server.Game.Model
     public VassalAssignmentState VassalAssignmentState { get; set; } = new VassalAssignmentState();
 
     /// <summary>
+    /// Represents the state of dragon tokens in the game, including their available
+    /// positions and the count taken by the Targaryen player.
+    /// </summary>
+    public DragonTokensState DragonTokensState { get; set; } = new DragonTokensState();
+
+    /// <summary>
     /// The house type of the winner. Null if the game has not ended yet.
     /// </summary>
     public HouseType? Winner { get; set; } = null;

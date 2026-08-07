@@ -73,15 +73,6 @@ namespace Agotbg.Server.Game.Model
     public List<HouseType> VassalHouseTypes { get; set; } = [];
 
     //////////////////////////////////////////////////////
-    /// TARGARYEN HOUSE PROPERTIES
-
-    /// <summary>
-    /// Indicates the strength of the dragons for this house. This only applies to the
-    /// Targaryen house.
-    /// </summary>
-    public byte DragonStrength { get; set; } = 0;
-
-    //////////////////////////////////////////////////////
     /// VASSAL HOUSE PROPERTIES
 
     /// <summary>
