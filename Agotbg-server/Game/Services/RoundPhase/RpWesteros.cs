@@ -17,6 +17,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   ///   <item><see cref="RoundPhaseType.VassalAssignment"/></item>
   ///   <item><see cref="RoundPhaseType.WildlingsBidding"/></item>
   ///   <item><see cref="RoundPhaseType.InfluenceTrackBidding"/></item>
+  ///   <item><see cref="RoundPhaseType.FireMadeFlesh"/></item>
   /// </list>
   /// </para>
   /// </summary>
@@ -101,6 +102,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       RoundPhaseType nextPhase = resolveAndMoveToCommand.NextRoundPhase;
       switch (nextPhase)
       {
+        case RoundPhaseType.FireMadeFlesh:
+          FireMadeFleshStateService.Prepare(gameState.FireMadeFleshState);
+          gameState.CurrentPhase = RoundPhaseType.FireMadeFlesh;
+          return Result.SUCCESS();
+
         case RoundPhaseType.WildlingsBidding:
           gameState.CurrentPhase = RoundPhaseType.WildlingsBidding;
           return Result.SUCCESS();

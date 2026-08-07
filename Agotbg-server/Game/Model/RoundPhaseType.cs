@@ -23,6 +23,6 @@ namespace Agotbg.Server.Game.Model
 
     // Special phases
 
-    CardFireMadeFlesh
+    FireMadeFlesh
   }
 }
