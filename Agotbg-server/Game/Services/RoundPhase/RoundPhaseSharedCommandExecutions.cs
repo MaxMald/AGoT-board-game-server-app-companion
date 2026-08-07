@@ -86,36 +86,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       );
     }
 
-    public static Result ExecuteMakeVassalStatus(
-      GameState gameState,
-      IRoundPhaseCommand command
-    )
-    {
-      if (command is not RpcMakeVassalageStatus makeVassalageStatusCommand)
-        return Result.FAILURE($"Invalid command type {command.Type} for making vassalage status.");
-
-      return GameStateService.MakeVassalageRelationship(
-        gameState,
-        makeVassalageStatusCommand.CommanderPlayerId,
-        makeVassalageStatusCommand.VassalHouseType
-      );
-    }
-
-    public static Result ExecuteBreakVassalStatus(
-      GameState gameState,
-      IRoundPhaseCommand command
-    )
-    {
-      if (command is not RpcBreakVassalageStatus breakVassalageStatusCommand)
-        return Result.FAILURE($"Invalid command type {command.Type} for breaking vassalage status.");
-
-      return GameStateService.BreakVassalageStatus(
-        gameState,
-        breakVassalageStatusCommand.CommanderPlayerId,
-        breakVassalageStatusCommand.VassalHouseType
-      );
-    }
-
     public static Result ExecuteUpdateIronBankLoanInterest(
       GameState gameState,
       IRoundPhaseCommand command

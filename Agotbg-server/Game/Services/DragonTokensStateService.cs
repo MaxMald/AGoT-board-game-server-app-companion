@@ -44,5 +44,24 @@ namespace Agotbg.Server.Game.Services
       state.DragonTokensTaken++;
       return Result.SUCCESS();
     }
+
+    /// <summary>
+    /// Prepares the dragon tokens state for the next round by checking if a token is
+    /// available at the specified round position. If available, it removes the token and
+    /// increments the count of taken tokens.
+    /// </summary>
+    ///
+    /// <param name="state">The dragon tokens state to update.</param>
+    ///
+    /// <param name="nextRound">The position of the dragon token for the next
+    /// round.</param>
+    public static void PrepareForNextRound(DragonTokensState state, byte nextRound)
+    {
+      if (state.AvailableDragonTokenPositions.Contains(nextRound))
+      {
+        state.AvailableDragonTokenPositions.Remove(nextRound);
+        state.DragonTokensTaken++;
+      }
+    }
   }
 }

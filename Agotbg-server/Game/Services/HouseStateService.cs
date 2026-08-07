@@ -123,28 +123,6 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
-    /// Updates the dragon's strength of the given house. Only House Targaryen can have
-    /// dragon strength, and the new value must not exceed the maximum allowed value
-    /// defined in GameRules.
-    /// </summary>
-    /// 
-    /// <param name="house">The house state to update.</param>
-    /// <param name="newDragonStrength">The new dragon strength value.</param>
-    /// 
-    /// <returns>A Result indicating success or failure of the operation.</returns>
-    public static Result UpdateDragonStrength(HouseState house, byte newDragonStrength)
-    {
-      if (house.Type != HouseType.Targaryen)
-        return Result.FAILURE("Only House Targaryen can have dragon strength.");
-
-      if (newDragonStrength > GameConstants.MaximumDragonStrength)
-        return Result.FAILURE("Dragon strength cannot exceed the maximum allowed value.");
-
-      house.DragonStrength = newDragonStrength;
-      return Result.SUCCESS();
-    }
-
-    /// <summary>
     /// Establishes a vassalage relationship between two houses.
     /// </summary>
     /// 

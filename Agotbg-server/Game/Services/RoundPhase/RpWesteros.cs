@@ -130,9 +130,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return Result.SUCCESS();
     }
 
-    private static Result ExecuteResolve(
-      GameState gameState
-    )
+    private static Result ExecuteResolve(GameState gameState)
     {
       if (gameState.Vassals.Count == 0)
       {

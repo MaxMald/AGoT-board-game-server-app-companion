@@ -134,8 +134,13 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
       byte nextRound = (byte)(gameState.CurrentRound + 1);
 
-      if (ShouldUpdateTargaryenDragonStrength(nextRound))
-        UpdateTargaryenDragonStrength(playerStates, nextRound);
+      if (HasTargaryenPlayer(playerStates))
+      {
+        DragonTokensStateService.PrepareForNextRound(
+          gameState.DragonTokensState,
+          nextRound
+        );
+      }
 
       ResolveIronBankInterestPayment(playerStates);
 
@@ -150,22 +155,9 @@ namespace Agotbg.Server.Game.Services.RoundPhase
                     .FirstOrDefault();
     }
 
-    private static bool ShouldUpdateTargaryenDragonStrength(byte nextRound)
+    private static bool HasTargaryenPlayer(List<PlayerState> playerStates)
     {
-      return nextRound % 2 == 0;
-    }
-
-    private static void UpdateTargaryenDragonStrength(List<PlayerState> players, byte nextRound)
-    {
-      foreach (PlayerState house in players)
-      {
-        if (house.HouseState.Type == HouseType.Targaryen)
-        {
-          // TODO: Event
-          house.HouseState.DragonStrength = (byte)(nextRound / 2);
-          return;
-        }
-      }
+      return playerStates.Any(p => p.HouseState.Type == HouseType.Targaryen);
     }
 
     private static void ResolveIronBankInterestPayment(List<PlayerState> players)

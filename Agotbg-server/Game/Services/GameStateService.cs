@@ -108,15 +108,6 @@ namespace Agotbg.Server.Game.Services
       return Result.SUCCESS();
     }
 
-    public static Result UpdatePlayerDragonStrength(GameState gameState, string playerId, byte newDragonStrength)
-    {
-      if (!gameState.Players.ContainsKey(playerId))
-        return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
-
-      PlayerState player = gameState.Players[playerId];
-      return HouseStateService.UpdateDragonStrength(player.HouseState, newDragonStrength);
-    }
-
     public static Result SubmitPlayerPowerTokensBid(GameState gameState, string playerId, byte newBid)
     {
       if (!gameState.Players.ContainsKey(playerId))

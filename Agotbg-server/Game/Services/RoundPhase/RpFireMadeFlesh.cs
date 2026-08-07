@@ -73,7 +73,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       }
 
       if (resolveFmf.PlayerId != targaryenPlayerState.PlayerId)
-        return Result.FAILURE($"Invalid player ID: {resolveFmf.PlayerId}. Only the Targaryen player can resolve Fire Made Flesh.");)
+        return Result.FAILURE($"Invalid player ID: {resolveFmf.PlayerId}. Only the Targaryen player can resolve Fire Made Flesh.");
 
       DragonTokensState dragonTokensState = gameState.DragonTokensState;
       FireMadeFleshState fmfState = gameState.FireMadeFleshState;
