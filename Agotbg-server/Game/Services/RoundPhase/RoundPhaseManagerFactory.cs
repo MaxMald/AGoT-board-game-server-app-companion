@@ -27,15 +27,16 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IHouseStateService houseStateService,
       IVassalAssignmentStateService vassalAssignmentStateService,
       IDragonTokensStateService dragonTokensStateService,
-      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService,
+      IWildlingsStateService wildlingsStateService
     )
     {
       RoundPhaseManager manager = new();
       manager.RegisterRoundPhase(new RpSetup(gameStateService, houseStateService, vassalAssignmentStateService));
       manager.RegisterRoundPhase(new RpWesterosWildlingIconsResolution(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpWesteros(gameStateService, houseStateService, vassalAssignmentStateService, influenceTrackBiddingStateService));
+      manager.RegisterRoundPhase(new RpWesteros(gameStateService, houseStateService, vassalAssignmentStateService, influenceTrackBiddingStateService, wildlingsStateService));
       manager.RegisterRoundPhase(new RpWildlingsBidding(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpWildlingsBiddingPresentation(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpWildlingsBiddingPresentation(gameStateService, houseStateService, wildlingsStateService));
       manager.RegisterRoundPhase(new RpInfluenceTrackBidding(gameStateService, houseStateService, influenceTrackBiddingStateService));
       manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenResolution(gameStateService, houseStateService));
       manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenPresentation(gameStateService, houseStateService, influenceTrackBiddingStateService));

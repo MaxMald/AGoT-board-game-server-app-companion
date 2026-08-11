@@ -27,11 +27,15 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     ///
     /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
+    /// <param name="wildlingsStateService">The wildlings state service.</param>
     public RpWildlingsBiddingPresentation(
       IGameStateService gameStateService,
-      IHouseStateService houseStateService
+      IHouseStateService houseStateService,
+      IWildlingsStateService wildlingsStateService
     ) : base(gameStateService, houseStateService)
-    { }
+    {
+      m_wildlingsStateServices = wildlingsStateService;
+    }
 
     /// <inheritdoc />
     protected override Result ExecuteDerived(
@@ -39,7 +43,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IRoundPhaseCommand command
     )
     {
-      WildlingsStateServices.ClearBiddingProperties(gameState.Wildlings);
+      m_wildlingsStateServices.ClearBiddingProperties(gameState.Wildlings);
       gameState.CurrentPhase = RoundPhaseType.Westeros;
       return Result.SUCCESS();
     }
@@ -49,5 +53,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     {
       return commandType == RoundPhaseCommandType.Resolve;
     }
+
+    private IWildlingsStateService m_wildlingsStateServices;
   }
 }

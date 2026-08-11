@@ -37,15 +37,18 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// service.</param>
     /// <param name="influenceTrackBiddingStateService">The influence track bidding state
     /// service.</param>
+    /// <param name="wildlingsStateService">The wildlings state service.</param>
     public RpWesteros(
       IGameStateService gameStateService,
       IHouseStateService houseStateService,
       IVassalAssignmentStateService vassalAssignmentStateService,
-      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService,
+      IWildlingsStateService wildlingsStateService
     ) : base(gameStateService, houseStateService)
     {
       m_vassalAssignmentStateService = vassalAssignmentStateService;
       m_influenceTrackBiddingStateService = influenceTrackBiddingStateService;
+      m_wildlingsStateService = wildlingsStateService;
     }
 
     /// <inheritdoc/>
@@ -125,6 +128,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// </summary>
     private IInfluenceTrackBiddingStateService m_influenceTrackBiddingStateService;
 
+    /// <summary>
+    /// Reference to the wildlings state service.
+    /// </summary>
+    private IWildlingsStateService m_wildlingsStateService;
+
     private Result ExecuteResolveAndMoveTo(
       GameState gameState,
       IRoundPhaseCommand command
@@ -143,7 +151,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           return Result.SUCCESS();
 
         case RoundPhaseType.WildlingsBidding:
-          WildlingsStateServices.PrepareForBidding(gameState.Wildlings, false);
+          m_wildlingsStateService.PrepareForBidding(gameState.Wildlings, false);
           gameState.CurrentPhase = RoundPhaseType.WildlingsBidding;
           return Result.SUCCESS();
 
@@ -159,9 +167,9 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return Result.FAILURE($"Invalid next round phase {nextPhase} for resolving and moving to another phase.");
     }
 
-    private static Result ExecuteStartPreemptiveRaid(GameState gameState)
+    private Result ExecuteStartPreemptiveRaid(GameState gameState)
     {
-      WildlingsStateServices.PrepareForBidding(gameState.Wildlings, true);
+      m_wildlingsStateService.PrepareForBidding(gameState.Wildlings, true);
       gameState.CurrentPhase = RoundPhaseType.WildlingsBidding;
       return Result.SUCCESS();
     }

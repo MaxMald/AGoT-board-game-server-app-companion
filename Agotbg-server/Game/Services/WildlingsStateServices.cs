@@ -1,17 +1,13 @@
 using Agotbg.Server.Game.Model;
+using Agotbg.Server.Game.Services.Interfaces;
 
 namespace Agotbg.Server.Game.Services
 {
-  public static class WildlingsStateServices
+  /// <inheritdoc/>
+  public class WildlingsStateService : IWildlingsStateService
   {
-    /// <summary>
-    /// Prepares the WildlingsState for bidding on a "Wildlings Attack" phase.
-    /// </summary>
-    ///
-    /// <param name="state">The WildlingsState to prepare for bidding.</param>
-    /// <param name="isPreemptiveRaid">Indicates whether the bidding is for a preemptive
-    /// raid.</param>
-    public static void PrepareForBidding(WildlingsState state, bool isPreemptiveRaid)
+    /// <inheritdoc/>
+    public void PrepareForBidding(WildlingsState state, bool isPreemptiveRaid)
     {
       if (isPreemptiveRaid)
       {
@@ -26,12 +22,8 @@ namespace Agotbg.Server.Game.Services
       state.NightWatchWins = false;
     }
 
-    /// <summary>
-    /// Clears the bidding properties of the WildlingsState.
-    /// </summary>
-    ///
-    /// <param name="state">The WildlingsState to clear bidding properties for.</param>
-    public static void ClearBiddingProperties(WildlingsState state)
+    /// <inheritdoc/>
+    public void ClearBiddingProperties(WildlingsState state)
     {
       state.StrengthWhenBiddingStarted = 0;
       state.TotalBetAmount = 0;
