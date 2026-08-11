@@ -81,21 +81,14 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
-    /// Updates the power token of a house, ensuring that vassal houses cannot have power
-    /// tokens.
+    /// Updates the power token of a house.
     /// </summary>
     /// 
     /// <param name="house">The house state to update.</param>
     /// <param name="newPowerTokens">The new power token value to set.</param>
-    /// 
-    /// <returns>A Result indicating success or failure of the operation.</returns>
-    public static Result UpdatePowerTokens(HouseState house, byte newPowerTokens)
+    public static void UpdatePowerTokens(HouseState house, byte newPowerTokens)
     {
-      if (house.IsVassal)
-        return Result.FAILURE("Vassal houses cannot have power tokens.");
-
-      house.PowerTokens = newPowerTokens;
-      return Result.SUCCESS();
+      house.PowerTokens = Math.Min(newPowerTokens, GameConstants.MaximumPowerTokens);
     }
 
     /// <summary>
@@ -108,18 +101,6 @@ namespace Agotbg.Server.Game.Services
     public static void UpdateHouseSupplyLevel(HouseState house, byte newSupplyLevel)
     {
       house.SupplyLevel = Math.Min(newSupplyLevel, GameConstants.MaximumSupplyLevel);
-    }
-
-    /// <summary>
-    /// Updates the kings court track position for a house and recalculates the number of
-    /// special orders based on the new position.
-    /// </summary>
-    /// 
-    /// <param name="house">The house state to update.</param>
-    /// <param name="newPosition">The new position on the King's Court track.</param>
-    public static void UpdateKingsCourtTrackPosition(HouseState house, byte newPosition)
-    {
-      house.KingsCourtTrackPosition = newPosition;
     }
 
     /// <summary>
@@ -193,13 +174,21 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <summary>
-    /// Clears the vassalage status of a house, resetting its commander house to
+    /// Clears the vassalage properties of a house, resetting its commander house to
     /// undefined and clearing its list of vassal house types.
     /// </summary>
     ///
+    /// <remarks>
+    /// This method clears the vassalage properties, either for a commander house or a
+    /// vassal house. It does not update the vassalage properties of any other houses
+    /// that may be related to this house. To safely remove a vassalage relationship, use
+    /// the <see cref="BreakVassalageStatus"/> method to ensure that the vassalage
+    /// relationships are properly managed.
+    /// </remarks>
+    ///
     /// <param name="house">The house state for which to clear the vassalage
-    /// status.</param>
-    public static void ClearVassalageRelationship(HouseState house)
+    /// properties.</param>
+    public static void ClearVassalageProperties(HouseState house)
     {
       house.CommanderHouse = HouseType.Undefined;
       house.VassalHouseTypes.Clear();

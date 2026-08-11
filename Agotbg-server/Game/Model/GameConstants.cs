@@ -18,7 +18,7 @@ namespace Agotbg.Server.Game.Model
     public static readonly byte MaximumNumberOfVassals = 4;
     public static readonly byte MaximumSupplyLevel = 6;
     public static readonly byte MaximumDragonStrength = 5;
-    public static readonly byte MaximumPowerTokens = 20; // TODO add rule to game logic
+    public static readonly byte MaximumPowerTokens = 20;
     public static readonly byte TargaryenInfluencePosition = 8;
     public static readonly byte PreemptiveRaidWildlingStrength = 6;
   }

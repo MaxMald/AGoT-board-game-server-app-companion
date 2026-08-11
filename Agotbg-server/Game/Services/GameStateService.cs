@@ -42,12 +42,6 @@ namespace Agotbg.Server.Game.Services
       return gameState;
     }
 
-    public static Result MoveToRoundPhase(GameState gameState, RoundPhaseType newPhase)
-    {
-      // TODO Round Transitions
-      return Result.SUCCESS();
-    }
-
     public static Result ModifyPlayerPowerTokens(GameState gameState, string playerId, short delta)
     {
       if (!gameState.Players.ContainsKey(playerId))
@@ -58,7 +52,9 @@ namespace Agotbg.Server.Game.Services
       short newPower = (short)Math.Max(0, power + delta);
       byte newPowerByte = (byte)Math.Min(newPower, byte.MaxValue);
 
-      return HouseStateService.UpdatePowerTokens(house, newPowerByte);
+      HouseStateService.UpdatePowerTokens(house, newPowerByte);
+
+      return Result.SUCCESS();
     }
 
     public static Result UpdatePlayerPowerTokens(GameState gameState, string playerId, byte newPowerTokens)
@@ -67,7 +63,9 @@ namespace Agotbg.Server.Game.Services
         return Result.FAILURE($"Player with ID {playerId} does not exist in the room.");
 
       PlayerState player = gameState.Players[playerId];
-      return HouseStateService.UpdatePowerTokens(player.HouseState, newPowerTokens);
+      HouseStateService.UpdatePowerTokens(player.HouseState, newPowerTokens);
+
+      return Result.SUCCESS();
     }
 
     public static Result UpdatePlayerSupplyLevel(GameState gameState, string playerId, byte newSupplyLevel)
@@ -223,7 +221,7 @@ namespace Agotbg.Server.Game.Services
     {
       List<HouseState> allHouses = GetAllHouses(gameState);
       foreach (HouseState house in allHouses)
-        HouseStateService.ClearVassalageRelationship(house);
+        HouseStateService.ClearVassalageProperties(house);
     }
 
     /// <summary>
