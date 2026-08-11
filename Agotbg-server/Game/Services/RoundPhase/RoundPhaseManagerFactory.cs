@@ -13,7 +13,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// registered.</returns>
     public static IRoundPhaseManager CreateDefault()
     {
-      var manager = new RoundPhaseManager();
+      RoundPhaseManager manager = new();
       manager.RegisterRoundPhase(new RpSetup());
       manager.RegisterRoundPhase(new RpWesterosWildlingIconsResolution());
       manager.RegisterRoundPhase(new RpWesteros());
