@@ -8,18 +8,23 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <summary>
     /// Creates a round phase manager with the default round phase configuration.
     /// </summary>
-    /// 
+    ///
+    /// <param name="houseStateService">The house state service to be used by the round
+    /// phase manager.</param>
+    ///
     /// <returns>A configured round phase manager with all default phases
     /// registered.</returns>
-    public static IRoundPhaseManager CreateDefault()
+    public static IRoundPhaseManager CreateDefault(
+      IHouseStateService houseStateService
+    )
     {
       RoundPhaseManager manager = new();
       manager.RegisterRoundPhase(new RpSetup());
       manager.RegisterRoundPhase(new RpWesterosWildlingIconsResolution());
       manager.RegisterRoundPhase(new RpWesteros());
-      manager.RegisterRoundPhase(new RpWildlingsBidding());
+      manager.RegisterRoundPhase(new RpWildlingsBidding(houseStateService));
       manager.RegisterRoundPhase(new RpWildlingsBiddingPresentation());
-      manager.RegisterRoundPhase(new RpInfluenceTrackBidding());
+      manager.RegisterRoundPhase(new RpInfluenceTrackBidding(houseStateService));
       manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenResolution());
       manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenPresentation());
       manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTieResolution());
