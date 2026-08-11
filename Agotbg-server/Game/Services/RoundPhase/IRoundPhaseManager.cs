@@ -12,6 +12,13 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   public interface IRoundPhaseManager
   {
     /// <summary>
+    /// Register a IRoundPhase implementation to the manager.
+    /// </summary>
+    /// 
+    /// <param name="roundPhase">The round phase implementation to register.</param>
+    public void RegisterRoundPhase(IRoundPhase roundPhase);
+
+    /// <summary>
     /// Executes the specified round phase command against the provided game state.
     /// </summary>
     /// 

@@ -10,31 +10,10 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// </summary>
   public class RoundPhaseManager : IRoundPhaseManager
   {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RoundPhaseManager"/> class with all
-    /// available round phases.
-    /// </summary>
-    public RoundPhaseManager()
+    /// <inheritdoc/>
+    public void RegisterRoundPhase(IRoundPhase roundPhase)
     {
-      m_roundPhases = new Dictionary<RoundPhaseType, IRoundPhase>
-      {
-        { RoundPhaseType.Setup, new RpSetup() },
-        { RoundPhaseType.WesterosWildlingIconsResolution, new RpWesterosWildlingIconsResolution() },
-        { RoundPhaseType.Westeros, new RpWesteros() },
-        { RoundPhaseType.WildlingsBidding, new RpWildlingsBidding() },
-        { RoundPhaseType.WildlingsBiddingPresentation, new RpWildlingsBiddingPresentation() },
-        { RoundPhaseType.InfluenceTrackBidding, new RpInfluenceTrackBidding() },
-        { RoundPhaseType.InfluenceTrackBiddingTargaryenResolution, new RpInfluenceTrackBiddingTargaryenResolution() },
-        { RoundPhaseType.InfluenceTrackBiddingTargaryenPresentation, new RpInfluenceTrackBiddingTargaryenPresentation() },
-        { RoundPhaseType.InfluenceTrackBiddingTieResolution, new RpInfluenceTrackBiddingTieResolution() },
-        { RoundPhaseType.InfluenceTrackBiddingPresentation, new RpInfluenceTrackBiddingPresentation() },
-        { RoundPhaseType.VassalAssignment, new RpVassalAssignment() },
-        { RoundPhaseType.Planning, new RpPlanning() },
-        { RoundPhaseType.Action, new RpAction() },
-        { RoundPhaseType.WinnerTieResolution, new RpWinnerTieResolution() },
-        { RoundPhaseType.GameOver, new RpGameOver() },
-        { RoundPhaseType.FireMadeFlesh, new RpFireMadeFlesh() }
-      };
+      m_roundPhases[roundPhase.Type] = roundPhase;
     }
 
     /// <inheritdoc/>
@@ -58,6 +37,6 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// Map of all available round phases, keyed by their corresponding <see
     /// cref="RoundPhaseType"/>.
     /// </summary>
-    private readonly Dictionary<RoundPhaseType, IRoundPhase> m_roundPhases;
+    private readonly Dictionary<RoundPhaseType, IRoundPhase> m_roundPhases = [];
   }
 }
