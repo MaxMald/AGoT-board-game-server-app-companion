@@ -48,6 +48,18 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc/>
     public override RoundPhaseType Type => RoundPhaseType.Planning;
 
+    /// <summary>
+    /// Intantiates a new instance of the <see cref="RpPlanning"/> class.
+    /// </summary>
+    ///
+    /// <param name="gameStateService">The game state service.</param>
+    /// <param name="houseStateService">The house state service.</param>
+    public RpPlanning(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService
+    ) : base(gameStateService, houseStateService)
+    { }
+
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
       GameState gameState,
@@ -60,27 +72,27 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           gameState.CurrentPhase = RoundPhaseType.Action; // Transition
           return Result.SUCCESS();
         case RoundPhaseCommandType.TransferPowerTokens:
-          return RoundPhaseSharedCommandExecutions.ExecuteTransferPowerTokens(
+          return ExecuteTransferPowerTokens(
             gameState,
             command
           );
         case RoundPhaseCommandType.ModifyPowerTokens:
-          return RoundPhaseSharedCommandExecutions.ExecuteModifyPowerTokens(
+          return ExecuteModifyPowerTokens(
             gameState,
             command
           );
         case RoundPhaseCommandType.UpdateSupplyLevel:
-          return RoundPhaseSharedCommandExecutions.ExecuteUpdateSupplyLevel(
+          return ExecuteUpdateSupplyLevel(
             gameState,
             command
           );
         case RoundPhaseCommandType.UpdateVictoryPoints:
-          return RoundPhaseSharedCommandExecutions.ExecuteUpdateVictoryPoints(
+          return ExecuteUpdateVictoryPoints(
             gameState,
             command
           );
         case RoundPhaseCommandType.UpdateIronBankLoanInterest:
-          return RoundPhaseSharedCommandExecutions.ExecuteUpdateIronBankLoanInterest(
+          return ExecuteUpdateIronBankLoanInterest(
             gameState,
             command
           );

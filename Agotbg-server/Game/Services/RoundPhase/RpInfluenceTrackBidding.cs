@@ -24,11 +24,13 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <summary>
     /// Creates a new instance of the <see cref="RpInfluenceTrackBidding"/> class.
     /// </summary>
-    /// 
+    ///
+    /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
     public RpInfluenceTrackBidding(
+      IGameStateService gameStateService,
       IHouseStateService houseStateService
-    ) : base(houseStateService)
+    ) : base(gameStateService, houseStateService)
     { }
 
     /// <inheritdoc/>
@@ -61,9 +63,9 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
       try
       {
-        List<HouseState> houses = GameStateService.GetAllHouses(gameState);
+        m_gameStateService.GetAllHouseStates(gameState, m_houseStates);
         InfluenceTracksService.UpdateInfluenceTrackPositions(
-          houses,
+          m_houseStates,
           gameState.InfluenceTrackBiddingState.HouseInfluencePositions,
           gameState.InfluenceTrackBiddingState.InfluenceTrackType
         );

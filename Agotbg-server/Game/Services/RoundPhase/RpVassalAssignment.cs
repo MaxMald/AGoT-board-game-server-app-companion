@@ -20,6 +20,21 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc />
     public override RoundPhaseType Type => RoundPhaseType.VassalAssignment;
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="RpVassalAssignment"/> class.
+    /// </summary>
+    ///
+    /// <param name="gameStateService">The game state service.</param>
+    /// <param name="houseStateService">The house state service.</param>
+    public RpVassalAssignment(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService,
+      IVassalAssignmentStateService vassalAssignmentStateService
+    ) : base(gameStateService, houseStateService)
+    {
+      m_vassalAssignmentStateService = vassalAssignmentStateService;
+    }
+
     /// <inheritdoc />
     protected override Result ExecuteDerived(
       GameState gameState,
@@ -42,6 +57,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     }
 
     /// <summary>
+    /// Reference to the vassal assignment state service.
+    /// </summary>
+    private IVassalAssignmentStateService m_vassalAssignmentStateService;
+
+    /// <summary>
     /// Resolves the vassal assignment phase. This method sets up the vassalage
     /// relationships based on the selections made by players during the phase.
     /// </summary>
@@ -55,7 +75,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="gameState">The current game state.</param>
     ///
     /// <returns>A result indicating success or failure of the operation.</returns>
-    private static Result ExecuteResolve(GameState gameState)
+    private Result ExecuteResolve(GameState gameState)
     {
       VassalAssignmentState vaState = gameState.VassalAssignmentState;
       if (!vaState.IsCompleted)
@@ -64,14 +84,14 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       Result result = SetupVassalageRelationships(gameState);
       if (!result.Success)
       {
-        VassalAssignmentStateServices.Clear(vaState);
-        VassalAssignmentStateServices.Prepare(gameState);
+        m_vassalAssignmentStateService.Clear(vaState);
+        m_vassalAssignmentStateService.Prepare(gameState);
         return Result.FAILURE(
           $"Failed to setup vassalage status: {result.Message}. The vassal assignment phase has been reset."
         );
       }
 
-      VassalAssignmentStateServices.Clear(vaState);
+      m_vassalAssignmentStateService.Clear(vaState);
       gameState.CurrentPhase = RoundPhaseType.Planning;
       return Result.SUCCESS();
     }
@@ -85,17 +105,17 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="gameState">The current game state.</param>
     /// 
     /// <returns>A result indicating success or failure of the operation.</returns>
-    private static Result MoveToNextPlayer(GameState gameState)
+    private Result MoveToNextPlayer(GameState gameState)
     {
       VassalAssignmentState vaState = gameState.VassalAssignmentState;
-      if (VassalAssignmentStateServices.IsLastPlayer(vaState, vaState.CurrentPlayerID))
+      if (m_vassalAssignmentStateService.IsLastPlayer(vaState, vaState.CurrentPlayerID))
       {
-        VassalAssignmentStateServices.AutomaticallyResolveOrderTokenSetsForCurrentPlayer(
+        m_vassalAssignmentStateService.AutomaticallyResolveOrderTokenSetsForCurrentPlayer(
           vaState
         );
       }
 
-      return VassalAssignmentStateServices.MoveToNextPlayer(vaState);
+      return m_vassalAssignmentStateService.MoveToNextPlayer(vaState);
     }
 
     /// <summary>
@@ -107,7 +127,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="command">The command to execute.</param>
     /// 
     /// <returns>A result indicating success or failure of the operation.</returns>
-    private static Result ExecuteAssignVassals(
+    private Result ExecuteAssignVassals(
       GameState gameState,
       IRoundPhaseCommand command
     )
@@ -127,7 +147,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (assignVassalHousesCommand.HouseTypes.Count == 0)
         return MoveToNextPlayer(gameState);
 
-      Result result = VassalAssignmentStateServices.AssignVassals(
+      Result result = m_vassalAssignmentStateService.AssignVassals(
         vaState,
         playerId,
         assignVassalHousesCommand.HouseTypes
@@ -151,30 +171,58 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="gameState">The current game state.</param>
     ///
     /// <returns>A result indicating success or failure of the operation.</returns>
-    private static Result SetupVassalageRelationships(GameState gameState)
+    private Result SetupVassalageRelationships(GameState gameState)
     {
-      GameStateService.ClearVassalageRelationships(gameState);
+      ClearVassalageRelationships(gameState);
       VassalAssignmentState vaState = gameState.VassalAssignmentState;
 
       foreach (VassalAssignmentPlayer vaPlayer in vaState.Players)
       {
         foreach (VassalHouseSelectionDescriptor vassalHouse in vaPlayer.SelectedVassalHouses)
         {
-          Result result = GameStateService.MakeVassalageRelationship(
+          PlayerState? playerState = m_gameStateService.GetPlayerState(
             gameState,
-            vaPlayer.PlayerId,
+            vaPlayer.PlayerId
+          );
+
+          if (playerState == null)
+          {
+            ClearVassalageRelationships(gameState);
+            return Result.FAILURE($"Player {vaPlayer.PlayerId} does not exist in the game state");
+          }
+
+          HouseState? vassalHouseState = m_gameStateService.GetVassalHouseState(
+            gameState,
             vassalHouse.HouseType
+          );
+
+          if (vassalHouseState == null)
+          {
+            ClearVassalageRelationships(gameState);
+            return Result.FAILURE($"Vassal house {vassalHouse.HouseType} does not exist in the game state");
+          }
+
+          Result result = m_houseStateService.MakeVassalageRelationship(
+            playerState.HouseState,
+            vassalHouseState
           );
 
           if (!result.Success)
           {
-            GameStateService.ClearVassalageRelationships(gameState);
+            ClearVassalageRelationships(gameState);
             return result;
           }
         }
       }
 
       return Result.SUCCESS();
+    }
+
+    private void ClearVassalageRelationships(GameState gameState)
+    {
+      m_gameStateService.GetAllHouseStates(gameState, m_houseStates);
+      foreach (HouseState houseState in m_houseStates)
+        m_houseStateService.ClearVassalageProperties(houseState);
     }
   }
 }

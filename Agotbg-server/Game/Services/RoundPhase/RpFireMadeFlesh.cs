@@ -20,6 +20,18 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc/>
     public override RoundPhaseType Type => RoundPhaseType.FireMadeFlesh;
 
+    /// <summary>
+    /// Instantiates a new instance of the <see cref="RpFireMadeFlesh"/> class.
+    /// </summary>
+    ///
+    /// <param name="gameStateService">The game state service.</param>
+    /// <param name="houseStateService">The house state service.</param>
+    public RpFireMadeFlesh(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService
+    ) : base(gameStateService, houseStateService)
+    { }
+
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
       GameState gameState,

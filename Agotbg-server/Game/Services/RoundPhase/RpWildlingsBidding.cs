@@ -29,9 +29,12 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// Instantiates a new instance of the <see cref="RpWildlingsBidding"/> class.
     /// </summary>
     ///
+    /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
-    public RpWildlingsBidding(IHouseStateService houseStateService) :
-      base(houseStateService)
+    public RpWildlingsBidding(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService
+    ) : base(gameStateService, houseStateService)
     {}
 
     /// <inheritdoc />

@@ -3,14 +3,13 @@ using Agotbg.Server.Game.Model;
 namespace Agotbg.Server.Game.Services
 {
   /// <summary>
-  /// Default implementation of the IHouseStateFactory interface. This factory is
-  /// responsible for creating HouseState objects based on the specified HouseType,
-  /// including both player houses and vassal houses.
+  /// This factory is responsible for creating HouseState objects based on the specified
+  /// HouseType, including both player houses and vassal houses.
   /// </summary>
-  public class HouseStateFactory : IHouseStateFactory
+  public static class HouseStateFactory
   {
     /// <inheritdoc/>
-    public HouseState Create(HouseType houseType)
+    public static HouseState Create(HouseType houseType)
     {
       switch (houseType)
       {
@@ -38,7 +37,7 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <inheritdoc/>
-    public HouseState CreateVassal(HouseType houseType)
+    public static HouseState CreateVassal(HouseType houseType)
     {
       if (houseType == HouseType.Undefined)
         throw new ArgumentException("Vassal house type cannot be undefined.", nameof(houseType));

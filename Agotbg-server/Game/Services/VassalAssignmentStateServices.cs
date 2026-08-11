@@ -7,17 +7,21 @@ namespace Agotbg.Server.Game.Services
   /// Provides services for managing the vassal assignment phase, including preparation,
   /// vassal selection, order token set distribution, and player turn progression.
   /// </summary>
-  public static class VassalAssignmentStateServices
+  public class VassalAssignmentStateServices : IVassalAssignmentStateService
   {
     /// <summary>
-    /// Prepares the vassal assignment state for a new vassal selection phase. Clears
-    /// previous state, populates available vassals, distributes order token sets to
-    /// players based on turn order, and sets the first player as current.
+    /// Reference to the game state service.
     /// </summary>
-    /// 
-    /// <param name="gameState">The game state containing vassal and player
-    /// information.</param>
-    public static void Prepare(GameState gameState)
+    IGameStateService m_gameStateService;
+
+    /// <inheritdoc/>
+    public VassalAssignmentStateServices(IGameStateService gameStateService)
+    {
+      m_gameStateService = gameStateService;
+    }
+
+    /// <inheritdoc/>
+    public void Prepare(GameState gameState)
     {
       VassalAssignmentState vaState = gameState.VassalAssignmentState;
       Clear(vaState);
@@ -34,7 +38,7 @@ namespace Agotbg.Server.Game.Services
       );
 
       List<PlayerState> playersInTurnOrder
-        = GameStateService.GetPlayersInTurnOrder(gameState);
+        = m_gameStateService.GetPlayersInTurnOrder(gameState);
 
       if (playersInTurnOrder.Count == 0)
       {
@@ -71,18 +75,8 @@ namespace Agotbg.Server.Game.Services
       vaState.IsCompleted = false;
     }
 
-    /// <summary>
-    /// Assigns vassal houses to the current player, consuming one of their order token
-    /// sets for each vassal house. Validates that the player is the current player, has
-    /// order token sets available, and the vassal houses are available for assignment.
-    /// </summary>
-    ///
-    /// <param name="vaState">The vassal assignment state to update.</param>
-    /// <param name="playerId">The ID of the player requesting the assignment.</param>
-    /// <param name="vassalHouseTypes">The types of vassal houses to assign.</param>
-    ///
-    /// <returns>A Result indicating success or failure with an error message.</returns>
-    public static Result AssignVassals(
+    /// <inheritdoc/>
+    public Result AssignVassals(
       VassalAssignmentState vaState,
       string playerId,
       List<HouseType> vassalHouseTypes
@@ -141,15 +135,8 @@ namespace Agotbg.Server.Game.Services
       return Result.SUCCESS();
     }
 
-    /// <summary>
-    /// Moves the current player to the next player in the vassal assignment state. If
-    /// there is no next player, the current player ID is set to an empty string.
-    /// </summary>
-    ///
-    /// <param name="vaState">The Vassal Assignment State.</param>
-    ///
-    /// <returns>A Result indicating the success or failure of the operation.</returns>
-    public static Result MoveToNextPlayer(VassalAssignmentState vaState)
+    /// <inheritdoc/>
+    public Result MoveToNextPlayer(VassalAssignmentState vaState)
     {
       if (string.IsNullOrEmpty(vaState.CurrentPlayerID))
         return Result.FAILURE("Current Player ID is null or empty.");
@@ -184,58 +171,26 @@ namespace Agotbg.Server.Game.Services
       return Result.SUCCESS();
     }
 
-    /// <summary>
-    /// Indicates if the vassal assignment state has a current player set. Returns true
-    /// if the CurrentPlayerID is not null or empty; otherwise, false.
-    /// </summary>
-    /// 
-    /// <param name="vaState">The Vassal Assignment State.</param>
-    /// 
-    /// <returns>True if there is a current player; otherwise, false.</returns>
-    public static bool HasCurrentPlayer(VassalAssignmentState vaState)
+    /// <inheritdoc/>
+    public bool HasCurrentPlayer(VassalAssignmentState vaState)
     {
       return !string.IsNullOrEmpty(vaState.CurrentPlayerID);
     }
 
-    /// <summary>
-    /// Indicates if the vassal assignment state has any available vassal houses for
-    /// assignment.
-    /// </summary>
-    ///
-    /// <param name="vaState">The Vassal Assignment State.</param>
-    ///
-    /// <returns>True if there are available vassal houses; otherwise, false.</returns>
-    public static bool HasAvailableVassalHouses(VassalAssignmentState vaState)
+    /// <inheritdoc/>
+    public bool HasAvailableVassalHouses(VassalAssignmentState vaState)
     {
       return vaState.AvailableVassalHouses.Count > 0;
     }
 
-    /// <summary>
-    /// Indicates if the vassal assignment state is completed, meaning it cannot assign
-    /// any more vassal houses to players.
-    /// </summary>
-    ///
-    /// <param name="vaState">The Vassal Assignment State.</param>
-    ///
-    /// <returns>True if the vassal assignment state is completed; otherwise,
-    /// false.</returns>
-    public static bool IsCompleted(VassalAssignmentState vaState)
+    /// <inheritdoc/>
+    public bool IsCompleted(VassalAssignmentState vaState)
     {
       return vaState.IsCompleted;
     }
 
-    /// <summary>
-    /// Indicates if the vassal assignment state has any vassal order token sets in
-    /// possession.
-    /// </summary>
-    ///
-    /// <param name="vaState">The Vassal Assignment State.</param>
-    ///
-    /// <returns>True if there are any vassal order token sets; otherwise,
-    /// false.</returns>
-    public static bool HasVassalOrderTokenSets(
-      VassalAssignmentState vaState
-    )
+    /// <inheritdoc/>
+    public bool HasVassalOrderTokenSets(VassalAssignmentState vaState)
     {
       foreach (VassalAssignmentPlayer vaPlayer in vaState.Players)
       {
@@ -245,16 +200,8 @@ namespace Agotbg.Server.Game.Services
       return false;
     }
 
-    /// <summary>
-    /// Indicates if the given player is the last player in the vassal assignment state.
-    /// This is true if the player has no next player ID.
-    /// </summary>
-    ///
-    /// <param name="vaState">The Vassal Assignment State.</param>
-    /// <param name="playerId">The ID of the player to check.</param>
-    ///
-    /// <returns>True if the player is the last player; otherwise, false.</returns>
-    public static bool IsLastPlayer(VassalAssignmentState vaState, string playerId)
+    /// <inheritdoc/>
+    public bool IsLastPlayer(VassalAssignmentState vaState, string playerId)
     {
       if (string.IsNullOrEmpty(playerId))
         return false;
@@ -266,14 +213,8 @@ namespace Agotbg.Server.Game.Services
       return string.IsNullOrEmpty(vaPlayer.NextPlayerId);
     }
 
-    /// <summary>
-    /// Automatically resolves vassal order token sets for the current player by
-    /// assigning available vassal houses to the player until they run out of order
-    /// token sets or there are no more available vassal houses.
-    /// </summary>
-    /// 
-    /// <param name="vaState">The Vassal Assignment State.</param>
-    public static void AutomaticallyResolveOrderTokenSetsForCurrentPlayer(
+    /// <inheritdoc/>
+    public void AutomaticallyResolveOrderTokenSetsForCurrentPlayer(
       VassalAssignmentState vaState
     )
     {
@@ -305,12 +246,8 @@ namespace Agotbg.Server.Game.Services
       }
     }
 
-    /// <summary>
-    /// Clears the given vassal assignment state, resetting to default values.
-    /// </summary>
-    /// 
-    /// <param name="state">The vassal assignment state to clear.</param>
-    public static void Clear(VassalAssignmentState state)
+    /// <inheritdoc/>
+    public void Clear(VassalAssignmentState state)
     {
       state.AvailableVassalHouses.Clear();
       state.Players.Clear();

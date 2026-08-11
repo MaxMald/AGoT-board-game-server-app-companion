@@ -20,6 +20,19 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc />
     public override RoundPhaseType Type => RoundPhaseType.InfluenceTrackBiddingTieResolution;
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="RpInfluenceTrackBiddingTieResolution"/>
+    /// class.
+    /// </summary>
+    ///
+    /// <param name="gameStateService">The game state service.</param>
+    /// <param name="houseStateService">The house state service.</param>
+    public RpInfluenceTrackBiddingTieResolution(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService
+    ) : base(gameStateService, houseStateService)
+    { }
+
     /// <inheritdoc />
     protected override Result ExecuteDerived(
       GameState gameState,
@@ -34,7 +47,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
       try
       { 
-        validPlayerId = GameStateService.GetPlayerIdThatHoldsTheIronThroneToken(gameState);
+        validPlayerId = m_gameStateService.GetPlayerIdThatHoldsTheIronThroneToken(gameState);
       }
       catch (InvalidOperationException ex)
       {

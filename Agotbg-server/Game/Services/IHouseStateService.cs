@@ -117,6 +117,15 @@ namespace Agotbg.Server.Game.Services
     public void UndoBidResolution(HouseState house, byte previousBid);
 
     /// <summary>
+    /// Updates the num of victory points for a house, ensuring that the new value is
+    /// within valid bounds.
+    /// </summary>
+    /// 
+    /// <param name="house">The house state for which to update the victory points.</param>
+    /// <param name="newVictoryPoints">The new number of victory points.</param>
+    public void UpdateVictoryPoints(HouseState house, byte newVictoryPoints);
+
+    /// <summary>
     /// Transfer a specified amount of power tokens from one house to another, ensuring
     /// that the transfer is valid and does not exceed the available tokens of the source
     /// house.

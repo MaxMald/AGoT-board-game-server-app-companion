@@ -26,6 +26,23 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc/>
     public override RoundPhaseType Type => RoundPhaseType.Westeros;
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="RpWesteros"/> class.
+    /// </summary>
+    ///
+    /// <param name="gameStateService">The game state service.</param>
+    /// <param name="houseStateService">The house state service.</param>
+    /// <param name="vassalAssignmentStateService">The vassal assignment state
+    /// service.</param>
+    public RpWesteros(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService,
+      IVassalAssignmentStateService vassalAssignmentStateService
+    ) : base(gameStateService, houseStateService)
+    {
+      m_vassalAssignmentStateService = vassalAssignmentStateService;
+    }
+
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
       GameState gameState,
@@ -39,32 +56,32 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         case RoundPhaseCommandType.ResolveAndMoveTo:
           return ExecuteResolveAndMoveTo(gameState, command);
         case RoundPhaseCommandType.TransferPowerTokens:
-          return RoundPhaseSharedCommandExecutions.ExecuteTransferPowerTokens(
+          return ExecuteTransferPowerTokens(
             gameState,
             command
           );
         case RoundPhaseCommandType.ModifyPowerTokens:
-          return RoundPhaseSharedCommandExecutions.ExecuteModifyPowerTokens(
+          return ExecuteModifyPowerTokens(
             gameState,
             command
           );
         case RoundPhaseCommandType.UpdateSupplyLevel:
-          return RoundPhaseSharedCommandExecutions.ExecuteUpdateSupplyLevel(
+          return ExecuteUpdateSupplyLevel(
             gameState,
             command
           );
         case RoundPhaseCommandType.UpdateVictoryPoints:
-          return RoundPhaseSharedCommandExecutions.ExecuteUpdateVictoryPoints(
+          return ExecuteUpdateVictoryPoints(
             gameState,
             command
           );
         case RoundPhaseCommandType.UpdateIronBankLoanInterest:
-          return RoundPhaseSharedCommandExecutions.ExecuteUpdateIronBankLoanInterest(
+          return ExecuteUpdateIronBankLoanInterest(
             gameState,
             command
           );
         case RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse:
-          return RoundPhaseSharedCommandExecutions.ExecuteMoveInfluenceTrackPositionForHouse(
+          return ExecuteMoveInfluenceTrackPositionForHouse(
             gameState,
             command
           );
@@ -93,7 +110,12 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return false;
     }
 
-    private static Result ExecuteResolveAndMoveTo(
+    /// <summary>
+    /// Reference to the vassal assignment state service.
+    /// </summary>
+    private IVassalAssignmentStateService m_vassalAssignmentStateService;
+
+    private Result ExecuteResolveAndMoveTo(
       GameState gameState,
       IRoundPhaseCommand command
     )
@@ -116,7 +138,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           return Result.SUCCESS();
 
         case RoundPhaseType.InfluenceTrackBidding:
-          GameStateService.PrepareForInfluenceTrackBidding(gameState, InfluenceTrackType.IronThrone);
+          m_gameStateService.PrepareForInfluenceTrackBidding(gameState, InfluenceTrackType.IronThrone);
           gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBidding;
           return Result.SUCCESS();
       }
@@ -130,7 +152,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return Result.SUCCESS();
     }
 
-    private static Result ExecuteResolve(GameState gameState)
+    private Result ExecuteResolve(GameState gameState)
     {
       if (gameState.Vassals.Count == 0)
       {
@@ -138,7 +160,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       }
       else
       {
-        VassalAssignmentStateServices.Prepare(gameState);
+        m_vassalAssignmentStateService.Prepare(gameState);
         gameState.CurrentPhase = RoundPhaseType.VassalAssignment;
       }
       return Result.SUCCESS();

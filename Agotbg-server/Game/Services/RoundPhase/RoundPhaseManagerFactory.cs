@@ -9,32 +9,38 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// Creates a round phase manager with the default round phase configuration.
     /// </summary>
     ///
+    /// <param name="gameStateService">The game state service to be used by the round
+    /// phase manager.</param>
     /// <param name="houseStateService">The house state service to be used by the round
     /// phase manager.</param>
+    /// <param name="vassalAssignmentStateService">The vassal assignment state service to
+    /// be used by the round phase manager.</param>
     ///
     /// <returns>A configured round phase manager with all default phases
     /// registered.</returns>
     public static IRoundPhaseManager CreateDefault(
-      IHouseStateService houseStateService
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService,
+      IVassalAssignmentStateService vassalAssignmentStateService
     )
     {
       RoundPhaseManager manager = new();
-      manager.RegisterRoundPhase(new RpSetup());
-      manager.RegisterRoundPhase(new RpWesterosWildlingIconsResolution());
-      manager.RegisterRoundPhase(new RpWesteros());
-      manager.RegisterRoundPhase(new RpWildlingsBidding(houseStateService));
-      manager.RegisterRoundPhase(new RpWildlingsBiddingPresentation());
-      manager.RegisterRoundPhase(new RpInfluenceTrackBidding(houseStateService));
-      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenResolution());
-      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenPresentation());
-      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTieResolution());
-      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingPresentation());
-      manager.RegisterRoundPhase(new RpVassalAssignment());
-      manager.RegisterRoundPhase(new RpPlanning());
-      manager.RegisterRoundPhase(new RpAction());
-      manager.RegisterRoundPhase(new RpWinnerTieResolution());
-      manager.RegisterRoundPhase(new RpGameOver());
-      manager.RegisterRoundPhase(new RpFireMadeFlesh());
+      manager.RegisterRoundPhase(new RpSetup(gameStateService, houseStateService, vassalAssignmentStateService));
+      manager.RegisterRoundPhase(new RpWesterosWildlingIconsResolution(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpWesteros(gameStateService, houseStateService, vassalAssignmentStateService));
+      manager.RegisterRoundPhase(new RpWildlingsBidding(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpWildlingsBiddingPresentation(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpInfluenceTrackBidding(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenResolution(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenPresentation(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTieResolution(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingPresentation(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpVassalAssignment(gameStateService, houseStateService, vassalAssignmentStateService));
+      manager.RegisterRoundPhase(new RpPlanning(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpAction(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpWinnerTieResolution(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpGameOver(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpFireMadeFlesh(gameStateService, houseStateService));
       return manager;
     }
   }

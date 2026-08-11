@@ -22,6 +22,23 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc/>
     public override RoundPhaseType Type => RoundPhaseType.Setup;
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="RpSetup"/> class.
+    /// </summary>
+    ///
+    /// <param name="gameStateService">The game state service.</param>
+    /// <param name="houseStateService">The house state service.</param>
+    /// <param name="vassalAssignmentStateService">The vassal assignment state
+    /// service.</param>
+    public RpSetup(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService,
+      IVassalAssignmentStateService vassalAssignmentStateService
+    ) : base(gameStateService, houseStateService)
+    {
+      m_vassalAssignmentStateService = vassalAssignmentStateService;
+    }
+
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
       GameState gameState,
@@ -34,7 +51,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       }
       else
       {
-        VassalAssignmentStateServices.Prepare(gameState);
+        m_vassalAssignmentStateService.Prepare(gameState);
         gameState.CurrentPhase = RoundPhaseType.VassalAssignment;
       }
       return Result.SUCCESS();
@@ -45,5 +62,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     {
       return commandType == RoundPhaseCommandType.Resolve;
     }
+
+    private IVassalAssignmentStateService m_vassalAssignmentStateService;
   }
 }

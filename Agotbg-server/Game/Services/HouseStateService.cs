@@ -133,6 +133,12 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <inheritdoc/>
+    public void UpdateVictoryPoints(HouseState house, byte newVictoryPoints)
+    {
+      house.VictoryPoints = Math.Min(newVictoryPoints, GameConstants.NumVictoryPointsToWin);
+    }
+
+    /// <inheritdoc/>
     public Result TransferPowerTokens(HouseState from, HouseState to, byte amount)
     {
       if (to.IsVassal)

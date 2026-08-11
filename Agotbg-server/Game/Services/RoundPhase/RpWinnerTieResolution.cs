@@ -43,6 +43,18 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc/>
     public override RoundPhaseType Type => RoundPhaseType.WinnerTieResolution;
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="RpWinnerTieResolution"/> class.
+    /// </summary>
+    ///
+    /// <param name="gameStateService">The game state service.</param>
+    /// <param name="houseStateService">The house state service.</param>
+    public RpWinnerTieResolution(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService
+    ) : base(gameStateService, houseStateService)
+    { }
+
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
       GameState gameState,

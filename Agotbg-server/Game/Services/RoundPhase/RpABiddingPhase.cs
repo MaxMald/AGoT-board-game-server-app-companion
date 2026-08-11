@@ -41,17 +41,16 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <summary>
     /// Instantiates a new instance of the <see cref="RpABiddingPhase"/> class.
     /// </summary>
-    /// 
+    ///
+    /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
-    protected RpABiddingPhase(IHouseStateService houseStateService)
+    protected RpABiddingPhase(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService
+    ) : base(gameStateService, houseStateService)
     {
       m_houseStateService = houseStateService;
     }
-
-    /// <summary>
-    /// Reference to the house state service.
-    /// </summary>
-    protected IHouseStateService m_houseStateService;
 
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
@@ -110,7 +109,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       List<HouseBet> houseBets
     );
 
-    private static Result ExecuteUpdatePowerTokensBid(
+    private Result ExecuteUpdatePowerTokensBid(
      GameState gameState,
      IRoundPhaseCommand command
    )
@@ -118,9 +117,16 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (command is not RpcUpdatePowerTokensBid updatePowerTokensBidCommand)
         return Result.FAILURE($"Invalid command type {command.Type} for updating power tokens bid.");
 
-      return GameStateService.SubmitPlayerPowerTokensBid(
+      PlayerState? playerState = m_gameStateService.GetPlayerState(
         gameState,
-        updatePowerTokensBidCommand.PlayerId,
+        updatePowerTokensBidCommand.PlayerId
+      );
+
+      if (playerState == null)
+        return Result.FAILURE($"Player with ID {updatePowerTokensBidCommand.PlayerId} does not exist.");
+
+      return m_houseStateService.SubmitPowerTokensBid(
+        playerState.HouseState,
         updatePowerTokensBidCommand.NewBid
       );
     }
@@ -144,11 +150,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
     private Result ExecuteResolve(GameState gameState)
     {
-      if (!GameStateService.HaveAllPlayersSubmittedTheirBids(gameState))
+      if (!m_gameStateService.HaveAllPlayersSubmittedTheirBids(gameState))
         return Result.FAILURE("Not all players have submitted their bids.");
 
-      List<HouseBet> housesBets = GameStateService.CreateHouseBets(gameState);
-      GameStateService.ClearAllHousesSubmittedBids(gameState);
+      List<HouseBet> housesBets = m_gameStateService.CreateHouseBets(gameState);
+      m_gameStateService.ClearAllHousesSubmittedBids(gameState);
 
       return ExecuteDerivedBidResolution(gameState, housesBets);
     }

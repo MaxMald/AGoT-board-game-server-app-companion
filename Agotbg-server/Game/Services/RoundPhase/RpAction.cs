@@ -47,6 +47,18 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc/>
     public override RoundPhaseType Type => RoundPhaseType.Action;
 
+    /// <summary>
+    /// Instantiates a action round phase..
+    /// </summary>
+    /// 
+    /// <param name="gameStateService">The game state service.</param>
+    /// <param name="houseStateService">The house state service.</param>
+    public RpAction(
+      IGameStateService gameStateService,
+      IHouseStateService houseStateService
+    ) : base(gameStateService, houseStateService)
+    {}
+
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
       GameState gameState,
@@ -58,32 +70,32 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         case RoundPhaseCommandType.Resolve:
           return ResolveActionPhase(gameState);
         case RoundPhaseCommandType.TransferPowerTokens:
-          return RoundPhaseSharedCommandExecutions.ExecuteTransferPowerTokens(
+          return ExecuteTransferPowerTokens(
             gameState,
             command
           );
         case RoundPhaseCommandType.ModifyPowerTokens:
-          return RoundPhaseSharedCommandExecutions.ExecuteModifyPowerTokens(
+          return ExecuteModifyPowerTokens(
             gameState,
             command
           );
         case RoundPhaseCommandType.UpdateSupplyLevel:
-          return RoundPhaseSharedCommandExecutions.ExecuteUpdateSupplyLevel(
+          return ExecuteUpdateSupplyLevel(
             gameState,
             command
           );
         case RoundPhaseCommandType.UpdateVictoryPoints:
-          return RoundPhaseSharedCommandExecutions.ExecuteUpdateVictoryPoints(
+          return ExecuteUpdateVictoryPoints(
             gameState,
             command
           );
         case RoundPhaseCommandType.UpdateIronBankLoanInterest:
-          return RoundPhaseSharedCommandExecutions.ExecuteUpdateIronBankLoanInterest(
+          return ExecuteUpdateIronBankLoanInterest(
             gameState,
             command
           );
         case RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse:
-          return RoundPhaseSharedCommandExecutions.ExecuteMoveInfluenceTrackPositionForHouse(
+          return ExecuteMoveInfluenceTrackPositionForHouse(
             gameState,
             command
           );
@@ -109,13 +121,13 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return false;
     }
 
-    private static Result ResolveActionPhase(GameState gameState)
+    private Result ResolveActionPhase(GameState gameState)
     {
       List<PlayerState> playerStates = gameState.Players.Values.ToList();
 
-      if (GameStateService.IsLastRound(gameState))
+      if (m_gameStateService.IsLastRound(gameState))
       {
-        if (GameStateService.HasTiedPlayersByVictoryPoints(gameState))
+        if (m_gameStateService.HasTiedPlayersByVictoryPoints(gameState))
         {
           gameState.CurrentPhase = RoundPhaseType.WinnerTieResolution; // Transition to Tie Resolution phase if there are tied players
           return Result.SUCCESS();
