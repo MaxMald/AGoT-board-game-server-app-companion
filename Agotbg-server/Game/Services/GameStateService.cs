@@ -152,10 +152,11 @@ namespace Agotbg.Server.Game.Services
     /// <inheritdoc/>
     public void PrepareForInfluenceTrackBidding(
       GameState gameState,
-      InfluenceTrackType influenceTrackType
+      InfluenceTrackType influenceTrackType,
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
     )
     {
-      InfluenceTrackBiddingStateService.Prepare(
+      influenceTrackBiddingStateService.Prepare(
         gameState.InfluenceTrackBiddingState,
         influenceTrackType
       );

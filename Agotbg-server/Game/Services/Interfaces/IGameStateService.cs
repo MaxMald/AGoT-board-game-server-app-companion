@@ -164,9 +164,12 @@ namespace Agotbg.Server.Game.Services.Interfaces
     ///
     /// <param name="gameState">The current game state.</param>
     /// <param name="influenceTrackType">The type of influence track for bidding.</param>
+    /// <param name="influenceTrackBiddingStateService">The service responsible for
+    /// managing the influence track bidding state.</param>
     public void PrepareForInfluenceTrackBidding(
       GameState gameState,
-      InfluenceTrackType influenceTrackType
+      InfluenceTrackType influenceTrackType,
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
     );
 
     /// <summary>

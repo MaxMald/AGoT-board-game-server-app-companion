@@ -28,11 +28,16 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     ///
     /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
+    /// <param name="influenceTrackBiddingStateService">The influence track bidding state
+    /// service.</param>
     public RpInfluenceTrackBiddingTieResolution(
       IGameStateService gameStateService,
-      IHouseStateService houseStateService
+      IHouseStateService houseStateService,
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
     ) : base(gameStateService, houseStateService)
-    { }
+    {
+      m_influenceTrackBiddingStateService = influenceTrackBiddingStateService;
+    }
 
     /// <inheritdoc />
     protected override Result ExecuteDerived(
@@ -58,7 +63,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (senderPlayerId != validPlayerId)
         return Result.FAILURE($"Player {senderPlayerId} is not allowed to resolve the influence tie group. Only player {validPlayerId} can do that.");
 
-      Result result = InfluenceTrackBiddingStateService.ResolveTieGroup(
+      Result result = m_influenceTrackBiddingStateService.ResolveTieGroup(
         gameState.InfluenceTrackBiddingState,
         resolveTieGroupCommand.TiedGroupBreaker
       );
@@ -66,7 +71,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (!result.Success)
         return result;
 
-      if (!InfluenceTrackBiddingStateService.HasTiedGroups(gameState.InfluenceTrackBiddingState))
+      if (!m_influenceTrackBiddingStateService.HasTiedGroups(gameState.InfluenceTrackBiddingState))
         gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingPresentation;
 
       return Result.SUCCESS();
@@ -77,5 +82,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     {
       return commandType == RoundPhaseCommandType.ResolveInfluenceTieGroup;
     }
+
+    /// <summary>
+    /// Reference to the influence track bidding state service, which is used to manage
+    /// the state of influence track bidding in the game.
+    /// </summary>
+    private IInfluenceTrackBiddingStateService m_influenceTrackBiddingStateService;
   }
 }

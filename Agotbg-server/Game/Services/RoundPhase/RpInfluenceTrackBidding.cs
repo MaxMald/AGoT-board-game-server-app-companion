@@ -28,11 +28,16 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     ///
     /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
+    /// <param name="influenceTrackBiddingStateService">The influence track bidding state
+    /// service.</param>
     public RpInfluenceTrackBidding(
       IGameStateService gameStateService,
-      IHouseStateService houseStateService
+      IHouseStateService houseStateService,
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
     ) : base(gameStateService, houseStateService)
-    { }
+    {
+      m_influenceTrackBiddingStateService = influenceTrackBiddingStateService;
+    }
 
     /// <inheritdoc/>
     protected override Result ExecuteDerivedBidResolution(
@@ -52,11 +57,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         return Result.SUCCESS();
       }
 
-      InfluenceTrackBiddingStateService.ProcessBetsAndDeterminePositions(
+      m_influenceTrackBiddingStateService.ProcessBetsAndDeterminePositions(
         gameState.InfluenceTrackBiddingState
       );
 
-      if (InfluenceTrackBiddingStateService.HasTiedGroups(gameState.InfluenceTrackBiddingState))
+      if (m_influenceTrackBiddingStateService.HasTiedGroups(gameState.InfluenceTrackBiddingState))
       {
         gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingTieResolution;
         return Result.SUCCESS();
@@ -79,6 +84,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingPresentation;
       return Result.SUCCESS();
     }
+
+    /// <summary>
+    /// Reference to the influence track bidding state service.
+    /// </summary>
+    private IInfluenceTrackBiddingStateService m_influenceTrackBiddingStateService;
 
     private static bool ShouldMoveToTargaryenResolution(List<HouseBet> houses)
     {

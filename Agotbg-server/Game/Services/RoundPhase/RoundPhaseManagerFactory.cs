@@ -17,6 +17,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// phase manager.</param>
     /// <param name="vassalAssignmentStateService">The vassal assignment state service to
     /// be used by the round phase manager.</param>
+    /// <param name="influenceTrackBiddingStateService">The influence track bidding state
+    /// service to be used by the round phase</param>
     ///
     /// <returns>A configured round phase manager with all default phases
     /// registered.</returns>
@@ -24,20 +26,21 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IGameStateService gameStateService,
       IHouseStateService houseStateService,
       IVassalAssignmentStateService vassalAssignmentStateService,
-      IDragonTokensStateService dragonTokensStateService
+      IDragonTokensStateService dragonTokensStateService,
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
     )
     {
       RoundPhaseManager manager = new();
       manager.RegisterRoundPhase(new RpSetup(gameStateService, houseStateService, vassalAssignmentStateService));
       manager.RegisterRoundPhase(new RpWesterosWildlingIconsResolution(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpWesteros(gameStateService, houseStateService, vassalAssignmentStateService));
+      manager.RegisterRoundPhase(new RpWesteros(gameStateService, houseStateService, vassalAssignmentStateService, influenceTrackBiddingStateService));
       manager.RegisterRoundPhase(new RpWildlingsBidding(gameStateService, houseStateService));
       manager.RegisterRoundPhase(new RpWildlingsBiddingPresentation(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpInfluenceTrackBidding(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpInfluenceTrackBidding(gameStateService, houseStateService, influenceTrackBiddingStateService));
       manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenResolution(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenPresentation(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTieResolution(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingPresentation(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTargaryenPresentation(gameStateService, houseStateService, influenceTrackBiddingStateService));
+      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingTieResolution(gameStateService, houseStateService, influenceTrackBiddingStateService));
+      manager.RegisterRoundPhase(new RpInfluenceTrackBiddingPresentation(gameStateService, houseStateService, influenceTrackBiddingStateService));
       manager.RegisterRoundPhase(new RpVassalAssignment(gameStateService, houseStateService, vassalAssignmentStateService));
       manager.RegisterRoundPhase(new RpPlanning(gameStateService, houseStateService));
       manager.RegisterRoundPhase(new RpAction(gameStateService, houseStateService, dragonTokensStateService));

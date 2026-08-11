@@ -1,4 +1,5 @@
 using Agotbg.Server.Game.Model;
+using Agotbg.Server.Game.Services.Interfaces;
 using Agotbg.Server.Utilities;
 
 namespace Agotbg.Server.Game.Services
@@ -7,15 +8,10 @@ namespace Agotbg.Server.Game.Services
   /// Provides services for processing influence track bidding, determining house
   /// positions, and resolving tied bets.
   /// </summary>
-  public static class InfluenceTrackBiddingStateService
+  public class InfluenceTrackBiddingStateService : IInfluenceTrackBiddingStateService
   {
-    /// <summary>
-    /// Prepares the influence track bidding state for the specified track type.
-    /// </summary>
-    /// 
-    /// <param name="state">The influence track bidding state to prepare.</param>
-    /// <param name="trackType">The type of influence track.</param>
-    public static void Prepare(
+    /// <inheritdoc/>
+    public void Prepare(
       InfluenceTrackBiddingState state,
       InfluenceTrackType trackType
     )
@@ -24,14 +20,8 @@ namespace Agotbg.Server.Game.Services
       state.InfluenceTrackType = trackType;
     }
 
-    /// <summary>
-    /// Processes all house bets to determine influence track positions. Applies
-    /// Targaryen power token gifts, sorts houses by bet amount, and identifies groups of
-    /// tied houses. Higher bets receive better positions (lower position numbers).
-    /// </summary>
-    ///
-    /// <param name="state">The influence track bidding state to process.</param>
-    public static void ProcessBetsAndDeterminePositions(InfluenceTrackBiddingState state)
+    /// <inheritdoc/>
+    public void ProcessBetsAndDeterminePositions(InfluenceTrackBiddingState state)
     {
       ApplyTargaryenGifts(state);
 
@@ -83,30 +73,14 @@ namespace Agotbg.Server.Game.Services
       }
     }
 
-    /// <summary>
-    /// Checks if there are any unresolved tied groups in the bidding state.
-    /// </summary>
-    /// 
-    /// <param name="state">The influence track bidding state to check.</param>
-    /// 
-    /// <returns>True if there are tied groups, false otherwise.</returns>
-    public static bool HasTiedGroups(InfluenceTrackBiddingState state)
+    /// <inheritdoc/>
+    public bool HasTiedGroups(InfluenceTrackBiddingState state)
     {
       return state.TiedGroups.Count > 0;
     }
 
-    /// <summary>
-    /// Resolves a tied group by assigning influence positions based on the provided
-    /// priority order. The tied group is removed from the state after resolution.
-    /// </summary>
-    ///
-    /// <param name="state">The influence track bidding state containing the tied
-    /// group.</param>
-    /// <param name="tiedGroupBreaker">The tie breaker specifying house priority
-    /// order.</param>
-    ///
-    /// <returns>A Result indicating success or failure with an error message.</returns>
-    public static Result ResolveTieGroup(
+    /// <inheritdoc/>
+    public Result ResolveTieGroup(
       InfluenceTrackBiddingState state,
       InfluenceTrackTiedGroupBreaker tiedGroupBreaker
     )
@@ -149,13 +123,8 @@ namespace Agotbg.Server.Game.Services
       return Result.SUCCESS();
     }
 
-    /// <summary>
-    /// Clears the given <see cref="InfluenceTrackBiddingState"/>, resetting its
-    /// properties to default values and clearing all lists.
-    /// </summary>
-    ///
-    /// <param name="state">The influence track bidding state to clear.</param>
-    public static void Clear(InfluenceTrackBiddingState state)
+    /// <inheritdoc/>
+    public void Clear(InfluenceTrackBiddingState state)
     {
       state.InfluenceTrackType = InfluenceTrackType.None;
       state.TargaryenPowerTokenGifts.Clear();

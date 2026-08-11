@@ -35,13 +35,17 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="houseStateService">The house state service.</param>
     /// <param name="vassalAssignmentStateService">The vassal assignment state
     /// service.</param>
+    /// <param name="influenceTrackBiddingStateService">The influence track bidding state
+    /// service.</param>
     public RpWesteros(
       IGameStateService gameStateService,
       IHouseStateService houseStateService,
-      IVassalAssignmentStateService vassalAssignmentStateService
+      IVassalAssignmentStateService vassalAssignmentStateService,
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
     ) : base(gameStateService, houseStateService)
     {
       m_vassalAssignmentStateService = vassalAssignmentStateService;
+      m_influenceTrackBiddingStateService = influenceTrackBiddingStateService;
     }
 
     /// <inheritdoc/>
@@ -116,6 +120,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// </summary>
     private IVassalAssignmentStateService m_vassalAssignmentStateService;
 
+    /// <summary>
+    /// Reference to the influence track bidding state service.
+    /// </summary>
+    private IInfluenceTrackBiddingStateService m_influenceTrackBiddingStateService;
+
     private Result ExecuteResolveAndMoveTo(
       GameState gameState,
       IRoundPhaseCommand command
@@ -139,7 +148,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           return Result.SUCCESS();
 
         case RoundPhaseType.InfluenceTrackBidding:
-          m_gameStateService.PrepareForInfluenceTrackBidding(gameState, InfluenceTrackType.IronThrone);
+          m_gameStateService.PrepareForInfluenceTrackBidding(
+            gameState,
+            InfluenceTrackType.IronThrone,
+            m_influenceTrackBiddingStateService
+          );
           gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBidding;
           return Result.SUCCESS();
       }

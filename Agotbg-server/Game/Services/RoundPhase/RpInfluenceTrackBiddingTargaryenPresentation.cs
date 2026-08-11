@@ -34,9 +34,12 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="houseStateService">The house state service.</param>
     public RpInfluenceTrackBiddingTargaryenPresentation(
       IGameStateService gameStateService,
-      IHouseStateService houseStateService
+      IHouseStateService houseStateService,
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
     ) : base(gameStateService, houseStateService)
-    { }
+    {
+      m_influenceTrackBiddingStateService = influenceTrackBiddingStateService;
+    }
 
     /// <inheritdoc />
     protected override Result ExecuteDerived(
@@ -44,11 +47,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IRoundPhaseCommand command
     )
     {
-      InfluenceTrackBiddingStateService.ProcessBetsAndDeterminePositions(
+      m_influenceTrackBiddingStateService.ProcessBetsAndDeterminePositions(
         gameState.InfluenceTrackBiddingState
       );
 
-      if (InfluenceTrackBiddingStateService.HasTiedGroups(gameState.InfluenceTrackBiddingState))
+      if (m_influenceTrackBiddingStateService.HasTiedGroups(gameState.InfluenceTrackBiddingState))
       {
         gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBiddingTieResolution;
       }
@@ -79,5 +82,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     {
       return commandType == RoundPhaseCommandType.Resolve;
     }
+
+    /// <summary>
+    /// Reference to the influence track bidding state service, which is used to manage
+    /// the state of influence track bidding in the game.
+    /// </summary>
+    private IInfluenceTrackBiddingStateService m_influenceTrackBiddingStateService;
   }
 }

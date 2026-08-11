@@ -31,11 +31,16 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     ///
     /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
+    /// <param name="influenceTrackBiddingStateService">The influence track bidding state
+    /// service.</param>
     public RpInfluenceTrackBiddingPresentation(
       IGameStateService gameStateService,
-      IHouseStateService houseStateService
+      IHouseStateService houseStateService,
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
     ) : base(gameStateService, houseStateService)
-    { }
+    {
+      m_influenceTrackBiddingStateService = influenceTrackBiddingStateService;
+    }
 
     /// <inheritdoc />
     protected override Result ExecuteDerived(
@@ -48,17 +53,25 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
       if (currentBiddingType == InfluenceTrackType.IronThrone)
       {
-        m_gameStateService.PrepareForInfluenceTrackBidding(gameState, InfluenceTrackType.Fiefdom);
+        m_gameStateService.PrepareForInfluenceTrackBidding(
+          gameState,
+          InfluenceTrackType.Fiefdom,
+          m_influenceTrackBiddingStateService
+        );
         gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBidding;
       } 
       else if (currentBiddingType == InfluenceTrackType.Fiefdom)
       {
-        m_gameStateService.PrepareForInfluenceTrackBidding(gameState, InfluenceTrackType.KingsCourt);
+        m_gameStateService.PrepareForInfluenceTrackBidding(
+          gameState,
+          InfluenceTrackType.KingsCourt,
+          m_influenceTrackBiddingStateService
+        );
         gameState.CurrentPhase = RoundPhaseType.InfluenceTrackBidding;
       } 
       else
       {
-        InfluenceTrackBiddingStateService.Clear(gameState.InfluenceTrackBiddingState);
+        m_influenceTrackBiddingStateService.Clear(gameState.InfluenceTrackBiddingState);
         gameState.CurrentPhase = RoundPhaseType.Westeros;
       }
       return Result.SUCCESS();
@@ -69,5 +82,10 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     {
       return commandType == RoundPhaseCommandType.Resolve;
     }
+
+    /// <summary>
+    /// Reference to the influence track bidding state service.
+    /// </summary>
+    private IInfluenceTrackBiddingStateService m_influenceTrackBiddingStateService;
   }
 }
