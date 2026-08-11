@@ -30,13 +30,16 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="houseStateService">The house state service.</param>
     /// <param name="influenceTrackBiddingStateService">The influence track bidding state
     /// service.</param>
+    /// <param name="influenceTrackService">The influence track service.</param>
     public RpInfluenceTrackBidding(
       IGameStateService gameStateService,
       IHouseStateService houseStateService,
-      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService
+      IInfluenceTrackBiddingStateService influenceTrackBiddingStateService,
+      IInfluenceTrackService influenceTrackService
     ) : base(gameStateService, houseStateService)
     {
       m_influenceTrackBiddingStateService = influenceTrackBiddingStateService;
+      m_influenceTrackService = influenceTrackService;
     }
 
     /// <inheritdoc/>
@@ -70,7 +73,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       try
       {
         m_gameStateService.GetAllHouseStates(gameState, m_houseStates);
-        InfluenceTracksService.UpdateInfluenceTrackPositions(
+        m_influenceTrackService.UpdateInfluenceTrackPositions(
           m_houseStates,
           gameState.InfluenceTrackBiddingState.HouseInfluencePositions,
           gameState.InfluenceTrackBiddingState.InfluenceTrackType
@@ -89,6 +92,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// Reference to the influence track bidding state service.
     /// </summary>
     private IInfluenceTrackBiddingStateService m_influenceTrackBiddingStateService;
+
+    /// <summary>
+    /// Reference to the influence track service.
+    /// </summary>
+    private IInfluenceTrackService m_influenceTrackService;
 
     private static bool ShouldMoveToTargaryenResolution(List<HouseBet> houses)
     {

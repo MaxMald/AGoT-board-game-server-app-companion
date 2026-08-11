@@ -37,17 +37,20 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// service.</param>
     /// <param name="influenceTrackBiddingStateService">The influence track bidding state
     /// service.</param>
+    /// <param name="influenceTrackService">The influence track service.</param>
     /// <param name="wildlingsStateService">The wildlings state service.</param>
     public RpWesteros(
       IGameStateService gameStateService,
       IHouseStateService houseStateService,
       IVassalAssignmentStateService vassalAssignmentStateService,
       IInfluenceTrackBiddingStateService influenceTrackBiddingStateService,
+      IInfluenceTrackService influenceTrackService,
       IWildlingsStateService wildlingsStateService
     ) : base(gameStateService, houseStateService)
     {
       m_vassalAssignmentStateService = vassalAssignmentStateService;
       m_influenceTrackBiddingStateService = influenceTrackBiddingStateService;
+      m_influenceTrackService = influenceTrackService;
       m_wildlingsStateService = wildlingsStateService;
     }
 
@@ -91,7 +94,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         case RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse:
           return ExecuteMoveInfluenceTrackPositionForHouse(
             gameState,
-            command
+            command,
+            m_influenceTrackService
           );
         case RoundPhaseCommandType.StartPreemptiveRaid:
           return ExecuteStartPreemptiveRaid(gameState);
@@ -127,6 +131,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// Reference to the influence track bidding state service.
     /// </summary>
     private IInfluenceTrackBiddingStateService m_influenceTrackBiddingStateService;
+
+    /// <summary>
+    /// Reference to the influence track service.
+    /// </summary>
+    private IInfluenceTrackService m_influenceTrackService;
 
     /// <summary>
     /// Reference to the wildlings state service.

@@ -1,21 +1,15 @@
 using Agotbg.Server.Game.Model;
+using Agotbg.Server.Game.Services.Interfaces;
 
 namespace Agotbg.Server.Game.Services
 {
   /// <summary>
-  /// Provides services for initializing the three influence tracks (Iron Throne,
-  /// Fiefdoms, and King's Court) in the game.
+  /// Provides services for managing the influence tracks of houses in the game.
   /// </summary>
-  public static class InfluenceTracksService
+  public class InfluenceTracksService : IInfluenceTrackService
   {
-    /// <summary>
-    /// Initializes all three influence tracks for the given houses based on their
-    /// starting positions defined in the game rules.
-    /// </summary>
-    ///
-    /// <param name="houses">The list of houses to position on the influence
-    /// tracks.</param>
-    public static void Initialize(List<HouseState> houses)
+    /// <inheritdoc/>
+    public void Initialize(List<HouseState> houses)
     {
       InitializeHousesOrderForIronThrone(houses);
       SetInfluenceTrackPositions(houses, InfluenceTrackType.IronThrone);
@@ -25,20 +19,8 @@ namespace Agotbg.Server.Game.Services
       SetInfluenceTrackPositions(houses, InfluenceTrackType.KingsCourt);
     }
 
-    /// <summary>
-    /// Moves a specified house to a new position on the given influence track. This
-    /// shifts other houses accordingly to maintain the order. The new position is
-    /// 1-based, with 1 being the highest position on the track.
-    /// </summary>
-    ///
-    /// <param name="houses">The list of houses.</param>
-    /// <param name="houseType">The type of the house to move.</param>
-    /// <param name="trackType">The type of the influence track.</param>
-    /// <param name="newPosition">The new 1-based position for the house.</param>
-    ///
-    /// <exception cref="Exception"/>
-    /// <exception cref="ArgumentException"/>
-    public static void MoveInfluenceTrackPositionForHouse(
+    /// <inheritdoc/>
+    public void MoveInfluenceTrackPositionForHouse(
       List<HouseState> houses,
       HouseType houseType,
       InfluenceTrackType trackType,
@@ -58,21 +40,8 @@ namespace Agotbg.Server.Game.Services
       SetInfluenceTrackPositions(houses, trackType);
     }
 
-    /// <summary>
-    /// Updates the influence track positions for the provided houses based on the given
-    /// list of house influence position items. Each item specifies a house and its new
-    /// position on the specified influence track. The method ensures that the houses are
-    /// updated correctly according to the provided positions.
-    /// </summary>
-    ///
-    /// <param name="houses">The list of houses to update.</param>
-    /// <param name="houseInfluencePositions">The list of house influence position
-    /// items.</param>
-    /// <param name="trackType">The type of the influence track.</param>
-    ///
-    /// <exception cref="Exception">Thrown when a house in the provided list is not
-    /// found.</exception>
-    public static void UpdateInfluenceTrackPositions(
+    /// <inheritdoc/>
+    public void UpdateInfluenceTrackPositions(
       List<HouseState> houses,
       List<HouseInfluencePositionItem> houseInfluencePositions,
       InfluenceTrackType trackType

@@ -1,4 +1,5 @@
 using Agotbg.Server.Game.Model;
+using Agotbg.Server.Game.Services.Interfaces;
 
 namespace Agotbg.Server.Game.Services
 {
@@ -17,6 +18,8 @@ namespace Agotbg.Server.Game.Services
     /// names and house selections.</param>
     /// <param name="maxPlayers">The maximum number of players allowed in the
     /// game.</param>
+    /// <param name="influenceTrackService">The influence track service used to manage
+    /// influence track positions for the houses.</param>
     ///
     /// <returns>A newly initialized <see cref="GameState"/> object ready for
     /// gameplay.</returns>
@@ -27,7 +30,8 @@ namespace Agotbg.Server.Game.Services
     /// multiple players select the same house.</exception>
     public static GameState Create(
       List<PlayerDescriptor> playersDescriptors,
-      int maxPlayers
+      int maxPlayers,
+      IInfluenceTrackService influenceTrackService
     )
     {
       int numPlayers = playersDescriptors.Count;
@@ -59,7 +63,7 @@ namespace Agotbg.Server.Game.Services
       CreateVassalHouses(gameState);
 
       List<HouseState> allHouses = GetAllHouseStates(gameState);
-      InfluenceTracksService.Initialize(allHouses);
+      influenceTrackService.Initialize(allHouses);
 
       gameState.CurrentPhase = RoundPhaseType.Setup;
       return gameState;

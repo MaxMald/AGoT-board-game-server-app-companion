@@ -1,4 +1,5 @@
 using Agotbg.Server.Game.Model;
+using Agotbg.Server.Game.Services.Interfaces;
 using Agotbg.Server.Utilities;
 
 namespace Agotbg.Server.Game.Services
@@ -74,7 +75,7 @@ namespace Agotbg.Server.Game.Services
       return Result.SUCCESS();
     }
 
-    public Result StartGame(RoomState room)
+    public Result StartGame(RoomState room, IInfluenceTrackService influenceTrackService)
     {
       if (room.RoomStatus != RoomStatus.PreparingGame)
         return Result.FAILURE("Game has already started.");
@@ -83,7 +84,8 @@ namespace Agotbg.Server.Game.Services
       {
         room.GameState = GameStateServiceFactory.Create(
           room.PlayersDescriptors.Values.ToList(),
-          room.MaxPlayers
+          room.MaxPlayers,
+          influenceTrackService
         );
         room.RoomStatus = RoomStatus.InProgress;
       }

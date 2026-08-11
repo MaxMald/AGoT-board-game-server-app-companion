@@ -295,7 +295,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <returns>The result of the command execution.</returns>
     public Result ExecuteMoveInfluenceTrackPositionForHouse(
       GameState gameState,
-      IRoundPhaseCommand command
+      IRoundPhaseCommand command,
+      IInfluenceTrackService influenceTrackService
     )
     {
       if (command is not RpcMoveInfluenceTrackPositionForHouse moveInfluenceTrackPositionCommand)
@@ -304,7 +305,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       try
       {
         m_gameStateService.GetAllHouseStates(gameState, m_houseStates);
-        InfluenceTracksService.MoveInfluenceTrackPositionForHouse(
+        influenceTrackService.MoveInfluenceTrackPositionForHouse(
           m_houseStates,
           moveInfluenceTrackPositionCommand.HouseType,
           moveInfluenceTrackPositionCommand.InfluenceTrackType,

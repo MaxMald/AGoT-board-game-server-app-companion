@@ -58,10 +58,12 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     public RpAction(
       IGameStateService gameStateService,
       IHouseStateService houseStateService,
-      IDragonTokensStateService dragonTokensStateService
+      IDragonTokensStateService dragonTokensStateService,
+      IInfluenceTrackService influenceTrackService
     ) : base(gameStateService, houseStateService)
     {
       m_dragonTokenStateService = dragonTokensStateService;
+      m_influenceTrackService = influenceTrackService;
     }
 
     /// <inheritdoc/>
@@ -102,7 +104,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         case RoundPhaseCommandType.MoveInfluenceTrackPositionForHouse:
           return ExecuteMoveInfluenceTrackPositionForHouse(
             gameState,
-            command
+            command,
+            m_influenceTrackService
           );
       }
 
@@ -130,6 +133,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// Reference to the dragon tokens state service.
     /// </summary>
     private IDragonTokensStateService m_dragonTokenStateService;
+
+    /// <summary>
+    /// Reference to the influence track service.
+    /// </summary>
+    private IInfluenceTrackService m_influenceTrackService;
 
     private Result ResolveActionPhase(GameState gameState)
     {
