@@ -25,6 +25,15 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc />
     public override RoundPhaseType Type => RoundPhaseType.WildlingsBidding;
 
+    /// <summary>
+    /// Instantiates a new instance of the <see cref="RpWildlingsBidding"/> class.
+    /// </summary>
+    ///
+    /// <param name="houseStateService">The house state service.</param>
+    public RpWildlingsBidding(IHouseStateService houseStateService) :
+      base(houseStateService)
+    {}
+
     /// <inheritdoc />
     protected override Result ExecuteDerivedBidResolution(
       GameState gameState,

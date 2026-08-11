@@ -38,6 +38,21 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// </remarks>
   public abstract class RpABiddingPhase : ARoundPhase
   {
+    /// <summary>
+    /// Instantiates a new instance of the <see cref="RpABiddingPhase"/> class.
+    /// </summary>
+    /// 
+    /// <param name="houseStateService">The house state service.</param>
+    protected RpABiddingPhase(IHouseStateService houseStateService)
+    {
+      m_houseStateService = houseStateService;
+    }
+
+    /// <summary>
+    /// Reference to the house state service.
+    /// </summary>
+    protected IHouseStateService m_houseStateService;
+
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
       GameState gameState,
@@ -110,7 +125,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       );
     }
 
-    private static Result ExecuteCancelPowerTokensBid(
+    private Result ExecuteCancelPowerTokensBid(
       GameState gameState,
       IRoundPhaseCommand command
     )
@@ -122,7 +137,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         return Result.FAILURE($"Player with ID {cancelPowerTokensCommand.PlayerId} does not exist.");
 
       HouseState house = gameState.Players[cancelPowerTokensCommand.PlayerId].HouseState;
-      HouseStateService.CancelPowerTokensBid(house);
+      m_houseStateService.CancelPowerTokensBid(house);
 
       return Result.SUCCESS();
     }

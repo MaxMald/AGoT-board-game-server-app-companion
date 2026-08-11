@@ -21,6 +21,16 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <inheritdoc/>
     public override RoundPhaseType Type => RoundPhaseType.InfluenceTrackBidding;
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="RpInfluenceTrackBidding"/> class.
+    /// </summary>
+    /// 
+    /// <param name="houseStateService">The house state service.</param>
+    public RpInfluenceTrackBidding(
+      IHouseStateService houseStateService
+    ) : base(houseStateService)
+    { }
+
     /// <inheritdoc/>
     protected override Result ExecuteDerivedBidResolution(
       GameState gameState,
