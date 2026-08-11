@@ -35,13 +35,14 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IDragonTokensStateService dragonTokensStateService,
       IInfluenceTrackBiddingStateService influenceTrackBiddingStateService,
       IInfluenceTrackService influenceTrackService,
-      IWildlingsStateService wildlingsStateService
+      IWildlingsStateService wildlingsStateService,
+      IFireMadeFleshStateService fireMadeFleshStateService
     )
     {
       RoundPhaseManager manager = new();
       manager.RegisterRoundPhase(new RpSetup(gameStateService, houseStateService, vassalAssignmentStateService));
       manager.RegisterRoundPhase(new RpWesterosWildlingIconsResolution(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpWesteros(gameStateService, houseStateService, vassalAssignmentStateService, influenceTrackBiddingStateService, influenceTrackService, wildlingsStateService));
+      manager.RegisterRoundPhase(new RpWesteros(gameStateService, houseStateService, vassalAssignmentStateService, influenceTrackBiddingStateService, influenceTrackService, wildlingsStateService, fireMadeFleshStateService));
       manager.RegisterRoundPhase(new RpWildlingsBidding(gameStateService, houseStateService));
       manager.RegisterRoundPhase(new RpWildlingsBiddingPresentation(gameStateService, houseStateService, wildlingsStateService));
       manager.RegisterRoundPhase(new RpInfluenceTrackBidding(gameStateService, houseStateService, influenceTrackBiddingStateService, influenceTrackService));
@@ -54,7 +55,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       manager.RegisterRoundPhase(new RpAction(gameStateService, houseStateService, dragonTokensStateService, influenceTrackService));
       manager.RegisterRoundPhase(new RpWinnerTieResolution(gameStateService, houseStateService));
       manager.RegisterRoundPhase(new RpGameOver(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpFireMadeFlesh(gameStateService, houseStateService, dragonTokensStateService));
+      manager.RegisterRoundPhase(new RpFireMadeFlesh(gameStateService, houseStateService, dragonTokensStateService, fireMadeFleshStateService));
       return manager;
     }
   }

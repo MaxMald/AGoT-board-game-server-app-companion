@@ -28,13 +28,17 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
     /// <param name="dragonTokensStateService">The dragon tokens state service.</param>
+    /// <param name="fireMadeFleshStateService">The Fire Made Flesh state
+    /// service.</param>
     public RpFireMadeFlesh(
       IGameStateService gameStateService,
       IHouseStateService houseStateService,
-      IDragonTokensStateService dragonTokensStateService
+      IDragonTokensStateService dragonTokensStateService,
+      IFireMadeFleshStateService fireMadeFleshStateService
     ) : base(gameStateService, houseStateService)
     {
       m_dragonTokenStateService = dragonTokensStateService;
+      m_fireMadeFleshStateService = fireMadeFleshStateService;
     }
 
     /// <inheritdoc/>
@@ -63,6 +67,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// A reference to the dragon tokens state service.
     /// </summary>
     private IDragonTokensStateService m_dragonTokenStateService;
+
+    /// <summary>
+    /// A reference to the fire made flesh state service.
+    /// </summary>
+    private IFireMadeFleshStateService m_fireMadeFleshStateService;
 
     /// <summary>
     /// Execute the resolution of the "Fire Made Flesh" phase, handling the player's
@@ -158,7 +167,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
       if (!result.Success)
       {
-        FireMadeFleshStateService.Prepare(fmfState);
+        m_fireMadeFleshStateService.Prepare(fmfState);
         return Result.FAILURE($"Failed to take dragon token: {result.Message}. The Fire Made Flesh phase has been reset.");
       }
 

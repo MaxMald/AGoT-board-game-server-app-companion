@@ -45,13 +45,15 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IVassalAssignmentStateService vassalAssignmentStateService,
       IInfluenceTrackBiddingStateService influenceTrackBiddingStateService,
       IInfluenceTrackService influenceTrackService,
-      IWildlingsStateService wildlingsStateService
+      IWildlingsStateService wildlingsStateService,
+      IFireMadeFleshStateService fireMadeFleshStateService
     ) : base(gameStateService, houseStateService)
     {
       m_vassalAssignmentStateService = vassalAssignmentStateService;
       m_influenceTrackBiddingStateService = influenceTrackBiddingStateService;
       m_influenceTrackService = influenceTrackService;
       m_wildlingsStateService = wildlingsStateService;
+      m_fireMadeFleshStateService = fireMadeFleshStateService;
     }
 
     /// <inheritdoc/>
@@ -138,6 +140,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     private IInfluenceTrackService m_influenceTrackService;
 
     /// <summary>
+    /// Reference to the Fire Made Flesh state service.
+    /// </summary>
+    private IFireMadeFleshStateService m_fireMadeFleshStateService;
+
+    /// <summary>
     /// Reference to the wildlings state service.
     /// </summary>
     private IWildlingsStateService m_wildlingsStateService;
@@ -155,7 +162,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       switch (nextPhase)
       {
         case RoundPhaseType.FireMadeFlesh:
-          FireMadeFleshStateService.Prepare(gameState.FireMadeFleshState);
+          m_fireMadeFleshStateService.Prepare(gameState.FireMadeFleshState);
           gameState.CurrentPhase = RoundPhaseType.FireMadeFlesh;
           return Result.SUCCESS();
 
