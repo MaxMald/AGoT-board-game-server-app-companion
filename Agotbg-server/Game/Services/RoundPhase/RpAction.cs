@@ -1,4 +1,5 @@
 using Agotbg.Server.Game.Model;
+using Agotbg.Server.Game.Services.Interfaces;
 using Agotbg.Server.Game.Services.RoundPhase.Command;
 using Agotbg.Server.Utilities;
 
@@ -50,14 +51,18 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <summary>
     /// Instantiates a action round phase..
     /// </summary>
-    /// 
+    ///
     /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
+    /// <param name="dragonTokensStateService">The dragon tokens state service.</param>
     public RpAction(
       IGameStateService gameStateService,
-      IHouseStateService houseStateService
+      IHouseStateService houseStateService,
+      IDragonTokensStateService dragonTokensStateService
     ) : base(gameStateService, houseStateService)
-    {}
+    {
+      m_dragonTokenStateService = dragonTokensStateService;
+    }
 
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
@@ -121,6 +126,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return false;
     }
 
+    /// <summary>
+    /// Reference to the dragon tokens state service.
+    /// </summary>
+    private IDragonTokensStateService m_dragonTokenStateService;
+
     private Result ResolveActionPhase(GameState gameState)
     {
       List<PlayerState> playerStates = gameState.Players.Values.ToList();
@@ -148,7 +158,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
       if (HasTargaryenPlayer(playerStates))
       {
-        DragonTokensStateService.PrepareForNextRound(
+        m_dragonTokenStateService.PrepareForNextRound(
           gameState.DragonTokensState,
           nextRound
         );

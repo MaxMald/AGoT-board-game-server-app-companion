@@ -1,6 +1,6 @@
 using Agotbg.Server.Game.Model;
 
-namespace Agotbg.Server.Game.Services
+namespace Agotbg.Server.Game.Services.Interfaces
 {
   /// <summary>
   /// Provides operations for managing and querying game state, including player and

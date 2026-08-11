@@ -1,4 +1,5 @@
 using Agotbg.Server.Game.Model;
+using Agotbg.Server.Game.Services.Interfaces;
 using Agotbg.Server.Game.Services.RoundPhase.Command;
 using Agotbg.Server.Utilities;
 
@@ -26,11 +27,15 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     ///
     /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
+    /// <param name="dragonTokensStateService">The dragon tokens state service.</param>
     public RpFireMadeFlesh(
       IGameStateService gameStateService,
-      IHouseStateService houseStateService
+      IHouseStateService houseStateService,
+      IDragonTokensStateService dragonTokensStateService
     ) : base(gameStateService, houseStateService)
-    { }
+    {
+      m_dragonTokenStateService = dragonTokensStateService;
+    }
 
     /// <inheritdoc/>
     protected override Result ExecuteDerived(
@@ -53,6 +58,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return commandType == RoundPhaseCommandType.ResolveFireMadeFlesh ||
         commandType == RoundPhaseCommandType.Resolve;
     }
+
+    /// <summary>
+    /// A reference to the dragon tokens state service.
+    /// </summary>
+    private IDragonTokensStateService m_dragonTokenStateService;
 
     /// <summary>
     /// Execute the resolution of the "Fire Made Flesh" phase, handling the player's
@@ -118,7 +128,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="command">The command to execute.</param>
     /// 
     /// <returns>The result of the command execution.</returns>
-    private static Result ExecuteResolve(GameState gameState, IRoundPhaseCommand command)
+    private Result ExecuteResolve(GameState gameState, IRoundPhaseCommand command)
     {
       PlayerState? targaryenPlayerState = gameState.Players
                                                    .FirstOrDefault(p => p.Value.HouseState.Type == HouseType.Targaryen)
@@ -140,7 +150,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
         return Result.SUCCESS();
       }
 
-      Result result = DragonTokensStateService.TakeDragonToken
+      Result result = m_dragonTokenStateService.TakeDragonToken
       (
         gameState.DragonTokensState,
         fmfState.PositionOfDesiredDragonToken

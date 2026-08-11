@@ -1,7 +1,7 @@
 using Agotbg.Server.Game.Model;
 using Agotbg.Server.Utilities;
 
-namespace Agotbg.Server.Game.Services
+namespace Agotbg.Server.Game.Services.Interfaces
 {
   /// <summary>
   /// Provides operations for managing house state, power tokens, vassalage

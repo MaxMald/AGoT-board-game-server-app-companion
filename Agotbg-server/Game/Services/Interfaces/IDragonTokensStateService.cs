@@ -1,13 +1,12 @@
 using Agotbg.Server.Game.Model;
-using Agotbg.Server.Game.Services.Interfaces;
 using Agotbg.Server.Utilities;
 
-namespace Agotbg.Server.Game.Services
+namespace Agotbg.Server.Game.Services.Interfaces
 {
   /// <summary>
-  /// Provides utility methods for managing the state of dragon tokens in the game.
+  /// Defines the interface for managing the state of dragon tokens in the game.
   /// </summary>
-  public class DragonTokensStateService : IDragonTokensStateService
+  public interface IDragonTokensStateService
   {
     /// <summary>
     /// Initialize the dragon tokens state by setting up the available positions and
@@ -15,16 +14,7 @@ namespace Agotbg.Server.Game.Services
     /// </summary>
     /// 
     /// <param name="state">The dragon tokens state to initialize.</param>
-    public void Initialize(DragonTokensState state)
-    {
-      state.AvailableDragonTokenPositions.Clear();
-      state.AvailableDragonTokenPositions.Add(2);
-      state.AvailableDragonTokenPositions.Add(4);
-      state.AvailableDragonTokenPositions.Add(6);
-      state.AvailableDragonTokenPositions.Add(8);
-      state.AvailableDragonTokenPositions.Add(10);
-      state.DragonTokensTaken = 0;
-    }
+    public void Initialize(DragonTokensState state);
 
     /// <summary>
     /// Attempts to take a dragon token from the specified position. If the position is
@@ -36,15 +26,7 @@ namespace Agotbg.Server.Game.Services
     /// <param name="position">The position of the dragon token to take.</param>
     ///
     /// <returns>A Result indicating success or failure of the operation.</returns>
-    public Result TakeDragonToken(DragonTokensState state, byte position)
-    {
-      if (!state.AvailableDragonTokenPositions.Contains(position))
-        return Result.FAILURE($"Dragon token at position {position} is not available.");
-
-      state.AvailableDragonTokenPositions.Remove(position);
-      state.DragonTokensTaken++;
-      return Result.SUCCESS();
-    }
+    public Result TakeDragonToken(DragonTokensState state, byte position);
 
     /// <summary>
     /// Prepares the dragon tokens state for the next round by checking if a token is
@@ -56,13 +38,6 @@ namespace Agotbg.Server.Game.Services
     ///
     /// <param name="nextRound">The position of the dragon token for the next
     /// round.</param>
-    public void PrepareForNextRound(DragonTokensState state, byte nextRound)
-    {
-      if (state.AvailableDragonTokenPositions.Contains(nextRound))
-      {
-        state.AvailableDragonTokenPositions.Remove(nextRound);
-        state.DragonTokensTaken++;
-      }
-    }
+    public void PrepareForNextRound(DragonTokensState state, byte nextRound);
   }
 }

@@ -1,3 +1,5 @@
+using Agotbg.Server.Game.Services.Interfaces;
+
 namespace Agotbg.Server.Game.Services.RoundPhase
 {
   /// <summary>
@@ -21,7 +23,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     public static IRoundPhaseManager CreateDefault(
       IGameStateService gameStateService,
       IHouseStateService houseStateService,
-      IVassalAssignmentStateService vassalAssignmentStateService
+      IVassalAssignmentStateService vassalAssignmentStateService,
+      IDragonTokensStateService dragonTokensStateService
     )
     {
       RoundPhaseManager manager = new();
@@ -37,10 +40,10 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       manager.RegisterRoundPhase(new RpInfluenceTrackBiddingPresentation(gameStateService, houseStateService));
       manager.RegisterRoundPhase(new RpVassalAssignment(gameStateService, houseStateService, vassalAssignmentStateService));
       manager.RegisterRoundPhase(new RpPlanning(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpAction(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpAction(gameStateService, houseStateService, dragonTokensStateService));
       manager.RegisterRoundPhase(new RpWinnerTieResolution(gameStateService, houseStateService));
       manager.RegisterRoundPhase(new RpGameOver(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpFireMadeFlesh(gameStateService, houseStateService));
+      manager.RegisterRoundPhase(new RpFireMadeFlesh(gameStateService, houseStateService, dragonTokensStateService));
       return manager;
     }
   }

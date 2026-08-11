@@ -1,7 +1,7 @@
 using Agotbg.Server.Game.Model;
 using Agotbg.Server.Utilities;
 
-namespace Agotbg.Server.Game.Services
+namespace Agotbg.Server.Game.Services.Interfaces
 {
   /// <summary>
   /// Defines a service that provides methods for managing the vassal assignment phase,
