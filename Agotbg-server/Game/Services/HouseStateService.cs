@@ -120,14 +120,6 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <inheritdoc/>
-    public void UndoBidResolution(HouseState house, byte previousBid)
-    {
-      house.PowerTokens += previousBid;
-      house.PowerTokensBid = previousBid;
-      house.HasBidPowerTokens = true;
-    }
-
-    /// <inheritdoc/>
     public void UpdateVictoryPoints(HouseState house, byte newVictoryPoints)
     {
       house.VictoryPoints = Math.Min(newVictoryPoints, GameConstants.NumVictoryPointsToWin);
@@ -145,12 +137,12 @@ namespace Agotbg.Server.Game.Services
       if (from.PowerTokens < amount)
         return Result.FAILURE("Insufficient power tokens to transfer.");
 
-      ushort usAmount = amount;
-      ushort usToPowerTokens = to.PowerTokens;
-      ushort totalPowerTokens = (ushort)(usToPowerTokens + usAmount);
+      byte newPowerTokens = (byte)(to.PowerTokens + amount);
+      if (newPowerTokens > GameConstants.MaximumPowerTokens)
+        return Result.FAILURE("Transfer would exceed the maximum power tokens.");
 
       from.PowerTokens -= amount;
-      to.PowerTokens = (byte)(Math.Min(totalPowerTokens, byte.MaxValue));
+      to.PowerTokens = newPowerTokens;
 
       return Result.SUCCESS();
     }

@@ -108,15 +108,6 @@ namespace Agotbg.Server.Game.Services.Interfaces
     public void ClearSubmittedPowerTokenBid(HouseState house);
 
     /// <summary>
-    /// Undoes the resolution of a bid by restoring the previous bid amount to the
-    /// house's
-    /// </summary>
-    /// 
-    /// <param name="house">The house state for which to undo the bid resolution.</param>
-    /// <param name="previousBid">The previous bid amount to restore.</param>
-    public void UndoBidResolution(HouseState house, byte previousBid);
-
-    /// <summary>
     /// Updates the num of victory points for a house, ensuring that the new value is
     /// within valid bounds.
     /// </summary>
