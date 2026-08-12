@@ -71,6 +71,8 @@ namespace Agotbg.Server.Game.Services
           trackPosition += (byte)betsWithMaxAmount.Count;
         }
       }
+
+      state.HouseBets.Clear();
     }
 
     /// <inheritdoc/>
