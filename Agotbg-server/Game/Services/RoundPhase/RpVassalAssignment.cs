@@ -45,7 +45,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (command.Type == RoundPhaseCommandType.AssignVassalHouses)
         return ExecuteAssignVassals(gameState, command);
       if (command.Type == RoundPhaseCommandType.Resolve)
-        return ExecuteResolve(gameState);
+        return ExecuteResolve(gameState, command);
       else
         return Result.FAILURE($"Invalid command type {command.Type} for round phase {Type}");
     }
@@ -74,10 +74,17 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// </remarks>
     ///
     /// <param name="gameState">The current game state.</param>
+    /// <param name="command">The command to execute.</param>
     ///
     /// <returns>A result indicating success or failure of the operation.</returns>
-    private Result ExecuteResolve(GameState gameState)
+    private Result ExecuteResolve(GameState gameState, IRoundPhaseCommand command)
     {
+      if (command is not RpcResolve resolveCommand)
+        return Result.FAILURE($"Invalid command type {command.Type} for round phase {RoundPhaseType.VassalAssignment}");
+
+      if (!m_gameStateService.IsAdministrator(gameState, resolveCommand.PlayerId))
+        return Result.FAILURE("Only the administrator can resolve this phase.");
+
       VassalAssignmentState vaState = gameState.VassalAssignmentState;
       if (!vaState.IsCompleted)
         return Result.FAILURE($"Cannot resolve vassal assignment phase because it is not completed");

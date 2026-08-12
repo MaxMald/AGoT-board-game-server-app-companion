@@ -57,12 +57,6 @@ namespace Agotbg.Server.Game.Services
       if (!vassal.IsVassal)
         return Result.FAILURE("The house is not a vassal.");
 
-      if (vassal.CommanderHouse != commander.CommanderHouse)
-        return Result.FAILURE("The specified commander does not command this vassal.");
-
-      if (commander.Type == vassal.Type)
-        return Result.FAILURE("A house cannot be vassal to itself.");
-
       if (vassal.CommanderHouse != commander.Type)
         return Result.FAILURE("The specified commander does not command this vassal.");
 

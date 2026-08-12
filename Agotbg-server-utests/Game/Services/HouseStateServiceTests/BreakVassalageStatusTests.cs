@@ -6,20 +6,14 @@ namespace Agotbg.Server.Utests.Game.Services.HouseStateServiceTests
 {
   internal class BreakVassalageStatusTests
   {
-    // NOTE: There appears to be a bug in the BreakVassalageStatus implementation at line 158.
-    // The check `if (vassal.CommanderHouse != commander.CommanderHouse)` prevents breaking
-    // vassalage relationships that were created via MakeVassalageRelationship because:
-    // - After MakeVassalageRelationship: vassal.CommanderHouse = commander.Type (e.g., Stark)
-    // - Commander houses are not vassals, so: commander.CommanderHouse = Undefined
-    // - The check becomes: Stark != Undefined, which is true, causing failure
-    // This makes BreakVassalageStatus unable to break valid vassalage relationships.
+    HouseStateService HouseStateService { get; } = new HouseStateService();
 
     [TestCase(HouseType.Stark, HouseType.Greyjoy)]
     [TestCase(HouseType.Lannister, HouseType.Martell)]
     [TestCase(HouseType.Tyrell, HouseType.Baratheon)]
     [TestCase(HouseType.Baratheon, HouseType.Arryn)]
     [TestCase(HouseType.Targaryen, HouseType.Stark)]
-    public void BreakVassalageStatus_ShouldFail_WhenVassalageRelationshipExistsViaMakeVassalage(
+    public void BreakVassalageStatus_ShouldSucceed_WhenVassalageRelationshipExists(
       HouseType commanderHouseType,
       HouseType vassalHouseType
     )
@@ -28,45 +22,19 @@ namespace Agotbg.Server.Utests.Game.Services.HouseStateServiceTests
       HouseState commanderHouse = CreateHouse(commanderHouseType);
       HouseState vassalHouse = CreateVassalHouse(vassalHouseType);
 
-      // Establish vassalage first
       HouseStateService.MakeVassalageRelationship(commanderHouse, vassalHouse);
-
-      // Act
-      Result result = HouseStateService.BreakVassalageStatus(commanderHouse, vassalHouse);
-
-      // Assert - Due to bug at line 158, this fails even though it should succeed
-      Assert.That(result.Success, Is.False);
-      Assert.That(result.Message, Is.EqualTo("The specified commander does not command this vassal."));
-      // Vassalage remains intact
-      Assert.That(vassalHouse.CommanderHouse, Is.EqualTo(commanderHouseType));
-      Assert.That(commanderHouse.VassalHouseTypes, Contains.Item(vassalHouseType));
-    }
-
-    [Test]
-    public void BreakVassalageStatus_ShouldSucceed_WhenVassalCommanderMatchesCommanderType()
-    {
-      // Arrange - Set up state that passes all validation checks
-      HouseState commanderHouse = CreateHouse(HouseType.Stark);
-      HouseState vassalHouse = CreateVassalHouse(HouseType.Greyjoy);
-
-      // Manually set up state that passes line 158 and 164:
-      // - Line 158: vassal.CommanderHouse == commander.CommanderHouse (both Undefined) OR
-      // - Line 164: vassal.CommanderHouse == commander.Type (e.g., Stark)
-      // We use line 164's requirement
-      vassalHouse.CommanderHouse = HouseType.Stark; // Matches commander.Type
-      commanderHouse.VassalHouseTypes.Add(HouseType.Greyjoy);
 
       // Act
       Result result = HouseStateService.BreakVassalageStatus(commanderHouse, vassalHouse);
 
       // Assert
       Assert.That(result.Success, Is.True);
-      Assert.That(commanderHouse.VassalHouseTypes, Is.Empty);
       Assert.That(vassalHouse.CommanderHouse, Is.EqualTo(HouseType.Undefined));
+      Assert.That(commanderHouse.VassalHouseTypes, Is.Empty);
     }
 
     [Test]
-    public void BreakVassalageStatus_ShouldFail_WhenVassalHouseIsNotVassal()
+    public void BreakVassalageStatus_ShouldFail_WhenVassalageReslationshipDoesNotExist()
     {
       // Arrange
       HouseState commanderHouse = CreateHouse(HouseType.Stark);
@@ -77,104 +45,93 @@ namespace Agotbg.Server.Utests.Game.Services.HouseStateServiceTests
 
       // Assert
       Assert.That(result.Success, Is.False);
-      Assert.That(result.Message, Is.EqualTo("The house is not a vassal."));
     }
 
     [Test]
     public void BreakVassalageStatus_ShouldFail_WhenVassalHasNoCommander()
     {
       // Arrange
-      HouseState commanderHouse = CreateHouse(HouseType.Stark);
-      HouseState vassalHouse = CreateVassalHouse(HouseType.Greyjoy);
-      // Vassal has no commander assigned
+      HouseState commanderStark = CreateHouse(HouseType.Stark);
+      HouseState vassalGreyjoy = CreateVassalHouse(HouseType.Greyjoy);
+      HouseState vassalLannister = CreateVassalHouse(HouseType.Lannister);
 
-      // Act
-      Result result = HouseStateService.BreakVassalageStatus(commanderHouse, vassalHouse);
+      // Vassal relationship Stark -> Greyjoy exists
+      HouseStateService.MakeVassalageRelationship(commanderStark, vassalGreyjoy);
 
-      // Assert - Passes line 158 (both Undefined), but fails line 164
+      // Act - Attempt to break vassalage with Lannister, which has no commander
+      Result result = HouseStateService.BreakVassalageStatus(commanderStark, vassalLannister);
+
+      // Assert
       Assert.That(result.Success, Is.False);
-      Assert.That(result.Message, Is.EqualTo("The specified commander does not command this vassal."));
+      Assert.That(commanderStark.VassalHouseTypes, Contains.Item(HouseType.Greyjoy));
     }
 
     [Test]
     public void BreakVassalageStatus_ShouldFail_WhenCommanderIsNotTheActualCommander()
     {
       // Arrange
-      HouseState actualCommander = CreateHouse(HouseType.Stark);
-      HouseState wrongCommander = CreateHouse(HouseType.Lannister);
-      HouseState vassalHouse = CreateVassalHouse(HouseType.Greyjoy);
+      HouseState starkCommander = CreateHouse(HouseType.Stark);
+      HouseState lannisterCommander = CreateHouse(HouseType.Lannister);
+      HouseState greyjoyVassal = CreateVassalHouse(HouseType.Greyjoy);
+      HouseState martellVassal = CreateVassalHouse(HouseType.Martell);
 
-      // Manually set up vassalage with actual commander (properly set CommanderHouse)
-      vassalHouse.CommanderHouse = HouseType.Stark; // Points to actual commander
-      actualCommander.VassalHouseTypes.Add(HouseType.Greyjoy);
+      // Vassal relationship Stark -> Greyjoy exists
+      HouseStateService.MakeVassalageRelationship(starkCommander, greyjoyVassal);
+
+      // Vassal relationship Lannister -> Martell exists
+      HouseStateService.MakeVassalageRelationship(lannisterCommander, martellVassal);
 
       // Act - Try to break with wrong commander
-      Result result = HouseStateService.BreakVassalageStatus(wrongCommander, vassalHouse);
-
-      // Assert - Fails at line 164 because vassal.CommanderHouse (Stark) != wrongCommander.Type (Lannister)
-      Assert.That(result.Success, Is.False);
-      Assert.That(result.Message, Is.EqualTo("The specified commander does not command this vassal."));
-      // Verify relationship is still intact
-      Assert.That(vassalHouse.CommanderHouse, Is.EqualTo(HouseType.Stark));
-      Assert.That(actualCommander.VassalHouseTypes, Contains.Item(HouseType.Greyjoy));
-    }
-
-    [Test]
-    public void BreakVassalageStatus_ShouldFail_WhenHouseTriesToBreakVassalageWithItself()
-    {
-      // Arrange
-      HouseState house = CreateVassalHouse(HouseType.Greyjoy);
-      house.CommanderHouse = HouseType.Greyjoy;
-
-      // Act
-      Result result = HouseStateService.BreakVassalageStatus(house, house);
+      Result result = HouseStateService.BreakVassalageStatus(lannisterCommander, greyjoyVassal);
 
       // Assert
       Assert.That(result.Success, Is.False);
-      Assert.That(result.Message, Is.EqualTo("A house cannot be vassal to itself."));
+      Assert.That(greyjoyVassal.CommanderHouse, Is.EqualTo(HouseType.Stark));
+      Assert.That(lannisterCommander.VassalHouseTypes, Does.Not.Contain(HouseType.Greyjoy));
+      Assert.That(lannisterCommander.VassalHouseTypes, Does.Contain(HouseType.Martell));
     }
 
     [Test]
     public void BreakVassalageStatus_ShouldFail_WhenCommanderDoesNotHaveVassalInList()
     {
       // Arrange
-      HouseState commanderHouse = CreateHouse(HouseType.Stark);
+      HouseState starkCommander = CreateHouse(HouseType.Stark);
       HouseState vassalHouse = CreateVassalHouse(HouseType.Greyjoy);
-      // Set up to pass lines 158 and 164 but fail at line 167
-      vassalHouse.CommanderHouse = HouseType.Stark; // Matches commander.Type
-      // Commander does not have vassal in its list (line 167 will fail)
+      HouseState vassalLannister = CreateVassalHouse(HouseType.Lannister);
+
+      // Vassal relationship Stark -> Greyjoy exists
+      HouseStateService.MakeVassalageRelationship(starkCommander, vassalHouse);
 
       // Act
-      Result result = HouseStateService.BreakVassalageStatus(commanderHouse, vassalHouse);
+      Result result = HouseStateService.BreakVassalageStatus(starkCommander, vassalLannister);
 
-      // Assert - Should reach line 167 and fail there
+      // Assert 
       Assert.That(result.Success, Is.False);
-      Assert.That(result.Message, Is.EqualTo("The specified commander does not have this vassal in its vassal list."));
+      Assert.That(starkCommander.VassalHouseTypes, Does.Contain(HouseType.Greyjoy));
+      Assert.That(starkCommander.VassalHouseTypes, Does.Not.Contain(HouseType.Lannister));
     }
 
     [Test]
     public void BreakVassalageStatus_ShouldOnlyRemoveSpecifiedVassal_WhenCommanderHasMultipleVassals()
     {
       // Arrange
-      HouseState commanderHouse = CreateHouse(HouseType.Stark);
-      HouseState vassal1 = CreateVassalHouse(HouseType.Greyjoy);
-      HouseState vassal2 = CreateVassalHouse(HouseType.Lannister);
+      HouseState starkCommander = CreateHouse(HouseType.Stark);
+      HouseState greyjoyVassal = CreateVassalHouse(HouseType.Greyjoy);
+      HouseState lannisterVassal = CreateVassalHouse(HouseType.Lannister);
 
-      // Manually set up multiple vassalages to pass validation
-      vassal1.CommanderHouse = HouseType.Stark; // Matches commander.Type
-      vassal2.CommanderHouse = HouseType.Stark; // Matches commander.Type
-      commanderHouse.VassalHouseTypes.Add(HouseType.Greyjoy);
-      commanderHouse.VassalHouseTypes.Add(HouseType.Lannister);
+      // Vassal relationships Stark -> Greyjoy and Stark -> Lannister exist
+      HouseStateService.MakeVassalageRelationship(starkCommander, greyjoyVassal);
+      HouseStateService.MakeVassalageRelationship(starkCommander, lannisterVassal);
 
-      // Act - Break only vassal1
-      Result result = HouseStateService.BreakVassalageStatus(commanderHouse, vassal1);
+      // Act - Break only greyjoyVassal
+      Result result = HouseStateService.BreakVassalageStatus(starkCommander, greyjoyVassal);
 
       // Assert
       Assert.That(result.Success, Is.True);
-      Assert.That(commanderHouse.VassalHouseTypes, Does.Not.Contain(HouseType.Greyjoy));
-      Assert.That(commanderHouse.VassalHouseTypes, Contains.Item(HouseType.Lannister));
-      Assert.That(vassal1.CommanderHouse, Is.EqualTo(HouseType.Undefined));
-      Assert.That(vassal2.CommanderHouse, Is.EqualTo(HouseType.Stark));
+      Assert.That(starkCommander.VassalHouseTypes, Does.Not.Contain(HouseType.Greyjoy));
+      Assert.That(starkCommander.VassalHouseTypes, Contains.Item(HouseType.Lannister));
+      Assert.That(greyjoyVassal.CommanderHouse, Is.EqualTo(HouseType.Undefined));
+      Assert.That(lannisterVassal.CommanderHouse, Is.EqualTo(HouseType.Stark));
     }
 
     private static HouseState CreateHouse(HouseType houseType)

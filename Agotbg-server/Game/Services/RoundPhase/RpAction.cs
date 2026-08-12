@@ -75,7 +75,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       switch (command.Type)
       {
         case RoundPhaseCommandType.Resolve:
-          return ResolveActionPhase(gameState);
+          return ExecuteResolve(gameState, command);
         case RoundPhaseCommandType.TransferPowerTokens:
           return ExecuteTransferPowerTokens(
             gameState,
@@ -139,8 +139,17 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// </summary>
     private IInfluenceTrackService m_influenceTrackService;
 
-    private Result ResolveActionPhase(GameState gameState)
+    private Result ExecuteResolve(
+      GameState gameState,
+      IRoundPhaseCommand roundPhaseCommand
+    )
     {
+      if (roundPhaseCommand is not RpcResolve resolveCommand)
+        return Result.FAILURE($"Invalid command type {roundPhaseCommand.Type} for round phase {Type}");
+
+      if (!m_gameStateService.IsAdministrator(gameState, resolveCommand.PlayerId))
+        return Result.FAILURE("Only the administrator can resolve the action phase.");
+
       List<PlayerState> playerStates = gameState.Players.Values.ToList();
 
       if (m_gameStateService.IsLastRound(gameState))

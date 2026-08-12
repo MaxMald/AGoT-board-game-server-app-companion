@@ -65,7 +65,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       switch (command.Type)
       {
         case RoundPhaseCommandType.Resolve:
-          return ExecuteResolve(gameState);
+          return ExecuteResolve(gameState, command);
         case RoundPhaseCommandType.ResolveAndMoveTo:
           return ExecuteResolveAndMoveTo(gameState, command);
         case RoundPhaseCommandType.TransferPowerTokens:
@@ -190,8 +190,14 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return Result.SUCCESS();
     }
 
-    private Result ExecuteResolve(GameState gameState)
+    private Result ExecuteResolve(GameState gameState, IRoundPhaseCommand command)
     {
+      if (command is not RpcResolve resolveCommand)
+        return Result.FAILURE("Invalid command type for resolving the Westeros phase.");
+
+      if (!m_gameStateService.IsAdministrator(gameState, resolveCommand.PlayerId))
+        return Result.FAILURE("Only the administrator can resolve the Westeros phase.");
+
       if (gameState.Vassals.Count == 0)
       {
         gameState.CurrentPhase = RoundPhaseType.Planning;

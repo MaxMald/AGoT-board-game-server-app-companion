@@ -70,33 +70,17 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       switch (command.Type)
       {
         case RoundPhaseCommandType.Resolve:
-          gameState.CurrentPhase = RoundPhaseType.Action; // Transition
-          return Result.SUCCESS();
+          return ExecuteResolve(gameState, command);
         case RoundPhaseCommandType.TransferPowerTokens:
-          return ExecuteTransferPowerTokens(
-            gameState,
-            command
-          );
+          return ExecuteTransferPowerTokens(gameState, command);
         case RoundPhaseCommandType.ModifyPowerTokens:
-          return ExecuteModifyPowerTokens(
-            gameState,
-            command
-          );
+          return ExecuteModifyPowerTokens(gameState, command);
         case RoundPhaseCommandType.UpdateSupplyLevel:
-          return ExecuteUpdateSupplyLevel(
-            gameState,
-            command
-          );
+          return ExecuteUpdateSupplyLevel(gameState, command);
         case RoundPhaseCommandType.UpdateVictoryPoints:
-          return ExecuteUpdateVictoryPoints(
-            gameState,
-            command
-          );
+          return ExecuteUpdateVictoryPoints(gameState, command);
         case RoundPhaseCommandType.UpdateIronBankLoanInterest:
-          return ExecuteUpdateIronBankLoanInterest(
-            gameState,
-            command
-          );
+          return ExecuteUpdateIronBankLoanInterest(gameState, command);
       }
       return Result.FAILURE($"Invalid command type {command.Type} for round phase {Type}");
     }
@@ -115,6 +99,18 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           return true;
       }
       return false;
+    }
+
+    private Result ExecuteResolve(GameState gameState, IRoundPhaseCommand roundPhaseCommand)
+    {
+      if (roundPhaseCommand is not RpcResolve resolveCommand)
+        return Result.FAILURE($"Invalid command type {roundPhaseCommand.Type} for round phase {Type}");
+
+      if (!m_gameStateService.IsAdministrator(gameState, resolveCommand.PlayerId))
+        return Result.FAILURE("Only the administrator can resolve the planning phase.");
+
+      gameState.CurrentPhase = RoundPhaseType.Action;
+      return Result.SUCCESS();
     }
   }
 }

@@ -51,8 +51,20 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return ExecuteDerived(gameState, command);
     }
 
+    /// <summary>
+    /// Reference to the game state service.
+    /// </summary>
     protected IGameStateService m_gameStateService;
+
+    /// <summary>
+    /// Reference to the house state service.
+    /// </summary>
     protected IHouseStateService m_houseStateService;
+
+    /// <summary>
+    /// Multi-purpose list to hold house states for various operations, improving
+    /// performance.
+    /// </summary>
     protected List<HouseState> m_houseStates = [];
 
     /// <summary>

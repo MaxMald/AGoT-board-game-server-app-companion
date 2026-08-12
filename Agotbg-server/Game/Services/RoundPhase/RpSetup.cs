@@ -46,6 +46,12 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IRoundPhaseCommand command
     )
     {
+      if (command is not RpcResolve resolveCommand)
+        return Result.FAILURE("Invalid command type for this phase.");
+
+      if (!m_gameStateService.IsAdministrator(gameState, resolveCommand.PlayerId))
+        return Result.FAILURE("Only the administrator can resolve this phase.");
+
       if (gameState.Vassals.Count == 0)
       {
         gameState.CurrentPhase = RoundPhaseType.Planning;

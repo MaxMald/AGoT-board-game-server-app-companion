@@ -8,5 +8,21 @@ namespace Agotbg.Server.Game.Services.RoundPhase.Command
   {
     /// <inheritdoc/>
     public RoundPhaseCommandType Type => RoundPhaseCommandType.Resolve;
+
+    /// <summary>
+    /// The ID of the player who issued the resolve command.
+    /// </summary>
+    public string PlayerId { get; }
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    ///
+    /// <param name="playerId">The ID of the player who issued the resolve
+    /// command.</param>
+    public RpcResolve(string playerId)
+    {
+      PlayerId = playerId;
+    }
   }
 }

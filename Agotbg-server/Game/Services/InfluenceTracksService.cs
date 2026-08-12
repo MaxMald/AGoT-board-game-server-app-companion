@@ -27,9 +27,16 @@ namespace Agotbg.Server.Game.Services
       byte newPosition
     )
     {
+      if (houses.Count <= 0)
+        throw new ArgumentException("The list of houses is empty. Cannot move house position.");
+
       HouseState? houseToMove = houses.FirstOrDefault(h => h.Type == houseType);
       if (houseToMove == null)
-        throw new Exception($"House {houseType} not found in the provided list.");
+        throw new ArgumentException($"House {houseType} not found in the provided list.");
+
+      int maxPosition = houses.Count;
+      if (newPosition > maxPosition)
+        newPosition = (byte)maxPosition;
 
       SortHousesByInfluenceTrackPosition(houses, trackType);
       houses.Remove(houseToMove);
