@@ -13,12 +13,12 @@ namespace Agotbg.Server.Game.Services
     /// <summary>
     /// Reference to the game state service.
     /// </summary>
-    IGameStateService m_gameStateService;
+    IGameStateService GameStateService { get; }
 
     /// <inheritdoc/>
     public VassalAssignmentStateServices(IGameStateService gameStateService)
     {
-      m_gameStateService = gameStateService;
+      GameStateService = gameStateService;
     }
 
     /// <inheritdoc/>
@@ -31,7 +31,10 @@ namespace Agotbg.Server.Game.Services
         vaState.AvailableVassalHouses.Add(vassalHouse.Type);
 
       if (vaState.AvailableVassalHouses.Count == 0)
+      {
+        vaState.IsCompleted = true;
         return;
+      }
 
       int numOrderTokenSets = Math.Min(
         vaState.AvailableVassalHouses.Count,
@@ -39,11 +42,12 @@ namespace Agotbg.Server.Game.Services
       );
 
       List<PlayerState> playersInTurnOrder
-        = m_gameStateService.GetPlayersInTurnOrder(gameState);
+        = GameStateService.GetPlayersInTurnOrder(gameState);
 
       if (playersInTurnOrder.Count == 0)
       {
         vaState.AvailableVassalHouses.Clear();
+        vaState.IsCompleted = true;
         return;
       }
 
@@ -54,20 +58,19 @@ namespace Agotbg.Server.Game.Services
         if (i < lastPlayerIndex)
           nextPlayerId = playersInTurnOrder[i + 1].PlayerId;
 
-        VassalOrderTokenSetType orderTokenSet = VassalOrderTokenSetType.None;
-        if (numOrderTokenSets > 0)
-        {
-          numOrderTokenSets--;
-          orderTokenSet = (VassalOrderTokenSetType)(numOrderTokenSets);
-        }
-
         VassalAssignmentPlayer vaPlayer = new VassalAssignmentPlayer()
         {
           PlayerId = playersInTurnOrder[i].PlayerId,
           NextPlayerId = nextPlayerId,
-          PossesedOrderTokenSets = new List<VassalOrderTokenSetType>() { orderTokenSet },
           SelectedVassalHouses = []
         };
+
+        if (numOrderTokenSets > 0)
+        {
+          numOrderTokenSets--;
+          VassalOrderTokenSetType orderTokenSet = (VassalOrderTokenSetType)(numOrderTokenSets);
+          vaPlayer.PossesedOrderTokenSets.Add(orderTokenSet);
+        }
 
         vaState.Players.Add(vaPlayer);
       }
@@ -139,6 +142,9 @@ namespace Agotbg.Server.Game.Services
     /// <inheritdoc/>
     public Result MoveToNextPlayer(VassalAssignmentState vaState)
     {
+      if (vaState.IsCompleted)
+        return Result.FAILURE("Vassal Assignment is already completed.");
+
       if (string.IsNullOrEmpty(vaState.CurrentPlayerID))
         return Result.FAILURE("Current Player ID is null or empty.");
 
@@ -159,7 +165,10 @@ namespace Agotbg.Server.Game.Services
         return Result.FAILURE("Next Player ID does not correspond to a Vassal Assignment Player.");
 
       if (currentPlayer.PossesedOrderTokenSets.Count > 0)
+      {
         nextPlayer.PossesedOrderTokenSets.AddRange(currentPlayer.PossesedOrderTokenSets);
+        currentPlayer.PossesedOrderTokenSets.Clear();
+      }
 
       if (nextPlayer.PossesedOrderTokenSets.Count == 0)
       {
@@ -215,9 +224,7 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <inheritdoc/>
-    public void AutomaticallyResolveOrderTokenSetsForCurrentPlayer(
-      VassalAssignmentState vaState
-    )
+    public void AutomaticallyAssignVassalsForCurrentPlayer(VassalAssignmentState vaState)
     {
       if (string.IsNullOrEmpty(vaState.CurrentPlayerID))
         return;
@@ -244,6 +251,12 @@ namespace Agotbg.Server.Game.Services
         };
 
         currentPlayer.SelectedVassalHouses.Add(vHouseSelectionDescriptor);
+      }
+
+      if (vaState.AvailableVassalHouses.Count == 0)
+      {
+        vaState.CurrentPlayerID = string.Empty;
+        vaState.IsCompleted = true;
       }
     }
 

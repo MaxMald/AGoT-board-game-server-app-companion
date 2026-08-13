@@ -118,7 +118,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       VassalAssignmentState vaState = gameState.VassalAssignmentState;
       if (m_vassalAssignmentStateService.IsLastPlayer(vaState, vaState.CurrentPlayerID))
       {
-        m_vassalAssignmentStateService.AutomaticallyResolveOrderTokenSetsForCurrentPlayer(
+        m_vassalAssignmentStateService.AutomaticallyAssignVassalsForCurrentPlayer(
           vaState
         );
       }

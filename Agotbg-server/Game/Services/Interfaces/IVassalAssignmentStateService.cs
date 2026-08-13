@@ -22,9 +22,13 @@ namespace Agotbg.Server.Game.Services.Interfaces
 
     /// <summary>
     /// Assigns vassal houses to the current player, consuming one of their order token
-    /// sets for each vassal house. Validates that the player is the current player, has
-    /// order token sets available, and the vassal houses are available for assignment.
+    /// sets for each vassal house.
     /// </summary>
+    ///
+    /// <remarks>
+    /// The state will be marked as complete if there are no more available vassal houses
+    /// after the assignment.
+    /// </remarks>
     ///
     /// <param name="vaState">The vassal assignment state to update.</param>
     /// <param name="playerId">The ID of the player requesting the assignment.</param>
@@ -38,9 +42,14 @@ namespace Agotbg.Server.Game.Services.Interfaces
     );
 
     /// <summary>
-    /// Moves the current player to the next player in the vassal assignment state. If
-    /// there is no next player, the current player ID is set to an empty string.
+    /// Moves the current player to the next player in the vassal assignment state.
     /// </summary>
+    ///
+    /// <remarks>
+    /// The state will be marked as complete if the current player is the last and there
+    /// are no more players to move to, or if the next player has no order token sets
+    /// available for assignment.
+    /// </remarks>
     ///
     /// <param name="vaState">The Vassal Assignment State.</param>
     ///
@@ -108,7 +117,7 @@ namespace Agotbg.Server.Game.Services.Interfaces
     /// </summary>
     /// 
     /// <param name="vaState">The Vassal Assignment State.</param>
-    public void AutomaticallyResolveOrderTokenSetsForCurrentPlayer(
+    public void AutomaticallyAssignVassalsForCurrentPlayer(
       VassalAssignmentState vaState
     );
 
