@@ -22,6 +22,12 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <inheritdoc/>
+    public void Initialize(VassalAssignmentState vaState)
+    {
+      Clear(vaState);
+    }
+
+    /// <inheritdoc/>
     public void Prepare(GameState gameState)
     {
       VassalAssignmentState vaState = gameState.VassalAssignmentState;

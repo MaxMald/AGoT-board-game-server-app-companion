@@ -9,12 +9,7 @@ namespace Agotbg.Server.Game.Services
   /// </summary>
   public class DragonTokensStateService : IDragonTokensStateService
   {
-    /// <summary>
-    /// Initialize the dragon tokens state by setting up the available positions and
-    /// resetting the count of taken tokens.
-    /// </summary>
-    /// 
-    /// <param name="state">The dragon tokens state to initialize.</param>
+    /// <inheritdoc/>
     public void Initialize(DragonTokensState state)
     {
       state.AvailableDragonTokenPositions.Clear();
@@ -26,16 +21,7 @@ namespace Agotbg.Server.Game.Services
       state.DragonTokensTaken = 0;
     }
 
-    /// <summary>
-    /// Attempts to take a dragon token from the specified position. If the position is
-    /// available, it removes the token from the available positions and increments the
-    /// count of taken tokens.
-    /// </summary>
-    ///
-    /// <param name="state">The dragon tokens state to update.</param>
-    /// <param name="position">The position of the dragon token to take.</param>
-    ///
-    /// <returns>A Result indicating success or failure of the operation.</returns>
+    /// <inheritdoc/>
     public Result TakeDragonToken(DragonTokensState state, byte position)
     {
       if (!state.AvailableDragonTokenPositions.Contains(position))
@@ -46,16 +32,7 @@ namespace Agotbg.Server.Game.Services
       return Result.SUCCESS();
     }
 
-    /// <summary>
-    /// Prepares the dragon tokens state for the next round by checking if a token is
-    /// available at the specified round position. If available, it removes the token and
-    /// increments the count of taken tokens.
-    /// </summary>
-    ///
-    /// <param name="state">The dragon tokens state to update.</param>
-    ///
-    /// <param name="nextRound">The position of the dragon token for the next
-    /// round.</param>
+    /// <inheritdoc/>
     public void PrepareForNextRound(DragonTokensState state, byte nextRound)
     {
       if (state.AvailableDragonTokenPositions.Contains(nextRound))

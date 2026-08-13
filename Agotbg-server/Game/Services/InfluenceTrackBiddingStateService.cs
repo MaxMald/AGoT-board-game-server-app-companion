@@ -11,6 +11,12 @@ namespace Agotbg.Server.Game.Services
   public class InfluenceTrackBiddingStateService : IInfluenceTrackBiddingStateService
   {
     /// <inheritdoc/>
+    public void Initialize(InfluenceTrackBiddingState state)
+    {
+      Clear(state);
+    }
+
+    /// <inheritdoc/>
     public void Prepare(
       InfluenceTrackBiddingState state,
       InfluenceTrackType trackType

@@ -9,6 +9,13 @@ namespace Agotbg.Server.Game.Services.Interfaces
   public interface IWildlingsStateService
   {
     /// <summary>
+    /// Initialize the wildlings state for a new game.
+    /// </summary>
+    /// 
+    /// <param name="wildlingsState">The WildlingsState to initialize.</param>
+    public void Initialize(WildlingsState wildlingsState);
+
+    /// <summary>
     /// Prepares the WildlingsState for bidding on a "Wildlings Attack" phase.
     /// </summary>
     ///

@@ -7,6 +7,17 @@ namespace Agotbg.Server.Game.Services
   public class WildlingsStateService : IWildlingsStateService
   {
     /// <inheritdoc/>
+    public void Initialize(WildlingsState wildlingsState)
+    {
+      wildlingsState.Strength = GameConstants.WildingStartingStrength;
+      wildlingsState.StrengthWhenBiddingStarted = 0;
+      wildlingsState.TotalBetAmount = 0;
+      wildlingsState.HouseBets.Clear();
+      wildlingsState.NightWatchWins = false;
+      wildlingsState.IsPreemptiveRaid = false;
+    }
+
+    /// <inheritdoc/>
     public void PrepareForBidding(WildlingsState state, bool isPreemptiveRaid)
     {
       if (isPreemptiveRaid)

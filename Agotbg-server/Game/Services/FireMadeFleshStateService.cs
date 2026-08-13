@@ -9,6 +9,14 @@ namespace Agotbg.Server.Game.Services
   /// </summary>
   public class FireMadeFleshStateService : IFireMadeFleshStateService
   {
+    /// <inheritdoc/>
+    public void Initialize(FireMadeFleshState state)
+    {
+      state.PositionOfDesiredDragonToken = 0;
+      state.PlayersWantsDragonToken = false;
+      state.IsCompleted = false;
+    }
+
     /// <inheritdoc />
     public void Prepare(FireMadeFleshState state)
     {

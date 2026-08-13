@@ -8,6 +8,14 @@ namespace Agotbg.Server.Game.Services.Interfaces
   public interface IFireMadeFleshStateService
   {
     /// <summary>
+    /// Initialize the "Fire Made Flesh" state for a new game.
+    /// </summary>
+    ///
+    /// <param name="state">The state of the "Fire Made Flesh" to
+    /// initialize.</param>
+    public void Initialize(FireMadeFleshState state);
+
+    /// <summary>
     /// Prepares the "Fire Made Flesh" state for a new "Fire Made Flesh" game phase.
     /// </summary>
     /// 

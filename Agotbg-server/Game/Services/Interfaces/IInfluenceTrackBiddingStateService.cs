@@ -9,6 +9,13 @@ namespace Agotbg.Server.Game.Services.Interfaces
   public interface IInfluenceTrackBiddingStateService
   {
     /// <summary>
+    /// Initialize the influence track bidding state for a new game.
+    /// </summary>
+    /// 
+    /// <param name="state">The influence track bidding state to initialize.</param>
+    public void Initialize(InfluenceTrackBiddingState state);
+
+    /// <summary>
     /// Prepares the influence track bidding state for the specified track type.
     /// </summary>
     /// 

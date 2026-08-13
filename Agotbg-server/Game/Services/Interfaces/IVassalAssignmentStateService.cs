@@ -11,6 +11,13 @@ namespace Agotbg.Server.Game.Services.Interfaces
   public interface IVassalAssignmentStateService
   {
     /// <summary>
+    /// Initialize the vassal assignment state for a new game.
+    /// </summary>
+    ///
+    /// <param name="vaState">The Vassal Assignment State to initialize.</param>
+    public void Initialize(VassalAssignmentState vaState);
+
+    /// <summary>
     /// Prepares the vassal assignment state for a new vassal selection phase. Clears
     /// previous state, populates available vassals, distributes order token sets to
     /// players based on turn order, and sets the first player as current.
