@@ -195,7 +195,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (command is not RpcResolve resolveCommand)
         return Result.FAILURE("Invalid command type for resolving the Westeros phase.");
 
-      if (!m_gameStateService.IsAdministrator(gameState, resolveCommand.PlayerId))
+      if (!m_gameStateService.IsHoster(gameState, resolveCommand.PlayerId))
         return Result.FAILURE("Only the administrator can resolve the Westeros phase.");
 
       if (gameState.Vassals.Count == 0)

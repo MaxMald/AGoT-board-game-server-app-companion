@@ -82,7 +82,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       if (command is not RpcResolve resolveCommand)
         return Result.FAILURE($"Invalid command type {command.Type} for round phase {RoundPhaseType.VassalAssignment}");
 
-      if (!m_gameStateService.IsAdministrator(gameState, resolveCommand.PlayerId))
+      if (!m_gameStateService.IsHoster(gameState, resolveCommand.PlayerId))
         return Result.FAILURE("Only the administrator can resolve this phase.");
 
       VassalAssignmentState vaState = gameState.VassalAssignmentState;

@@ -185,6 +185,7 @@ namespace Agotbg.Server.Game.Services
 
       gameState.CurrentPhase = RoundPhaseType.Setup;
       gameState.CurrentRound = GameConstants.StartingRoundNumber;
+      gameState.HosterPlayerId = roomState.HosterPlayerId;
       roomState.GameState = gameState;
       return Result.SUCCESS();
     }

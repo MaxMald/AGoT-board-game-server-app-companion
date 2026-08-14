@@ -92,10 +92,9 @@ namespace Agotbg.Server.Game.Services
     }
 
     /// <inheritdoc/>
-    public bool IsAdministrator(GameState gameState, string playerId)
+    public bool IsHoster(GameState gameState, string playerId)
     {
-      // TODO
-      return false;
+      return gameState.HosterPlayerId == playerId;
     }
 
     /// <inheritdoc/>

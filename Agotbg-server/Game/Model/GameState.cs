@@ -7,6 +7,11 @@ namespace Agotbg.Server.Game.Model
   public class GameState
   {
     /// <summary>
+    /// The id of the hoster player.
+    /// </summary>
+    public string HosterPlayerId { get; set; } = string.Empty;
+
+    /// <summary>
     /// Dictionary of all players in the game, keyed by player ID.
     /// </summary>
     public Dictionary<string, PlayerState> Players { get; set; } = [];

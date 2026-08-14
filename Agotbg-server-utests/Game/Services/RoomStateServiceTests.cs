@@ -637,6 +637,7 @@ namespace Agotbg.Server.Utests.Game.Services
       Assert.That(state.GameState.CurrentPhase, Is.EqualTo(RoundPhaseType.Setup));
       Assert.That(state.GameState.Winner, Is.Null);
       Assert.That(state.GameState.IsGameOver, Is.False);
+      Assert.That(state.GameState.HosterPlayerId, Is.EqualTo(state.HosterPlayerId));
     }
 
     [Test]

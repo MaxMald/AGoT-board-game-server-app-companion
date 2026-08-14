@@ -120,8 +120,8 @@ namespace Agotbg.Server.Game.Services.Interfaces
     /// <param name="gameState">The current game state.</param>
     /// <param name="playerId">The ID of the player to check.</param>
     ///
-    /// <returns>True if the player is the administrator; otherwise, false.</returns>
-    public bool IsAdministrator(GameState gameState, string playerId);
+    /// <returns>True if the player is the hoster; otherwise, false.</returns>
+    public bool IsHoster(GameState gameState, string playerId);
 
     /// <summary>
     /// Checks the win condition based on the current game state and updates the game
