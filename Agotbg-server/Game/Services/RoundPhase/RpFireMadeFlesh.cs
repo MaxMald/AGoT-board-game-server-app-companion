@@ -82,7 +82,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="command">The command to execute.</param>
     /// 
     /// <returns>The result of the command execution.</returns>
-    private static Result ExecuteResolveFireMadeFlesh(
+    private Result ExecuteResolveFireMadeFlesh(
       GameState gameState,
       IRoundPhaseCommand command
      )
@@ -97,17 +97,20 @@ namespace Agotbg.Server.Game.Services.RoundPhase
                                                     .FirstOrDefault(p => p.Value.HouseState.Type == HouseType.Targaryen)
                                                     .Value;
 
+      FireMadeFleshState fmfState = gameState.FireMadeFleshState;
       if (targaryenPlayerState == null)
       {
+        fmfState.IsCompleted = true;
         gameState.CurrentPhase = RoundPhaseType.Westeros;
         return Result.FAILURE("No Targaryen player found. Game phase has returned to Westeros.");
       }
 
-      if (resolveFmf.PlayerId != targaryenPlayerState.PlayerId)
+      bool isValidPlayerId = targaryenPlayerState.PlayerId == resolveFmf.PlayerId;
+
+      if (!isValidPlayerId)
         return Result.FAILURE($"Invalid player ID: {resolveFmf.PlayerId}. Only the Targaryen player can resolve Fire Made Flesh.");
 
       DragonTokensState dragonTokensState = gameState.DragonTokensState;
-      FireMadeFleshState fmfState = gameState.FireMadeFleshState;
 
       if (resolveFmf.PlayerWantsDragonToken)
       {
@@ -139,15 +142,25 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <returns>The result of the command execution.</returns>
     private Result ExecuteResolve(GameState gameState, IRoundPhaseCommand command)
     {
+      if (command is not RpcResolve resolveCommand)
+        return Result.FAILURE($"Invalid command type: {command.Type}");
+
       PlayerState? targaryenPlayerState = gameState.Players
                                                    .FirstOrDefault(p => p.Value.HouseState.Type == HouseType.Targaryen)
                                                    .Value;
 
       if (targaryenPlayerState == null)
       {
+        gameState.FireMadeFleshState.IsCompleted = true;
         gameState.CurrentPhase = RoundPhaseType.Westeros;
         return Result.FAILURE("No Targaryen player found. Game phase has returned to Westeros.");
       }
+
+      bool isValidPlayerId = targaryenPlayerState.PlayerId == resolveCommand.PlayerId
+        || m_gameStateService.IsHoster(gameState, resolveCommand.PlayerId);
+
+      if (!isValidPlayerId)
+        return Result.FAILURE($"Invalid player ID: {resolveCommand.PlayerId}. Only the Targaryen player can resolve Fire Made Flesh.");
 
       FireMadeFleshState fmfState = gameState.FireMadeFleshState;
       if (!fmfState.IsCompleted)
