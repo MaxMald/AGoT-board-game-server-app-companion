@@ -6,11 +6,12 @@ using Agotbg.Server.Utilities;
 namespace Agotbg.Server.Game.Services.RoundPhase
 {
   /// <summary>
-  /// <para>
   /// The Action phase is the final phase of a round in the board game (not the app
   /// companion). During this phase, players resolves their orders in the game board.
+  /// </summary>
+  ///
+  /// <remarks>
   /// Many game state operations can be performed during this phase, such as:
-  /// </para>
   /// <list type="bullet">
   ///   <item><see cref="RoundPhaseCommandType.Resolve"/></item>
   ///   <item><see cref="RoundPhaseCommandType.TransferPowerTokens"/></item>
@@ -42,7 +43,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   ///   <item><see cref="RoundPhaseType.WinnerTieResolution"/></item>
   ///   <item><see cref="RoundPhaseType.GameOver"/></item>
   /// </list>
-  /// </summary>
+  /// </remarks>
   public class RpAction : ARoundPhase
   {
     /// <inheritdoc/>
