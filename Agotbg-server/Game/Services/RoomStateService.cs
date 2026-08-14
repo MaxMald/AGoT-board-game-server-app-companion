@@ -27,13 +27,17 @@ namespace Agotbg.Server.Game.Services
     /// dragon tokens state.</param>
     /// <param name="fireMadeFleshStateService">The service responsible for managing the
     /// Fire Made Flesh state.</param>
+    /// <param name="ironBankInterestPaymentStateService">The service responsible for
+    /// managing the Iron Bank loan interest payment state.</param>
     public RoomStateService(
       IInfluenceTrackService influenceTrackService,
       IWildlingsStateService wildlingsStateService,
       IVassalAssignmentStateService vassalAssignmentStateService,
       IInfluenceTrackBiddingStateService influenceTrackBiddingStateService,
       IDragonTokensStateService dragonTokensStateService,
-      IFireMadeFleshStateService fireMadeFleshStateService)
+      IFireMadeFleshStateService fireMadeFleshStateService,
+      IIronBankInterestPaymentStateService ironBankInterestPaymentStateService
+    )
     {
       InfluenceTrackService = influenceTrackService;
       WildlingsStateService = wildlingsStateService;
@@ -41,6 +45,7 @@ namespace Agotbg.Server.Game.Services
       InfluenceTrackBiddingStateService = influenceTrackBiddingStateService;
       DragonTokensStateService = dragonTokensStateService;
       FireMadeFleshStateService = fireMadeFleshStateService;
+      IronBankInterestPaymentStateService = ironBankInterestPaymentStateService;
     }
 
     /// <inheritdoc/>
@@ -177,6 +182,7 @@ namespace Agotbg.Server.Game.Services
         InfluenceTrackBiddingStateService.Initialize(gameState.InfluenceTrackBiddingState);
         DragonTokensStateService.Initialize(gameState.DragonTokensState);
         FireMadeFleshStateService.Initialize(gameState.FireMadeFleshState);
+        IronBankInterestPaymentStateService.Initialize(gameState.IronBankLoanInterestState, gameState.Players.Values.ToList());
       }
       catch (Exception e)
       {
@@ -196,6 +202,7 @@ namespace Agotbg.Server.Game.Services
     private IInfluenceTrackBiddingStateService InfluenceTrackBiddingStateService { get; }
     private IDragonTokensStateService DragonTokensStateService { get; }
     private IFireMadeFleshStateService FireMadeFleshStateService { get; }
+    private IIronBankInterestPaymentStateService IronBankInterestPaymentStateService { get; }
 
     private static void CreatePlayerHouses(
       GameState gameState,

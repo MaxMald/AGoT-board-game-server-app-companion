@@ -58,6 +58,12 @@ namespace Agotbg.Server.Game.Model
     public FireMadeFleshState FireMadeFleshState { get; set; } = new FireMadeFleshState();
 
     /// <summary>
+    /// Represents the state of the Iron Bank Loan Interest Resolution phase, including
+    /// the results for each player's interest payment attempt.
+    /// </summary>
+    public IronBankInterestPaymentState IronBankLoanInterestState { get; set; } = new IronBankInterestPaymentState();
+
+    /// <summary>
     /// The house type of the winner. Null if the game has not ended yet.
     /// </summary>
     public HouseType? Winner { get; set; } = null;

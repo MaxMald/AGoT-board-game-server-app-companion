@@ -39,6 +39,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
   /// Possible transitions from this phase:
   /// </para>
   /// <list type="bullet">
+  ///   <item><see cref="RoundPhaseType.IronBankInterestPaymentResolution"/></item>
   ///   <item><see cref="RoundPhaseType.WesterosWildlingIconsResolution"/></item>
   ///   <item><see cref="RoundPhaseType.WinnerTieResolution"/></item>
   ///   <item><see cref="RoundPhaseType.GameOver"/></item>
@@ -56,15 +57,20 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// <param name="gameStateService">The game state service.</param>
     /// <param name="houseStateService">The house state service.</param>
     /// <param name="dragonTokensStateService">The dragon tokens state service.</param>
+    /// <param name="influenceTrackService">The influence track service.</param>
+    /// <param name="ironBankInterestPaymentStateService">The Iron Bank interest payment
+    /// state service.</param>
     public RpAction(
       IGameStateService gameStateService,
       IHouseStateService houseStateService,
       IDragonTokensStateService dragonTokensStateService,
-      IInfluenceTrackService influenceTrackService
+      IInfluenceTrackService influenceTrackService,
+      IIronBankInterestPaymentStateService ironBankInterestPaymentStateService
     ) : base(gameStateService, houseStateService)
     {
-      m_dragonTokenStateService = dragonTokensStateService;
-      m_influenceTrackService = influenceTrackService;
+      DragonTokenStateService = dragonTokensStateService;
+      InfluenceTrackService = influenceTrackService;
+      IronBankInterestPaymentStateService = ironBankInterestPaymentStateService;
     }
 
     /// <inheritdoc/>
@@ -106,7 +112,7 @@ namespace Agotbg.Server.Game.Services.RoundPhase
           return ExecuteMoveInfluenceTrackPositionForHouse(
             gameState,
             command,
-            m_influenceTrackService
+            InfluenceTrackService
           );
       }
 
@@ -130,15 +136,9 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return false;
     }
 
-    /// <summary>
-    /// Reference to the dragon tokens state service.
-    /// </summary>
-    private IDragonTokensStateService m_dragonTokenStateService;
-
-    /// <summary>
-    /// Reference to the influence track service.
-    /// </summary>
-    private IInfluenceTrackService m_influenceTrackService;
+    private IDragonTokensStateService DragonTokenStateService { get; }
+    private IInfluenceTrackService InfluenceTrackService { get; }
+    private IIronBankInterestPaymentStateService IronBankInterestPaymentStateService { get; }
 
     private Result ExecuteResolve(
       GameState gameState,
@@ -176,16 +176,26 @@ namespace Agotbg.Server.Game.Services.RoundPhase
 
       if (HasTargaryenPlayer(playerStates))
       {
-        m_dragonTokenStateService.PrepareForNextRound(
+        DragonTokenStateService.PrepareForNextRound(
           gameState.DragonTokensState,
           nextRound
         );
       }
 
-      ResolveIronBankInterestPayment(playerStates);
+      IronBankInterestPaymentState ironBankState = gameState.IronBankLoanInterestState;
+      ResolveIronBankInterestPayment(ironBankState, playerStates);
 
-      gameState.CurrentRound = nextRound; // TODO: Event
-      gameState.CurrentPhase = RoundPhaseType.WesterosWildlingIconsResolution; // Transition
+      gameState.CurrentRound = nextRound;
+      if (IronBankInterestPaymentStateService.HasAnyResolvedInterestPayment(ironBankState))
+      {
+        gameState.CurrentPhase = RoundPhaseType.IronBankInterestPaymentResolution;
+      }
+      else
+      {
+        IronBankInterestPaymentStateService.Clear(ironBankState);
+        gameState.CurrentPhase = RoundPhaseType.WesterosWildlingIconsResolution;
+      }
+      
       return Result.SUCCESS();
     }
 
@@ -200,27 +210,20 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       return playerStates.Any(p => p.HouseState.Type == HouseType.Targaryen);
     }
 
-    private static void ResolveIronBankInterestPayment(List<PlayerState> players)
+    private void ResolveIronBankInterestPayment(
+      IronBankInterestPaymentState state,
+      List<PlayerState> players
+    )
     {
-      foreach (PlayerState house in players)
+      foreach (PlayerState playerState in players)
       {
-        byte interest = house.HouseState.IronBankLoanInterest;
-        if (interest == 0)
+        if (playerState.HouseState.IronBankLoanInterest == 0)
           continue;
 
-        byte housePowerTokens = house.HouseState.PowerTokens;
-        if (housePowerTokens < interest)
-        {
-          house.HouseState.PowerTokens = 0;
-
-          byte remainingInterest = (byte)(interest - housePowerTokens);
-          // TODO: Event this player has defaulted on their Iron Bank loan
-        }
-        else
-        {
-          house.HouseState.PowerTokens -= interest;
-          // TODO: Event this player has paid their Iron Bank loan interest
-        }
+        IronBankInterestPaymentStateService.ResolvePlayerInterestPayment(
+          state,
+          playerState
+        );
       }
     }
   }

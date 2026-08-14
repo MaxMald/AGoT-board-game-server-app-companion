@@ -25,6 +25,10 @@ namespace Agotbg.Server.Game.Services.RoundPhase
     /// round phase manager.</param>
     /// <param name="wildlingsStateService">The wildlings state service to be used by the
     /// round phase manager.</param>
+    /// <param name="fireMadeFleshStateService">The fire made flesh state service to be
+    /// used by the round phase manager.</param>
+    /// <param name="ironBankInterestPaymentStateService">The iron bank interest payment
+    /// state service to be used by the round phase manager.</param>
     ///
     /// <returns>A configured round phase manager with all default phases
     /// registered.</returns>
@@ -36,7 +40,8 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       IInfluenceTrackBiddingStateService influenceTrackBiddingStateService,
       IInfluenceTrackService influenceTrackService,
       IWildlingsStateService wildlingsStateService,
-      IFireMadeFleshStateService fireMadeFleshStateService
+      IFireMadeFleshStateService fireMadeFleshStateService,
+      IIronBankInterestPaymentStateService ironBankInterestPaymentStateService
     )
     {
       RoundPhaseManager manager = new();
@@ -52,10 +57,11 @@ namespace Agotbg.Server.Game.Services.RoundPhase
       manager.RegisterRoundPhase(new RpInfluenceTrackBiddingPresentation(gameStateService, houseStateService, influenceTrackBiddingStateService));
       manager.RegisterRoundPhase(new RpVassalAssignment(gameStateService, houseStateService, vassalAssignmentStateService));
       manager.RegisterRoundPhase(new RpPlanning(gameStateService, houseStateService));
-      manager.RegisterRoundPhase(new RpAction(gameStateService, houseStateService, dragonTokensStateService, influenceTrackService));
+      manager.RegisterRoundPhase(new RpAction(gameStateService, houseStateService, dragonTokensStateService, influenceTrackService, ironBankInterestPaymentStateService));
       manager.RegisterRoundPhase(new RpWinnerTieResolution(gameStateService, houseStateService));
       manager.RegisterRoundPhase(new RpGameOver(gameStateService, houseStateService));
       manager.RegisterRoundPhase(new RpFireMadeFlesh(gameStateService, houseStateService, dragonTokensStateService, fireMadeFleshStateService));
+      manager.RegisterRoundPhase(new RpIronBankInterestPaymentResolution(gameStateService, houseStateService, ironBankInterestPaymentStateService));
       return manager;
     }
   }

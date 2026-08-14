@@ -6,6 +6,7 @@ namespace Agotbg.Server.Game.Model
   public enum RoundPhaseType : byte
   {
     Setup,
+    IronBankInterestPaymentResolution,
     WesterosWildlingIconsResolution,
     Westeros,
     WildlingsBidding,

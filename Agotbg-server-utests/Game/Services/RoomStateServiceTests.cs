@@ -17,6 +17,7 @@ namespace Agotbg.Server.Utests.Game.Services
       VassalAssignmentStateService = new Mock<IVassalAssignmentStateService>();
       DragonTokensStateService = new Mock<IDragonTokensStateService>();
       FireMadeFleshStateService = new Mock<IFireMadeFleshStateService>();
+      IronBankInterestPaymentStateService = new Mock<IIronBankInterestPaymentStateService>();
 
       RSS = new RoomStateService(
         InfluenceTrackService.Object,
@@ -24,7 +25,8 @@ namespace Agotbg.Server.Utests.Game.Services
         VassalAssignmentStateService.Object,
         InfluenceTrackBiddingStateService.Object,
         DragonTokensStateService.Object,
-        FireMadeFleshStateService.Object
+        FireMadeFleshStateService.Object,
+        IronBankInterestPaymentStateService.Object
       );
     }
 
@@ -665,6 +667,7 @@ namespace Agotbg.Server.Utests.Game.Services
       InfluenceTrackBiddingStateService.Verify(s => s.Initialize(It.IsAny<InfluenceTrackBiddingState>()), Times.Once);
       DragonTokensStateService.Verify(s => s.Initialize(It.IsAny<DragonTokensState>()), Times.Once);
       FireMadeFleshStateService.Verify(s => s.Initialize(It.IsAny<FireMadeFleshState>()), Times.Once);
+      IronBankInterestPaymentStateService.Verify(s => s.Initialize(It.IsAny<IronBankInterestPaymentState>(), It.IsAny<List<PlayerState>>()), Times.Once);
     }
 
     [Test]
@@ -738,6 +741,7 @@ namespace Agotbg.Server.Utests.Game.Services
     private Mock<IInfluenceTrackBiddingStateService> InfluenceTrackBiddingStateService { get; set; }
     private Mock<IDragonTokensStateService> DragonTokensStateService { get; set; }
     private Mock<IFireMadeFleshStateService> FireMadeFleshStateService { get; set; }
+    private Mock<IIronBankInterestPaymentStateService> IronBankInterestPaymentStateService { get; set; }
     private RoomStateService RSS { get; set; }
 
     private static RoomState CreateRoomWithHosterOnly(byte maxPlayers = 3)

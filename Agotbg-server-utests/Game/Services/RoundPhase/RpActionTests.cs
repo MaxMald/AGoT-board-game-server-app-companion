@@ -18,12 +18,14 @@ namespace Agotbg.Server.Utests.Game.Services.RoundPhase
       HouseStateService = new Mock<IHouseStateService>();
       DragonTokensStateService = new Mock<IDragonTokensStateService>();
       InfluenceTrackService = new Mock<IInfluenceTrackService>();
+      IronBankInterestPaymentStateService = new Mock<IIronBankInterestPaymentStateService>();
 
       RPAction = new RpAction(
         GameStateService.Object,
         HouseStateService.Object,
         DragonTokensStateService.Object,
-        InfluenceTrackService.Object
+        InfluenceTrackService.Object,
+        IronBankInterestPaymentStateService.Object
       );
     }
 
@@ -210,7 +212,7 @@ namespace Agotbg.Server.Utests.Game.Services.RoundPhase
       AddPlayerState(state, "Martell", HouseType.Martell);
 
       state.CurrentRound = GameConstants.NumRounds; // Last round
-      state.Players["Stark"].HouseState.VictoryPoints = 9; 
+      state.Players["Stark"].HouseState.VictoryPoints = 9;
       state.Players["Lannister"].HouseState.VictoryPoints = 10; // Highest victory points
       state.Players["Martell"].HouseState.VictoryPoints = 6;
 
@@ -246,5 +248,6 @@ namespace Agotbg.Server.Utests.Game.Services.RoundPhase
     private Mock<IHouseStateService> HouseStateService { get; set; }
     private Mock<IDragonTokensStateService> DragonTokensStateService { get; set; }
     private Mock<IInfluenceTrackService> InfluenceTrackService { get; set; }
+    private Mock<IIronBankInterestPaymentStateService> IronBankInterestPaymentStateService { get; set; }
   }
 }
