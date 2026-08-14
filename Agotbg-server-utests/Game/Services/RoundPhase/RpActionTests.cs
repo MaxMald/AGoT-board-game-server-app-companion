@@ -106,10 +106,15 @@ namespace Agotbg.Server.Utests.Game.Services.RoundPhase
           ))
         .Returns(true);
 
-      state.CurrentRound = 3;
       GameStateService
         .Setup(gss => gss.IsLastRound(It.IsAny<GameState>()))
         .Returns(false);
+
+      IronBankInterestPaymentStateService
+        .Setup(ibipss => ibipss.HasAnyResolvedInterestPayment(It.IsAny<IronBankInterestPaymentState>()))
+        .Returns(false);
+
+      state.CurrentRound = 3;
 
       // Act
       Result result = RPAction.Execute(
@@ -241,6 +246,226 @@ namespace Agotbg.Server.Utests.Game.Services.RoundPhase
       // Assert
       Assert.That(result.Success, Is.True);
       Assert.That(state.Winner, Is.EqualTo(HouseType.Lannister));
+    }
+
+    [Test]
+    public void ExecuteResolve_ShouldCall_ResolvePlayerInterestPayment_WhenIsNotLastRound()
+    {
+      // Arrange
+      GameState state = CreateGameStateWithHoster("Stark", HouseType.Stark);
+      PlayerState starkPS = state.Players["Stark"];
+      PlayerState lannisterPS =  AddPlayerState(state, "Lannister", HouseType.Lannister);
+      PlayerState martellPS = AddPlayerState(state, "Martell", HouseType.Martell);
+      PlayerState arryPS = AddPlayerState(state, "Arryn", HouseType.Arryn);
+      PlayerState targaryenPS = AddPlayerState(state, "Targaryen", HouseType.Targaryen);
+
+      GameStateService
+        .Setup(
+          gss => gss.IsHoster(
+            It.IsAny<GameState>(),
+            It.Is<string>(id => id == "Stark")
+          ))
+        .Returns(true);
+
+      GameStateService
+        .Setup(gss => gss.IsLastRound(It.IsAny<GameState>()))
+        .Returns(false);
+
+      IronBankInterestPaymentStateService
+        .Setup(ibipss => ibipss.HasAnyResolvedInterestPayment(It.IsAny<IronBankInterestPaymentState>()))
+        .Returns(true);
+
+      state.CurrentRound = 3;
+      starkPS.HouseState.IronBankLoanInterest = 2;
+      lannisterPS.HouseState.IronBankLoanInterest = 3;
+      martellPS.HouseState.IronBankLoanInterest = 1;
+      arryPS.HouseState.IronBankLoanInterest = 1;
+      targaryenPS.HouseState.IronBankLoanInterest = 2;
+
+      // Act
+      Result result = RPAction.Execute(
+        state,
+        new RpcResolve("Stark")
+      );
+
+      // Assert
+      Assert.That(result.Success, Is.True);
+
+      IronBankInterestPaymentStateService.Verify(
+        ibipss => ibipss.ResolvePlayerInterestPayment(
+          It.IsAny<IronBankInterestPaymentState>(),
+          It.Is<PlayerState>(ps => ps == starkPS)
+        ),
+        Times.Once
+      );
+
+      IronBankInterestPaymentStateService.Verify(
+        ibipss => ibipss.ResolvePlayerInterestPayment(
+          It.IsAny<IronBankInterestPaymentState>(),
+          It.Is<PlayerState>(ps => ps == lannisterPS)
+        ),
+        Times.Once
+      );
+
+      IronBankInterestPaymentStateService.Verify(
+        ibipss => ibipss.ResolvePlayerInterestPayment(
+          It.IsAny<IronBankInterestPaymentState>(),
+          It.Is<PlayerState>(ps => ps == martellPS)
+        ),
+        Times.Once
+      );
+
+      IronBankInterestPaymentStateService.Verify(
+        ibipss => ibipss.ResolvePlayerInterestPayment(
+          It.IsAny<IronBankInterestPaymentState>(),
+          It.Is<PlayerState>(ps => ps == arryPS)
+        ),
+        Times.Once
+      );
+        
+      IronBankInterestPaymentStateService.Verify(
+        ibipss => ibipss.ResolvePlayerInterestPayment(
+          It.IsAny<IronBankInterestPaymentState>(),
+          It.Is<PlayerState>(ps => ps == targaryenPS)
+        ),
+        Times.Once
+      );
+    }
+
+    [Test]
+    public void ExecuteResolve_ShouldCall_ResolvePlayerInterestPayemer_JustForPlayersWithInterest_WhenIsNotLastRound()
+    {
+      // Arrange
+      GameState state = CreateGameStateWithHoster("Stark", HouseType.Stark);
+      PlayerState starkPS = state.Players["Stark"];
+      PlayerState lannisterPS = AddPlayerState(state, "Lannister", HouseType.Lannister);
+      PlayerState martellPS = AddPlayerState(state, "Martell", HouseType.Martell);
+
+      GameStateService
+        .Setup(
+          gss => gss.IsHoster(
+            It.IsAny<GameState>(),
+            It.Is<string>(id => id == "Stark")
+          ))
+        .Returns(true);
+
+      GameStateService
+        .Setup(gss => gss.IsLastRound(It.IsAny<GameState>()))
+        .Returns(false);
+
+      IronBankInterestPaymentStateService
+        .Setup(ibipss => ibipss.HasAnyResolvedInterestPayment(It.IsAny<IronBankInterestPaymentState>()))
+        .Returns(true);
+
+      state.CurrentRound = 3;
+      starkPS.HouseState.IronBankLoanInterest = 0; // No interest
+      lannisterPS.HouseState.IronBankLoanInterest = 3; // Has interest
+      martellPS.HouseState.IronBankLoanInterest = 0; // No interest
+
+      // Act
+      Result result = RPAction.Execute(
+        state,
+        new RpcResolve("Stark")
+      );
+
+      // Assert
+      Assert.That(result.Success, Is.True);
+      IronBankInterestPaymentStateService.Verify(
+        ibipss => ibipss.ResolvePlayerInterestPayment(
+          It.IsAny<IronBankInterestPaymentState>(),
+          It.Is<PlayerState>(ps => ps == starkPS)
+        ),
+        Times.Never
+      );
+
+      IronBankInterestPaymentStateService.Verify(
+        ibipss => ibipss.ResolvePlayerInterestPayment(
+          It.IsAny<IronBankInterestPaymentState>(),
+          It.Is<PlayerState>(ps => ps == lannisterPS)
+        ),
+        Times.Once
+      );
+
+      IronBankInterestPaymentStateService.Verify(
+        ibipss => ibipss.ResolvePlayerInterestPayment(
+          It.IsAny<IronBankInterestPaymentState>(),
+          It.Is<PlayerState>(ps => ps == martellPS)
+        ),
+        Times.Never
+      );
+    }
+
+    [Test]
+    public void ExecuteResolve_ShouldMoveToIronBankInterestPaymentResolution_WhenIsNotLastRoundAndHasResolvedInterestPayments()
+    {
+      // Arrange
+      GameState state = CreateGameStateWithHoster("Stark", HouseType.Stark);
+      AddPlayerState(state, "Lannister", HouseType.Lannister);
+      AddPlayerState(state, "Martell", HouseType.Martell);
+
+      GameStateService
+        .Setup(
+          gss => gss.IsHoster(
+            It.IsAny<GameState>(),
+            It.Is<string>(id => id == "Stark")
+          ))
+        .Returns(true);
+
+      GameStateService
+        .Setup(gss => gss.IsLastRound(It.IsAny<GameState>()))
+        .Returns(false);
+
+      IronBankInterestPaymentStateService
+        .Setup(ibipss => ibipss.HasAnyResolvedInterestPayment(It.IsAny<IronBankInterestPaymentState>()))
+        .Returns(true);
+
+      state.CurrentRound = 3;
+
+      // Act
+      Result result = RPAction.Execute(
+        state,
+        new RpcResolve("Stark")
+      );
+
+      // Assert
+      Assert.That(result.Success, Is.True);
+      Assert.That(state.CurrentPhase, Is.EqualTo(RoundPhaseType.IronBankInterestPaymentResolution));
+    }
+
+    [Test]
+    public void ExecuteResolve_ShouldMoveToWesterosWildlingIconsResolution_WhenIsNotLastRoundAndNoResolvedInterestPayments()
+    {
+      // Arrange
+      GameState state = CreateGameStateWithHoster("Stark", HouseType.Stark);
+      AddPlayerState(state, "Lannister", HouseType.Lannister);
+      AddPlayerState(state, "Martell", HouseType.Martell);
+      GameStateService
+        .Setup(
+          gss => gss.IsHoster(
+            It.IsAny<GameState>(),
+            It.Is<string>(id => id == "Stark")
+          ))
+        .Returns(true);
+
+      GameStateService
+        .Setup(gss => gss.IsLastRound(It.IsAny<GameState>()))
+        .Returns(false);
+
+      IronBankInterestPaymentStateService
+        .Setup(ibipss => ibipss.HasAnyResolvedInterestPayment(It.IsAny<IronBankInterestPaymentState>()))
+        .Returns(false);
+
+      state.CurrentRound = 3;
+
+      // Act
+      Result result = RPAction.Execute(
+        state,
+        new RpcResolve("Stark")
+      );
+
+      // Assert
+      Assert.That(result.Success, Is.True);
+      Assert.That(state.CurrentPhase, Is.EqualTo(RoundPhaseType.WesterosWildlingIconsResolution));
     }
 
     private RpAction RPAction { get; set; }
